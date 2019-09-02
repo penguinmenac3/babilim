@@ -105,6 +105,7 @@ class TransformedDataset(Dataset):
         :param dataset: The dataset to transform.
         :param transformer: The transformer that gets applied to the dataset.
         """
+        super().__init__(dataset.config)
         self.dataset = dataset
         self.transformer = transformer
     

@@ -1,6 +1,7 @@
 from typing import Sequence, Any, Sequence, Callable, Dict
 from collections import defaultdict
 import babilim
+from babilim import PYTORCH_BACKEND, TF_BACKEND
 from babilim.core.itensor import ITensor
 from babilim.core.tensor import Tensor, TensorWrapper
 
@@ -68,9 +69,13 @@ class ILayer(object):
 
 _LAYER_REGISTRY: Dict[str, Dict[str, ILayer]] = defaultdict(dict)
 
-def register_layer(backend: str, name: str) -> Callable:
+def register_layer(name: str, backend: str = None) -> Callable:
     def register_layer_decorator(layer):
-        _LAYER_REGISTRY[backend][name] = layer
+        if backend is None:
+            _LAYER_REGISTRY[TF_BACKEND][name] = layer
+            _LAYER_REGISTRY[PYTORCH_BACKEND][name] = layer
+        else:
+            _LAYER_REGISTRY[backend][name] = layer
         return layer
     return register_layer_decorator
 

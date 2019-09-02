@@ -156,6 +156,9 @@ class Config(ConfigPart):
         self.problem_base_dir = None
         self.problem_dataset = None
 
+        # The following should not be changed, since babilim will change them internally.
+        self.train_actual_checkpoint_path = None
+
         super().__init__()
 
     def __repr__(self) -> str:

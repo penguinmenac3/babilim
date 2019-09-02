@@ -301,6 +301,7 @@ def setup(config: Config, continue_with_specific_checkpointpath: bool = False, c
         _log_code(chkpt_path=chkpt_path)
     __log_file = os.path.join(chkpt_path, "log.txt")
     __checkpoint_path = chkpt_path
+    config.train_actual_checkpoint_path = chkpt_path
     return chkpt_path
 
 

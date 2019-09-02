@@ -1,12 +1,11 @@
 import babilim
 from babilim import PYTORCH_BACKEND, TF_BACKEND
 from babilim.annotations import RunOnlyOnce
-from babilim.layers import IModel, register_layer
+from babilim.models import IModel, register_model
 from babilim.layers import BatchNormalization, Conv2D, MaxPooling2D, GlobalAveragePooling2D, Linear, ReLU
 
 
-@register_layer(TF_BACKEND, "FashionMnistModel")
-@register_layer(PYTORCH_BACKEND, "FashionMnistModel")
+@register_model("FashionMnistModel")
 class FashionMnistModel(IModel):
     def __init__(self, name="FashionMnistModel"):
         super().__init__(name, layer_type="FashionMnistModel")

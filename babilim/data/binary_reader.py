@@ -29,18 +29,18 @@ def register_binary_fmt(type_char: str, fmt: str) -> Callable[[Callable], Callab
 
     Example:
 
-    >>> @register_binary_fmt(type_char="T", fmt="bb[e]e[s]e")
-    >>> class ExampleType(object):
-    >>> def __init__(self, i1: int, i2: int, arr1d: List[float], f1: float, s1: str, d1: float):
-    >>>    self.i1 = i1
-    >>>    self.i2 = i2
-    >>>    self.arr1d = arr1d
-    >>>    self.f1 = f1
-    >>>    self.d1 = d1
-    >>>    self.s1 = s1
-    >>>
-    >>> def serialize(self) -> [int, int, List[float], float, str, float]:
-    >>>    return [self.i1, self.i2, self.arr1d, self.f1, self.s1, self.d1]
+        @register_binary_fmt(type_char="T", fmt="bb[e]e[s]e")
+        class ExampleType(object):
+        def __init__(self, i1: int, i2: int, arr1d: List[float], f1: float, s1: str, d1: float):
+            self.i1 = i1
+            self.i2 = i2
+            self.arr1d = arr1d
+            self.f1 = f1
+            self.d1 = d1
+            self.s1 = s1
+        
+        def serialize(self) -> [int, int, List[float], float, str, float]:
+            return [self.i1, self.i2, self.arr1d, self.f1, self.s1, self.d1]
 
     All types that you registered and basic datatypes from struct are supported
     https://docs.python.org/3/library/struct.html

@@ -28,7 +28,6 @@ class Linear(ILayer):
             self.linear = self.linear.to(torch.device("cuda"))
 
     def call(self, features):
-        self.build(features)
         return Tensor(native=self.linear(features.native))
 
 

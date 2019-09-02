@@ -15,6 +15,7 @@ class ILayer(object):
         # ensure that call gets called with ITensor objects but the caller can use native tensors.
         args, wrapped_args = self.__wrapper.wrap(args)
         kwargs, wrapped_kwargs = self.__wrapper.wrap(kwargs)
+        self.build(*args, **kwargs)
         result = self.call(*args, **kwargs)
         if wrapped_args or wrapped_kwargs:
             return self.__wrapper.unwrap(kwargs)

@@ -19,5 +19,4 @@ class Linear(ILayer):
         self.bias = Tensor(data=None, trainable=True, native=self.linear.bias)
 
     def call(self, features):
-        self.build(features)
         return Tensor(native=self.linear(features.native))

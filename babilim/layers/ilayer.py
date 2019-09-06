@@ -1,4 +1,4 @@
-from typing import Sequence, Any, Sequence, Callable, Dict
+from typing import Sequence, Any, Sequence, Callable, Dict, Iterable
 from collections import defaultdict
 import babilim
 from babilim import PYTORCH_BACKEND, TF_BACKEND
@@ -6,9 +6,16 @@ from babilim.core.itensor import ITensor
 from babilim.core.tensor import Tensor, TensorWrapper
 
 
+layer_name_table = {}
+
+
 class ILayer(object):
     def __init__(self, name: str, layer_type: str):
-        self.__name = name
+        if name not in layer_name_table:
+            layer_name_table[name] = 0
+        numbering = layer_name_table[name]
+        self.__name = "{}_{}".format(name, numbering)
+        layer_name_table[name] += 1
         self.__layer_type = layer_type
         self.__wrapper = TensorWrapper()
 
@@ -52,8 +59,21 @@ class ILayer(object):
         all_vars = []
         for k in self.__dict__:
             v = self.__dict__[k]
+            if isinstance(v, Dict):
+                for k in v:
+                    x = v[k]
+                    if isinstance(x, ILayer):
+                        all_vars.extend(x.variables)
+                    if isinstance(x, ITensor):
+                        all_vars.append(x)
+            elif isinstance(v, Iterable):
+                for x in v:
+                    if isinstance(x, ILayer):
+                        all_vars.extend(x.variables)
+                    if isinstance(x, ITensor):
+                        all_vars.append(x)
             if isinstance(v, ILayer):
-                all_vars.append(v.variables)
+                all_vars.extend(v.variables)
             if isinstance(v, ITensor):
                 all_vars.append(v)
         return all_vars

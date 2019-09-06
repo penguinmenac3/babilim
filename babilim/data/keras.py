@@ -2,8 +2,18 @@ import tensorflow as tf
 from math import ceil
 import numpy as np
 from typing import Sequence
+from collections import namedtuple
 
 from babilim.experiment import Config
+
+
+def isnamedtupleinstance(x):
+    t = type(x)
+    b = t.__bases__
+    if len(b) != 1 or b[0] != tuple: return False
+    f = getattr(t, '_fields', None)
+    if not isinstance(f, tuple): return False
+    return all(type(n)==str for n in f)
 
 
 class BatchedKerasDataset(tf.keras.utils.Sequence):
@@ -34,5 +44,10 @@ class BatchedKerasDataset(tf.keras.utils.Sequence):
             input_tensor_order = sorted(list(features[0].keys()))
             return {k: np.array([dic[k] for dic in features]) for k in input_tensor_order},\
                    {k: np.array([dic[k] for dic in labels]) for k in labels[0]}
+        elif isnamedtupleinstance(features[0]):
+            InputType = type(features[0])
+            LabelType = type(labels[0])
+            return InputType(**{k: np.array([getattr(dic, k) for dic in features]) for k in features[0]._fields}),\
+                   LabelType(**{k: np.array([getattr(dic, k) for dic in labels]) for k in labels[0]._fields})
         else:  # for single feature, label
             return np.array(features), np.array(labels)

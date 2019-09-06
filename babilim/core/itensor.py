@@ -1,6 +1,7 @@
 from typing import Union, Any, Tuple
 import numpy as np
 
+tensor_name_table = {}
 
 class ITensorWrapper(object):
     def wrap(self, obj: Any) -> Any:
@@ -11,14 +12,34 @@ class ITensorWrapper(object):
 
 
 class ITensor(object):
-    def __init__(self, native):
+    def __init__(self, native, name: str = "unnamed"):
         self.native = native
+        if name not in tensor_name_table:
+            tensor_name_table[name] = 0
+        numbering = tensor_name_table[name]
+        self.name = "{}_{}".format(name, numbering)
+        tensor_name_table[name] += 1
+
+    def copy(self) -> 'ITensor':
+        raise NotImplementedError("Each implementation of a tensor must implement this.")
+    
+    def cast(self, dtype) -> 'ITensor':
+        raise NotImplementedError("Each implementation of a tensor must implement this.")
+
+    def stop_gradients(self) -> 'ITensor':
+        raise NotImplementedError("Each implementation of a tensor must implement this.")
 
     def assign(self, other: Union['ITensor', np.ndarray]) -> 'ITensor':
         raise NotImplementedError("Each implementation of a variable must implement this.")
         
     def numpy(self) -> np.ndarray:
         raise NotImplementedError("Each implementation of a variable must implement this.")
+
+    def mean(self, axis: int=None) -> 'ITensor':
+        raise NotImplementedError("Each implementation of a variable must implement this.")
+    
+    def argmax(self, axis: int=None) -> 'ITensor':
+        raise NotImplementedError("Each implementation of a tensor must implement this.")
 
     @property
     def shape(self) -> Tuple:

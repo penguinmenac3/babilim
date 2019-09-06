@@ -22,8 +22,8 @@ class Linear(ILayer):
     def build(self, features):
         in_features = features.shape[-1]
         self.linear = PtLinear(in_features, self.out_features)
-        self.weight = Tensor(data=None, trainable=True, native=self.linear.weight)
-        self.bias = Tensor(data=None, trainable=True, native=self.linear.bias)
+        self.weight = Tensor(data=None, trainable=True, native=self.linear.weight, name=self.name + "/kernel")
+        self.bias = Tensor(data=None, trainable=True, native=self.linear.bias, name=self.name + "/bias")
         if torch.cuda.is_available():
             self.linear = self.linear.to(torch.device("cuda"))
 

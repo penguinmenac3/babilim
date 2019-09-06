@@ -4,13 +4,13 @@ import babilim
 from babilim import PYTORCH_BACKEND, TF_BACKEND
 from babilim.core.itensor import ITensor, ITensorWrapper
 
-def Tensor(*, data: np.ndarray, trainable: bool, native=None, order_flipped: bool = False) -> ITensor:
+def Tensor(*, data: np.ndarray, trainable: bool, native=None, name: str="unnamed") -> ITensor:
     if babilim.get_backend() == PYTORCH_BACKEND:
         from babilim.core.tensor_pt import Tensor as _Tensor
-        return _Tensor(data, trainable, native, order_flipped)
+        return _Tensor(data, trainable, native, name)
     elif babilim.get_backend() == TF_BACKEND:
         from babilim.core.tensor_tf import Tensor as _Tensor
-        return _Tensor(data, trainable, native, order_flipped)
+        return _Tensor(data, trainable, native, name)
     else:
         raise RuntimeError("No variable implementation for this backend was found. (backend={})".format(babilim.get_backend()))
 

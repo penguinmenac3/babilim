@@ -19,47 +19,57 @@ class TensorWrapper(ITensorWrapper):
             for i in range(len(obj)):
                 obj[i], q = self.wrap(obj[i])
                 wrapped = wrapped or q
-        if isinstance(obj, Dict):
+        elif isinstance(obj, Dict):
             for k in obj:
                 obj[k], q = self.wrap(obj[k])
                 wrapped = wrapped or q
-        if isinstance(obj, tf.Variable):
+        elif isinstance(obj, tf.Variable):
             obj = Tensor(native=obj, trainable=obj.trainable)
             wrapped = True
         elif isinstance(obj, _Tensor):
             obj = Tensor(native=obj)
             wrapped = True
+        elif isinstance(obj, np.ndarray):
+            obj = Tensor(data=obj, trainable=False)
+            wrapped = True
         return obj, wrapped
     
     def unwrap(self, obj: Any) -> Any:
+        out = None
         if isinstance(obj, Sequence):
+            out = []
             for i in range(len(obj)):
-                obj[i] = self.unwrap(obj[i])
+                out.append(self.unwrap(obj[i]))
         if isinstance(obj, Dict):
+            out = {}
             for k in obj:
-                obj[k] = self.unwrap(obj[k])
+                out[k] = self.unwrap(obj[k])
         if isinstance(obj, Tensor):
-            obj = obj.native
-        return obj
+            out = obj.native
+        return out
 
 
 class Tensor(ITensor):
-    def __init__(self, data: np.ndarray = None, trainable: bool = False, native=None, order_flipped: bool = False):
-        self.order_flipped = order_flipped
+    def __init__(self, data: np.ndarray = None, trainable: bool = False, native=None, name:str = "unnamed"):
         if data is not None:
-            if self.order_flipped:
-                data = data.T
             native = tf.Variable(data, trainable=trainable)
         elif native is not None:
             native = native
         else:
             raise RuntimeError("You must specify the data or a native value from the correct framework.")
-        super().__init__(native)
+        super().__init__(native, name)
+
+    def copy(self) -> 'Tensor':
+        return Tensor(data=self.numpy(), trainable=self.trainable)
+        
+    def cast(self, dtype) -> 'Tensor':
+        return Tensor(native=tf.cast(self.native, dtype))
+
+    def stop_gradients(self) -> 'Tensor':
+        return Tensor(native=tf.stop_gradient(self.native))
 
     def assign(self, other: Union['Tensor', np.ndarray]) -> 'Tensor':
         if isinstance(other, np.ndarray):
-            if self.order_flipped:
-                other = other.T
             self.assign(Tensor(data=other, trainable=self.trainable))
         elif isinstance(self.native, tf.Variable):
             self.native.assign(other.native)
@@ -68,9 +78,13 @@ class Tensor(ITensor):
         return self
 
     def numpy(self) -> np.ndarray:
-        if self.order_flipped:
-            return self.native.numpy().T
         return self.native.numpy()
+
+    def mean(self, axis: int=None) -> 'Tensor':
+        return Tensor(native=tf.reduce_mean(self.native, axis=axis))
+        
+    def argmax(self, axis: int=None) -> 'ITensor':
+        return Tensor(native=tf.argmax(self.native, axis=axis))
 
     @property
     def shape(self) -> Tuple:
@@ -78,7 +92,7 @@ class Tensor(ITensor):
 
     @property
     def trainable(self) -> bool:
-        return self.native.trainable
+        return True  # FIXME figure out how self.native.trainable works now
 
     def __str__(self):
         return str(self.native)

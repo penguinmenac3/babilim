@@ -277,15 +277,15 @@ def setup(config: Config, continue_with_specific_checkpointpath: bool = False, c
     if __log_file is not None:
         raise RuntimeError("You must not setup logging twice!")
     time_stamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d_%H.%M.%S')
-    chkpt_path = config.train.checkpoint_path + "/" + time_stamp
-    chkpt_path = chkpt_path + "_" + config.train.experiment_name
+    chkpt_path = config.train_checkpoint_path + "/" + time_stamp
+    chkpt_path = chkpt_path + "_" + config.train_experiment_name
 
     if continue_with_specific_checkpointpath:
-        chkpt_path = config.train.checkpoint_path + "/" + continue_with_specific_checkpointpath
+        chkpt_path = config.train_checkpoint_path + "/" + continue_with_specific_checkpointpath
         print("Continue with checkpoint: {}".format(chkpt_path))
     elif continue_training:
-        chkpts = sorted([name for name in os.listdir(config.train.checkpoint_path)])
-        chkpt_path = config.train.checkpoint_path + "/" + chkpts[-1]
+        chkpts = sorted([name for name in os.listdir(config.train_checkpoint_path)])
+        chkpt_path = config.train_checkpoint_path + "/" + chkpts[-1]
         print("Latest found checkpoint: {}".format(chkpt_path))
 
     if not os.path.exists(os.path.join(chkpt_path, "train")):

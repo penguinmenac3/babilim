@@ -19,12 +19,15 @@ class TensorWrapper(ITensorWrapper):
             for i in range(len(obj)):
                 obj[i], q = self.wrap(obj[i])
                 wrapped = wrapped or q
-        if isinstance(obj, Dict):
+        elif isinstance(obj, Dict):
             for k in obj:
                 obj[k], q = self.wrap(obj[k])
                 wrapped = wrapped or q
         elif isinstance(obj, _Tensor):
             obj = Tensor(native=obj, trainable=obj.requires_grad)
+            wrapped = True
+        elif isinstance(obj, np.ndarray):
+            obj = Tensor(data=obj, trainable=False)
             wrapped = True
         return obj, wrapped
     
@@ -40,11 +43,9 @@ class TensorWrapper(ITensorWrapper):
         return obj
 
 class Tensor(ITensor):
-    def __init__(self, data: np.ndarray = None, trainable=False, native: _Tensor=None, order_flipped: bool = False):
-        self.order_flipped = order_flipped
+    def __init__(self, data: np.ndarray = None, trainable=False, native: _Tensor=None, name: str="unnamed"):
         if data is not None:
-            if self.order_flipped:
-                data = data.T
+            data = data.T
             native = torch.from_numpy(data)
             native.requires_grad = trainable
             if torch.cuda.is_available():
@@ -53,12 +54,20 @@ class Tensor(ITensor):
             native = native
         else:
             raise RuntimeError("You must specify the data or a native value from the correct framework.")
-        super().__init__(native)
+        super().__init__(native, name)
+
+    def copy(self) -> 'Tensor':
+        return Tensor(data=self.numpy(), trainable=self.trainable)
+        
+    def cast(self, dtype) -> 'ITensor':
+        raise NotImplementedError("Each implementation of a tensor must implement this.")
+
+    def stop_gradients(self) -> 'Tensor':
+        return Tensor(native=self.native.detach())
 
     def assign(self, other: Union['Tensor', np.ndarray]) -> 'Tensor':
         if isinstance(other, np.ndarray):
-            if self.order_flipped:
-                other = other.T
+            other = other.T
             self.assign(Tensor(data=other, trainable=self.trainable))
         else:
             self.native.data = other.native
@@ -71,9 +80,13 @@ class Tensor(ITensor):
         if torch.cuda.is_available():
             tmp = tmp.cpu()
         
-        if self.order_flipped:
-            return tmp.numpy().T
-        return tmp.numpy()
+        return tmp.numpy().T
+
+    def mean(self, axis: int=None) -> 'Tensor':
+        return Tensor(native=self.native.mean(axis=axis))
+    
+    def argmax(self, axis: int=None) -> 'ITensor':
+        raise NotImplementedError("Each implementation of a tensor must implement this.")
 
     @property
     def shape(self) -> Tuple:

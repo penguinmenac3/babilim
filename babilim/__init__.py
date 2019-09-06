@@ -35,6 +35,7 @@ def set_backend(backend: str):
     global _backend
     if backend not in [PYTORCH_BACKEND, TF_BACKEND]:
         raise RuntimeError("Unknown backend selected: {}".format(backend))
+    print("Using backend: {}".format(backend))
     _backend = backend
 
 def get_backend() -> str:

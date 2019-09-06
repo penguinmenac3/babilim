@@ -15,8 +15,8 @@ class Linear(ILayer):
     @RunOnlyOnce
     def build(self, features):
         self.linear.build(features.shape)
-        self.weight = Tensor(data=None, trainable=True, native=self.linear.kernel, order_flipped=True)
-        self.bias = Tensor(data=None, trainable=True, native=self.linear.bias)
+        self.weight = Tensor(data=None, trainable=True, native=self.linear.kernel, name=self.name + "/kernel")
+        self.bias = Tensor(data=None, trainable=True, native=self.linear.bias, name=self.name + "/bias")
 
     def call(self, features):
         return Tensor(native=self.linear(features.native))

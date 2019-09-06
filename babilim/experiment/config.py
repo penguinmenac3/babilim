@@ -191,12 +191,7 @@ class Config(ConfigPart):
         assert Config.__has_attribute(self, "train_log_steps")
         assert Config.__has_attribute(self, "train_optimizer")
         assert Config.__has_attribute(self, "train_learning_rate_shedule")
-        assert Config.__has_attribute(self, "arch_prepare")
-        assert Config.__has_attribute(self, "arch_model")
-        assert Config.__has_attribute(self, "arch_loss")
-        assert Config.__has_attribute(self, "arch_metrics")
         assert Config.__has_attribute(self, "problem_base_dir")
-        assert Config.__has_attribute(self, "problem_dataset")
 
         return True
 

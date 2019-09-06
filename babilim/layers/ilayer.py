@@ -12,10 +12,12 @@ layer_name_table = {}
 class ILayer(object):
     def __init__(self, name: str, layer_type: str):
         if name not in layer_name_table:
-            layer_name_table[name] = 0
-        numbering = layer_name_table[name]
-        self.__name = "{}_{}".format(name, numbering)
-        layer_name_table[name] += 1
+            layer_name_table[name] = 1
+            self.__name = name
+        else:
+            numbering = layer_name_table[name]
+            self.__name = "{}_{}".format(name, numbering)
+            layer_name_table[name] += 1
         self.__layer_type = layer_type
         self.__wrapper = TensorWrapper()
 

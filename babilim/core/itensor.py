@@ -15,10 +15,17 @@ class ITensor(object):
     def __init__(self, native, name: str = "unnamed"):
         self.native = native
         if name not in tensor_name_table:
-            tensor_name_table[name] = 0
-        numbering = tensor_name_table[name]
-        self.name = "{}_{}".format(name, numbering)
+            tensor_name_table[name] = 1
+            self.__name = name
+        else:
+            numbering = tensor_name_table[name]
+            self.__name = "{}_{}".format(name, numbering)
+            tensor_name_table[name] += 1
         tensor_name_table[name] += 1
+
+    @property
+    def name(self):
+        return self.__name
 
     def copy(self) -> 'ITensor':
         raise NotImplementedError("Each implementation of a tensor must implement this.")

@@ -46,7 +46,7 @@ class Loss(object):
     def reset_avg(self):
         for k in self._accumulators:
             acc = self._accumulators[k]
-            acc.assign(np.zeroes_like(acc.numpy()))
+            acc.assign(np.zeros_like(acc.numpy()))
             self._counters[k] = 0
 
     def summary(self):

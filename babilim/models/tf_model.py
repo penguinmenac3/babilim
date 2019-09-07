@@ -58,8 +58,7 @@ def _train(config: Config, model, dataset: Sequence, optimizer, lr_schedule, los
         
         # Update global variables and log the variables
         samples_seen += config.train_batch_size
-        total_loss = loss.avg["total"].numpy()
-        print("\rTraining {}/{} - Loss {:.3f} - LR {:.6f}".format(i + 1, N, total_loss, lr), end="")
+        print("\rTraining {}/{} - Loss {:.3f} - LR {:.6f}".format(i + 1, N, loss.avg["total"].numpy(), lr), end="")
         if i % config.train_log_steps == 0:
             tf.summary.scalar('learning_rate', lr, step=samples_seen)
             loss.summary()
@@ -77,7 +76,7 @@ def _validate(config, model, dataset: Sequence, loss, metrics):
         prediction = model(**inp)
         loss(y_true=outp, y_pred=prediction)
         metrics(y_true=outp, y_pred=prediction)
-        print("\rValidating {}/{} - Loss {:.3f}".format(i, N, loss.avg["total"]), end="")
+        print("\rValidating {}/{} - Loss {:.3f}".format(i, N, loss.avg["total"].numpy()), end="")
     loss.summary()
     metrics.summary()
     print()

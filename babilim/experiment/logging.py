@@ -23,6 +23,11 @@ PYTHON_IGNORE_LIST = ["__pycache__", "*.pyc", ".ipynb_checkpoints", "checkpoints
                       "tfrecords", "*.code-workspace", ".git"]
 
 
+def tprint(msg: str, end: str="\n"):
+    time_stamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+    print("\r[{}] {}".format(time_stamp, msg), end=end)
+
+
 def __ignore(candidate: str, forbidden_list: List[str]) -> bool:
     # Parse list to find simple placeholder notations
     start_list = []

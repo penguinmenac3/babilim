@@ -10,13 +10,13 @@ from babilim.annotations import RunOnlyOnce
 
 
 class Conv2D(ILayer):
-    def __init__(self, filters, kernel_size, kernel_l2_weight, name, padding=None, kernel_initializer=None):
+    def __init__(self, filters, kernel_size, name, padding=None, strides=None, dilation_rate=None, kernel_initializer=None):
         super().__init__(name=name, layer_type="Conv2D")
         if kernel_initializer is None:
             kernel_initializer = Orthogonal()
         if padding is None:
             padding = "same"
-        self.conv = _Conv2D(filters=filters, kernel_regularizer=l2(kernel_l2_weight), kernel_size=kernel_size,
+        self.conv = _Conv2D(filters=filters, kernel_size=kernel_size, strides=strides, dilation_rate=dilation_rate,
                                   padding=padding, activation="relu", kernel_initializer=kernel_initializer)
 
     @RunOnlyOnce

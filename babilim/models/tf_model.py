@@ -1,5 +1,6 @@
+from babilim.experiment.logging import tprint
 from typing import Sequence
-
+import datetime, time
 import os
 import time
 import tensorflow as tf
@@ -48,6 +49,7 @@ def _train(config: Config, model, dataset: Sequence, optimizer, lr_schedule, los
             outp = type(y)(**outp)
             prediction = model(**inp)
             loss_results = loss(y_true=outp, y_pred=prediction)
+            loss.log("total", loss_results)
             metrics(y_true=outp, y_pred=prediction)
         variables = model.trainable_variables
         raw_vars = _tensor_wrapper.unwrap(variables)
@@ -58,27 +60,29 @@ def _train(config: Config, model, dataset: Sequence, optimizer, lr_schedule, los
         
         # Update global variables and log the variables
         samples_seen += config.train_batch_size
-        print("\rTraining {}/{} - Loss {:.3f} - LR {:.6f}".format(i + 1, N, loss.avg["total"].numpy(), lr), end="")
+        time_stamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H.%M.%S')
+        tprint("Training {}/{} - Loss {:.3f} - LR {:.6f}".format(i + 1, N, loss.avg["total"].numpy(), lr), end="")
         if i % config.train_log_steps == 0:
             tf.summary.scalar('learning_rate', lr, step=samples_seen)
-            loss.summary()
-            metrics.summary()
+            loss.summary(samples_seen)
+            metrics.summary(samples_seen)
     print()
 
 
 #@tf.function
-def _validate(config, model, dataset: Sequence, loss, metrics):
+def _validate(config, model, dataset: Sequence, loss, metrics, samples_seen):
     N = len(dataset)
     for i, (x, y) in enumerate(dataset):
         inp, _ = _tensor_wrapper.wrap(x._asdict())
         outp, _ = _tensor_wrapper.wrap(y._asdict())
         outp = type(y)(**outp)
         prediction = model(**inp)
-        loss(y_true=outp, y_pred=prediction)
+        loss_results = loss(y_true=outp, y_pred=prediction)
+        loss.log("total", loss_results)
         metrics(y_true=outp, y_pred=prediction)
-        print("\rValidating {}/{} - Loss {:.3f}".format(i, N, loss.avg["total"].numpy()), end="")
-    loss.summary()
-    metrics.summary()
+        tprint("Validating {}/{} - Loss {:.3f}".format(i, N, loss.avg["total"].numpy()), end="")
+    loss.summary(samples_seen)
+    metrics.summary(samples_seen)
     print()
     return loss.avg, metrics.avg
 
@@ -106,7 +110,7 @@ def fit(model, training_dataset: Dataset, validation_dataset: Dataset, loss, met
     manager = tf.train.CheckpointManager(ckpt, os.path.join(chkpt_path, "checkpoints"), max_to_keep=10)
     ckpt.restore(manager.latest_checkpoint)
 
-    print("Epoch {}/{}".format(1, epochs))
+    tprint("Start training for {} epochs.".format(epochs))
     samples_seen = 0
     start = time.time()
     for i in range(epochs):
@@ -114,16 +118,16 @@ def fit(model, training_dataset: Dataset, validation_dataset: Dataset, loss, met
         metrics.reset_avg()
         with train_summary_writer.as_default():
             _train(config, model, batched_training_dataset, optimizer, lr_scheduler, loss, metrics, samples_seen)
-            samples_seen += len(batched_training_dataset)
+            samples_seen += len(batched_training_dataset) * config.train_batch_size
         
         loss.reset_avg()
         metrics.reset_avg()
         with val_summary_writer.as_default():
-            loss_results, metrics_results = _validate(config, model, batched_validation_dataset, loss, metrics)
+            loss_results, metrics_results = _validate(config, model, batched_validation_dataset, loss, metrics, samples_seen)
 
         ckpt.step.assign_add(1)
         save_path = manager.save()
         elapsed_time = time.time() - start
         eta = elapsed_time / (i + 1) * (epochs - (i + 1))
-        print("\rEpoch {}/{} - ETA {} - {} - {}".format(i + 1, epochs, format_time(eta),
+        tprint("Epoch {}/{} - ETA {} - {} - {}".format(i + 1, epochs, format_time(eta),
                                                         __dict_to_str(loss_results), __dict_to_str(metrics_results)))

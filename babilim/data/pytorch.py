@@ -2,6 +2,7 @@ from torch.utils.data import Dataset as __TDataset
 from torch.utils.data import DataLoader as __DataLoader
 from typing import Sequence
 from babilim.experiment import Config
+import numpy as np
 
 
 class _PyTorchDataset(__TDataset):
@@ -17,7 +18,14 @@ class _PyTorchDataset(__TDataset):
         return len(self.dataset)
 
     def __getitem__(self, idx):
-        return self.dataset[idx]
+        feat, label = self.dataset[idx]
+        out_f = []
+        out_l = []
+        for f in feat:
+            out_f.append(np.swapaxes(f, 0, -1))
+        for l in label:
+            out_l.append(np.swapaxes(l, 0, -1))
+        return type(feat)(*out_f), type(label)(*out_l)
 
 
 def BatchedPytorchDataset(dataset: Sequence, config: Config, shuffle: bool = True, num_workers: int = 1) -> __DataLoader:

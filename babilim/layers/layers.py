@@ -37,8 +37,9 @@ def Linear(out_features: int, name:str ="Linear") -> ILayer:
 
 @register_layer(TF_BACKEND, "Conv2D")
 @register_layer(PYTORCH_BACKEND, "Conv2D")
-def Conv2D(filters: int, kernel_size: Tuple[int, int], kernel_l2_weight: float, name: str = "Conv2D",
-           padding: Optional[str] = None, kernel_initializer: Optional[Any] = None) -> ILayer:
+def Conv2D(filters: int, kernel_size: Tuple[int, int], name: str = "Conv2D",
+           padding: Optional[str] = None, strides: Tuple[int, int] = (1, 1),
+           dilation_rate: Tuple[int, int] = (1, 1), kernel_initializer: Optional[Any] = None) -> ILayer:
     """A simple 2d convolution layer.
 
     TODO stride, dilation, etc.
@@ -61,10 +62,10 @@ def Conv2D(filters: int, kernel_size: Tuple[int, int], kernel_l2_weight: float, 
     """
     if is_backend(PYTORCH_BACKEND):
         from babilim.layers.pt.conv import Conv2D as _Conv2D
-        return _Conv2D(filters, kernel_size, kernel_l2_weight, name, padding, kernel_initializer)
+        return _Conv2D(filters, kernel_size, name, padding, strides, dilation_rate, kernel_initializer)
     elif is_backend(TF_BACKEND):
         from babilim.layers.tf.conv import Conv2D as _Conv2D
-        return _Conv2D(filters, kernel_size, kernel_l2_weight, name, padding, kernel_initializer)
+        return _Conv2D(filters, kernel_size, name, padding, strides, dilation_rate, kernel_initializer)
     else:
         raise NotImplementedError("The backend {} is not implemented by this layer.".format(get_backend()))
 

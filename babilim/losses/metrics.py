@@ -44,12 +44,15 @@ class Metrics(object):
             acc.assign(np.zeros_like(acc.numpy()))
             self._counters[k] = 0
 
-    def summary(self):
+    def summary(self, samples_seen, summary_writer=None):
         avgs = self.avg
-        print("Metrics: ", end="")
-        for k in avgs:
-            print("{}={:.4f} ".format(k, avgs[k].numpy()), end="")
-        print()
+        if summary_writer is not None:
+            for k in avgs:
+                summary_writer.add_scalar("{}_metric".format(k), avgs[k].numpy(), global_step=samples_seen)
+        else:
+            import tensorflow as tf
+            for k in avgs:
+                tf.summary.scalar("{}_metric".format(k), avgs[k].numpy(), step=samples_seen)
 
     @property
     def avg(self):

@@ -1,3 +1,4 @@
+from typing import Tuple
 import babilim
 import babilim.experiment.logging as logging
 from babilim import PYTORCH_BACKEND, TF_BACKEND, PHASE_TRAIN, PHASE_TEST, PHASE_VALIDATION
@@ -13,7 +14,6 @@ import babilim.optimizers.learning_rates as lr
 from babilim.losses import Loss, Metrics, CrossEntropyLossFromLogits, MeanSquaredError, CategoricalAccuracy
 
 import numpy as np
-from tensorflow.keras.datasets import fashion_mnist
 from collections import namedtuple
 
 
@@ -42,22 +42,34 @@ class FashionMnistConfig(Config):
 
 
 class FashionMnistDataset(Dataset):
-    def __init__(self, config, phase):
+    def __init__(self, config: FashionMnistConfig, phase: str):
         super().__init__(config)
-        ((trainX, trainY), (valX, valY)) = fashion_mnist.load_data()
-        self.trainX = trainX
-        self.trainY = trainY
-        self.valX = valX
-        self.valY = valY
+        if babilim.is_backend(TF_BACKEND):
+            from tensorflow.keras.datasets import fashion_mnist
+            ((trainX, trainY), (valX, valY)) = fashion_mnist.load_data()
+            self.trainX = trainX
+            self.trainY = trainY
+            self.valX = valX
+            self.valY = valY
+        else:
+            from torchvision.datasets import FashionMNIST
+            dataset = FashionMNIST(config.problem_base_dir, train=phase==PHASE_TRAIN, download=True)
+            self.trainX = []
+            self.trainY = []
+            for x, y in dataset:
+                self.trainX.append(x)
+                self.trainY.append(y)
+            self.valX = self.trainX
+            self.valY = self.trainY
         self.training = phase == PHASE_TRAIN
 
-    def __len__(self):
+    def __len__(self) -> int:
         if self.training:
-            return len(self.trainX)
+            return int(len(self.trainX))
         else:
-            return len(self.valX)
+            return int(len(self.valX))
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: int) -> Tuple[NetworkInput, NetworkOutput]:
         label = np.zeros(shape=(10,), dtype="float32")
         if self.training:
             label[self.trainY[idx]] = 1
@@ -70,35 +82,35 @@ class FashionMnistDataset(Dataset):
         return NetworkInput(features=feat), NetworkOutput(class_id=label)
 
     @property
-    def version(self):
+    def version(self) -> str:
         return "FashionMnistDataset"
 
 
 @register_model("FashionMnistModel")
 class FashionMnistModel(IModel):
-    def __init__(self, config, name="FashionMnistModel"):
+    def __init__(self, config: FashionMnistConfig, name: str = "FashionMnistModel"):
         super().__init__(name, layer_type="FashionMnistModel")
         l2_weight = config.train_l2_weight
         out_features = config.problem_number_of_categories
         self.linear = []
         
         self.linear.append(BatchNormalization())
-        self.linear.append(Conv2D(filters=12, kernel_size=(3, 3), kernel_l2_weight=l2_weight))
+        self.linear.append(Conv2D(filters=12, kernel_size=(3, 3)))
         self.linear.append(ReLU())
         self.linear.append(MaxPooling2D())
 
         self.linear.append(BatchNormalization())
-        self.linear.append(Conv2D(filters=18, kernel_size=(3, 3), kernel_l2_weight=l2_weight))
+        self.linear.append(Conv2D(filters=18, kernel_size=(3, 3)))
         self.linear.append(ReLU())
         self.linear.append(MaxPooling2D())
 
         self.linear.append(BatchNormalization())
-        self.linear.append(Conv2D(filters=18, kernel_size=(3, 3), kernel_l2_weight=l2_weight))
+        self.linear.append(Conv2D(filters=18, kernel_size=(3, 3)))
         self.linear.append(ReLU())
         self.linear.append(MaxPooling2D())
 
         self.linear.append(BatchNormalization())
-        self.linear.append(Conv2D(filters=18, kernel_size=(3, 3), kernel_l2_weight=l2_weight))
+        self.linear.append(Conv2D(filters=18, kernel_size=(3, 3)))
         self.linear.append(ReLU())
         self.linear.append(GlobalAveragePooling2D())
 
@@ -106,12 +118,14 @@ class FashionMnistModel(IModel):
         self.linear.append(Linear(out_features=out_features))
 
     @RunOnlyOnce
-    def build(self, features):
+    def build(self, features: ITensor):
         pass
 
-    def call(self, features):
+    def call(self, features: ITensor) -> NetworkOutput:
         net = features
         for l in self.linear:
+            print(l)
+            print(net.shape)
             net = l(net)
         return NetworkOutput(class_id=net)
 
@@ -132,20 +146,20 @@ class FashionMnistMetrics(Metrics):
         self.mse = MeanSquaredError()
         self.ca = CategoricalAccuracy()
 
-    def call(self, y_pred: NetworkOutput, y_true: NetworkOutput):
+    def call(self, y_pred: NetworkOutput, y_true: NetworkOutput) -> None:
         # TODO propper logging
         self.log("ce", self.ce(y_pred.class_id, y_true.class_id).mean())
         self.log("ca", self.ca(y_pred.class_id, y_true.class_id).mean())
         self.log("mse", self.mse(y_pred.class_id, y_true.class_id).mean())
         self.log("vil", self.variance_in_loss(y_pred.class_id, y_true.class_id).mean())
 
-    def categorical_variance_loss(self, y_true, y_pred):
+    def categorical_variance_loss(self, y_true: ITensor, y_pred: ITensor) -> ITensor:
         L = self.ce(y_true, y_pred)
 
         mean = L.mean()
         return L.mean() + self.mse(mean, L)
 
-    def variance_in_loss(self, y_true, y_pred):
+    def variance_in_loss(self, y_true: ITensor, y_pred: ITensor) -> ITensor:
         # Compute Loss
         L = self.ce(y_true, y_pred)
 
@@ -154,7 +168,7 @@ class FashionMnistMetrics(Metrics):
 
 
 if __name__ == "__main__":
-    babilim.set_backend(TF_BACKEND)
+    babilim.set_backend(PYTORCH_BACKEND)
 
     # Create our configuration (containing all hyperparameters)
     config = FashionMnistConfig()

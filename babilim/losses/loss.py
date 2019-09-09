@@ -20,7 +20,6 @@ class Loss(object):
         :param y_true: The desired outputs of the network (labels). Either a NamedTuple pointing at ITensors or a Dict or Tuple of ITensors.
         """
         loss = self.call(y_pred, y_true)
-        self.log("total", loss)
         return loss
     
     
@@ -49,13 +48,15 @@ class Loss(object):
             acc.assign(np.zeros_like(acc.numpy()))
             self._counters[k] = 0
 
-    def summary(self):
+    def summary(self, samples_seen, summary_writer=None):
         avgs = self.avg
-        print()
-        print("Losses: ", end="")
-        for k in avgs:
-            print("{}={:.4f} ".format(k, avgs[k].numpy()), end="")
-        print()
+        if summary_writer is not None:
+            for k in avgs:
+                summary_writer.add_scalar("{}".format(k), avgs[k].numpy(), global_step=samples_seen)
+        else:
+            import tensorflow as tf
+            for k in avgs:
+                tf.summary.scalar("{}".format(k), avgs[k].numpy(), step=samples_seen)
 
     @property
     def avg(self):
@@ -71,6 +72,7 @@ class CrossEntropyLossFromLogits(Loss):
         super().__init__()
         if babilim.is_backend(babilim.PYTORCH_BACKEND):
             from torch.nn import CrossEntropyLoss
+            # FIXME This is actually the wrong one
             self.loss_fun = CrossEntropyLoss()
         else:
             from tensorflow.nn import softmax_cross_entropy_with_logits
@@ -78,7 +80,7 @@ class CrossEntropyLossFromLogits(Loss):
 
     def call(self, y_pred: ITensor, y_true: ITensor, axis: int=-1) -> ITensor:
         if babilim.is_backend(babilim.PYTORCH_BACKEND):
-            return Tensor(data=None, trainable=True, native=self.loss_fun(y_pred.native, y_true.native, axis=axis))
+            return Tensor(data=None, trainable=True, native=self.loss_fun(y_pred.native, y_true.native))
         else:
             return Tensor(data=None, trainable=True, native=self.loss_fun(labels=y_true.native, logits=y_pred.native, axis=axis))
 

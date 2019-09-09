@@ -1,4 +1,4 @@
-from typing import Union, Any, Sequence, Dict, Tuple
+from typing import Union, Any, Sequence, Dict, Tuple, Optional
 
 import numpy as np
 import tensorflow as tf
@@ -80,10 +80,10 @@ class Tensor(ITensor):
     def numpy(self) -> np.ndarray:
         return self.native.numpy()
 
-    def mean(self, axis: int=None) -> 'Tensor':
+    def mean(self, axis: Optional[int]=None) -> 'Tensor':
         return Tensor(native=tf.reduce_mean(self.native, axis=axis))
         
-    def argmax(self, axis: int=None) -> 'ITensor':
+    def argmax(self, axis: Optional[int]=None) -> 'ITensor':
         return Tensor(native=tf.argmax(self.native, axis=axis))
 
     @property

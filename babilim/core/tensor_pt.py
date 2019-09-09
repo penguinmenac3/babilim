@@ -1,4 +1,4 @@
-from typing import Union, Any, Sequence, Dict, Tuple
+from typing import Union, Any, Sequence, Dict, Tuple, Optional
 
 import numpy as np
 import torch
@@ -82,10 +82,10 @@ class Tensor(ITensor):
         
         return tmp.numpy().T
 
-    def mean(self, axis: int=None) -> 'Tensor':
+    def mean(self, axis: Optional[int]=None) -> 'Tensor':
         return Tensor(native=self.native.mean(axis=axis))
     
-    def argmax(self, axis: int=None) -> 'ITensor':
+    def argmax(self, axis: Optional[int]=None) -> 'ITensor':
         raise NotImplementedError("Each implementation of a tensor must implement this.")
 
     @property

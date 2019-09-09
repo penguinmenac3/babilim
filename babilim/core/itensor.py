@@ -1,4 +1,4 @@
-from typing import Union, Any, Tuple
+from typing import Union, Any, Tuple, Optional
 import numpy as np
 
 tensor_name_table = {}
@@ -42,10 +42,10 @@ class ITensor(object):
     def numpy(self) -> np.ndarray:
         raise NotImplementedError("Each implementation of a variable must implement this.")
 
-    def mean(self, axis: int=None) -> 'ITensor':
+    def mean(self, axis: Optional[int]=None) -> 'ITensor':
         raise NotImplementedError("Each implementation of a variable must implement this.")
     
-    def argmax(self, axis: int=None) -> 'ITensor':
+    def argmax(self, axis: Optional[int]=None) -> 'ITensor':
         raise NotImplementedError("Each implementation of a tensor must implement this.")
 
     @property

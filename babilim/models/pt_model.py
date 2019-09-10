@@ -32,7 +32,6 @@ def format_time(t):
     return '%d:%02d:%02d' % (hours, minutes, seconds)
 
 
-#@tf.function
 def _train(config: Config, model, dataset, optimizer, lr_schedule, loss, metrics, samples_seen: int, summary_writer):
     N = len(dataset)
     
@@ -45,9 +44,9 @@ def _train(config: Config, model, dataset, optimizer, lr_schedule, loss, metrics
     for i, (x, y) in enumerate(dataset):
         # Forward pass, computing gradients and applying them
         for var in variables:
-            print(var.native.grad)
-            # TODO zero grads properly
-            var.native.grad = 0
+            if var.native.grad is not None:
+                    var.native.grad.detach_()
+                    var.native.grad.zero_()
         inp, _ = _tensor_wrapper.wrap(x._asdict())
         outp, _ = _tensor_wrapper.wrap(y._asdict())
         outp = type(y)(**outp)
@@ -56,7 +55,7 @@ def _train(config: Config, model, dataset, optimizer, lr_schedule, loss, metrics
         loss.log("total", loss_results)
         metrics(y_true=outp, y_pred=prediction)
         # Translate those to something usefull...
-        # TODO criterion.backwards()
+        loss_results.native.backward()
         gradients = [var.native.grad for var in variables]
         wrapped_grads, _ = _tensor_wrapper.wrap(gradients)
         lr = lr_schedule(samples_seen / config.train_batch_size)
@@ -72,7 +71,6 @@ def _train(config: Config, model, dataset, optimizer, lr_schedule, loss, metrics
     print()
 
 
-#@tf.function
 def _validate(config, model, dataset, loss, metrics, samples_seen, summary_writer):
     N = len(dataset)
     for i, (x, y) in enumerate(dataset):

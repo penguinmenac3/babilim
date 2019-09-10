@@ -1,11 +1,12 @@
 from typing import Tuple
 import babilim
 import babilim.experiment.logging as logging
+from babilim.experiment.logging import tprint
 from babilim import PYTORCH_BACKEND, TF_BACKEND, PHASE_TRAIN, PHASE_TEST, PHASE_VALIDATION
 from babilim.annotations import RunOnlyOnce
 from babilim.models import IModel, register_model
 from babilim.core.itensor import ITensor
-from babilim.layers import BatchNormalization, Conv2D, MaxPooling2D, GlobalAveragePooling2D, Linear, ReLU
+from babilim.layers import BatchNormalization, Conv2D, MaxPooling2D, GlobalAveragePooling2D, Linear, ReLU, Flatten
 from babilim.data import Dataset
 from babilim.experiment import Config
 from babilim.optimizers import SGD
@@ -115,6 +116,7 @@ class FashionMnistModel(IModel):
         self.linear.append(GlobalAveragePooling2D())
 
         self.linear.append(BatchNormalization())
+        self.linear.append(Flatten())
         self.linear.append(Linear(out_features=out_features))
 
     @RunOnlyOnce
@@ -124,9 +126,9 @@ class FashionMnistModel(IModel):
     def call(self, features: ITensor) -> NetworkOutput:
         net = features
         for l in self.linear:
-            print(l)
-            print(net.shape)
+            #print(l.name)
             net = l(net)
+            #print(net.shape)
         return NetworkOutput(class_id=net)
 
 
@@ -136,6 +138,7 @@ class FashionMnistLoss(Loss):
         self.ce = CrossEntropyLossFromLogits()
 
     def call(self, y_pred: NetworkOutput, y_true: NetworkOutput) -> ITensor:
+        #tprint("y_pred={} y_true={}".format(y_pred.class_id.shape, y_true.class_id.shape))
         return self.ce(y_pred.class_id, y_true.class_id).mean()
 
 

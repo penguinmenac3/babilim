@@ -7,6 +7,18 @@ from babilim.layers.ilayer import ILayer, register_layer
 # Various (Conv, Linear, BatchNorm)
 # *******************************************************
 
+@register_layer(TF_BACKEND, "Flatten")
+@register_layer(PYTORCH_BACKEND, "Flatten")
+def Flatten(name:str = "Flatten") -> ILayer:
+    if is_backend(PYTORCH_BACKEND):
+        from babilim.layers.pt.flatten import Flatten as _Flatten
+        return _Flatten(name)
+    elif is_backend(TF_BACKEND):
+        from babilim.layers.tf.flatten import Flatten as _Flatten
+        return _Flatten(name)
+    else:
+        raise NotImplementedError("The backend {} is not implemented by this layer.".format(get_backend()))
+
 @register_layer(TF_BACKEND, "Linear")
 @register_layer(PYTORCH_BACKEND, "Linear")
 def Linear(out_features: int, name:str ="Linear") -> ILayer:

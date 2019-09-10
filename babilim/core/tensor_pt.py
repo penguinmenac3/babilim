@@ -90,7 +90,7 @@ class Tensor(ITensor):
 
     @property
     def shape(self) -> Tuple:
-        return self.native.shape
+        return tuple(self.native.shape)
 
     @property
     def trainable(self) -> bool:

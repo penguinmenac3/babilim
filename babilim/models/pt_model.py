@@ -109,6 +109,12 @@ def fit(model, training_dataset: Dataset, validation_dataset: Dataset, loss, met
     # Load Checkpoint
     # TODO
 
+    # Actually force model to be build by running one forward step
+    tprint("Build model.")
+    features, _ = next(iter(batched_training_dataset))
+    inp, _ = _tensor_wrapper.wrap(features._asdict())
+    model(**inp)
+
     tprint("Start training for {} epochs.".format(epochs))
     samples_seen = 0
     start = time.time()

@@ -61,7 +61,9 @@ class ILayer(object):
         all_vars = []
         for k in self.__dict__:
             v = self.__dict__[k]
-            if isinstance(v, Dict):
+            if isinstance(v, str):
+                pass
+            elif isinstance(v, Dict):
                 for k in v:
                     x = v[k]
                     if isinstance(x, ILayer):
@@ -74,9 +76,9 @@ class ILayer(object):
                         all_vars.extend(x.variables)
                     if isinstance(x, ITensor):
                         all_vars.append(x)
-            if isinstance(v, ILayer):
+            elif isinstance(v, ILayer):
                 all_vars.extend(v.variables)
-            if isinstance(v, ITensor):
+            elif isinstance(v, ITensor):
                 all_vars.append(v)
         return all_vars
 

@@ -110,6 +110,12 @@ def fit(model, training_dataset: Dataset, validation_dataset: Dataset, loss, met
     manager = tf.train.CheckpointManager(ckpt, os.path.join(chkpt_path, "checkpoints"), max_to_keep=10)
     ckpt.restore(manager.latest_checkpoint)
 
+    # Actually force model to be build by running one forward step
+    tprint("Build model.")
+    features, _ = batched_training_dataset[0]
+    inp, _ = _tensor_wrapper.wrap(features._asdict())
+    model(**inp)
+
     tprint("Start training for {} epochs.".format(epochs))
     samples_seen = 0
     start = time.time()

@@ -116,6 +116,8 @@ class FashionMnistModel(IModel):
 
         self.linear.append(BatchNormalization())
         self.linear.append(Flatten())
+        self.linear.append(Linear(out_features=18))
+        self.linear.append(ReLU())
         self.linear.append(Linear(out_features=out_features))
 
     @RunOnlyOnce

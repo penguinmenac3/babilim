@@ -12,7 +12,7 @@ from babilim.experiment import Config
 from babilim.optimizers import SGD
 import babilim.optimizers.learning_rates as lr
 # TODO implement the following
-from babilim.losses import Loss, Metrics, CrossEntropyLossFromLogits, MeanSquaredError, CategoricalAccuracy
+from babilim.losses import Loss, Metrics, SparseCrossEntropyLossFromLogits, MeanSquaredError, SparseCategoricalAccuracy
 
 import numpy as np
 from collections import namedtuple
@@ -71,14 +71,13 @@ class FashionMnistDataset(Dataset):
             return int(len(self.valX))
 
     def __getitem__(self, idx: int) -> Tuple[NetworkInput, NetworkOutput]:
-        label = np.zeros(shape=(10,), dtype="float32")
         if self.training:
-            label[self.trainY[idx]] = 1
+            label = np.array(self.trainY[idx], dtype="uint8")
             feat = np.array(self.trainX[idx], dtype="float32")
         else:
-            label[self.valY[idx]] = 1
+            label = np.array(self.valY[idx], dtype="uint8")
             feat = np.array(self.valX[idx], dtype="float32")
-            
+
         feat = np.reshape(feat, (28, 28, 1))
         return NetworkInput(features=feat), NetworkOutput(class_id=label)
 
@@ -135,7 +134,7 @@ class FashionMnistModel(IModel):
 class FashionMnistLoss(Loss):
     def __init__(self):
         super().__init__()
-        self.ce = CrossEntropyLossFromLogits()
+        self.ce = SparseCrossEntropyLossFromLogits()
 
     def call(self, y_pred: NetworkOutput, y_true: NetworkOutput) -> ITensor:
         #tprint("y_pred={} y_true={}".format(y_pred.class_id.shape, y_true.class_id.shape))
@@ -145,29 +144,12 @@ class FashionMnistLoss(Loss):
 class FashionMnistMetrics(Metrics):
     def __init__(self):
         super().__init__()
-        self.ce = CrossEntropyLossFromLogits()
-        self.mse = MeanSquaredError()
-        self.ca = CategoricalAccuracy()
+        self.ce = SparseCrossEntropyLossFromLogits()
+        self.ca = SparseCategoricalAccuracy()
 
     def call(self, y_pred: NetworkOutput, y_true: NetworkOutput) -> None:
-        # TODO propper logging
         self.log("ce", self.ce(y_pred.class_id, y_true.class_id).mean())
         self.log("ca", self.ca(y_pred.class_id, y_true.class_id).mean())
-        self.log("mse", self.mse(y_pred.class_id, y_true.class_id).mean())
-        self.log("vil", self.variance_in_loss(y_pred.class_id, y_true.class_id).mean())
-
-    def categorical_variance_loss(self, y_true: ITensor, y_pred: ITensor) -> ITensor:
-        L = self.ce(y_true, y_pred)
-
-        mean = L.mean()
-        return L.mean() + self.mse(mean, L)
-
-    def variance_in_loss(self, y_true: ITensor, y_pred: ITensor) -> ITensor:
-        # Compute Loss
-        L = self.ce(y_true, y_pred)
-
-        mean = L.mean()
-        return self.mse(mean, L)
 
 
 if __name__ == "__main__":

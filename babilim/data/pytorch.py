@@ -24,7 +24,10 @@ class _PyTorchDataset(__TDataset):
         for f in feat:
             out_f.append(np.swapaxes(f, 0, -1))
         for l in label:
-            out_l.append(np.swapaxes(l, 0, -1))
+            if len(l.shape) > 1:
+                out_l.append(np.swapaxes(l, 0, -1))
+            else:
+                out_l.append(l)
         return type(feat)(*out_f), type(label)(*out_l)
 
 

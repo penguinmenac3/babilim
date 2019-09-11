@@ -60,7 +60,26 @@ class Tensor(ITensor):
         return Tensor(data=self.numpy(), trainable=self.trainable)
         
     def cast(self, dtype) -> 'ITensor':
-        raise NotImplementedError("Each implementation of a tensor must implement this.")
+        if dtype == "float16":
+            return Tensor(native=self.native.half())
+        elif dtype == "float32":
+            return Tensor(native=self.native.float())
+        elif dtype == "float64":
+            return Tensor(native=self.native.double())
+        elif dtype == "bool":
+            return Tensor(native=self.native.bool())
+        elif dtype == "uint8":
+            return Tensor(native=self.native.byte())
+        elif dtype == "int8":
+            return Tensor(native=self.native.char())
+        elif dtype == "int16":
+            return Tensor(native=self.native.short())
+        elif dtype == "int32":
+            return Tensor(native=self.native.int())
+        elif dtype == "int64":
+            return Tensor(native=self.native.long())
+        else:
+            raise RuntimeError("dtype {} not valid".format(dtype))
 
     def stop_gradients(self) -> 'Tensor':
         return Tensor(native=self.native.detach())
@@ -83,10 +102,16 @@ class Tensor(ITensor):
         return tmp.numpy().T
 
     def mean(self, axis: Optional[int]=None) -> 'Tensor':
-        return Tensor(native=self.native.mean(axis=axis))
+        if axis is not None:
+            return Tensor(native=self.native.mean(dim=axis))
+        else:
+            return Tensor(native=self.native.mean())
     
     def argmax(self, axis: Optional[int]=None) -> 'ITensor':
-        raise NotImplementedError("Each implementation of a tensor must implement this.")
+        if axis is not None:
+            return Tensor(native=self.native.argmax(dim=axis))
+        else:
+            return Tensor(native=self.native.argmax())
 
     @property
     def shape(self) -> Tuple:

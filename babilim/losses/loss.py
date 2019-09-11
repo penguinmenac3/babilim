@@ -67,22 +67,22 @@ class Loss(object):
 
 
 
-class CrossEntropyLossFromLogits(Loss):
+class SparseCrossEntropyLossFromLogits(Loss):
     def __init__(self):
         super().__init__()
         if babilim.is_backend(babilim.PYTORCH_BACKEND):
             from torch.nn import CrossEntropyLoss
-            # FIXME This is actually the wrong one
             self.loss_fun = CrossEntropyLoss()
         else:
-            from tensorflow.nn import softmax_cross_entropy_with_logits
-            self.loss_fun = softmax_cross_entropy_with_logits
+            from tensorflow.nn import sparse_softmax_cross_entropy_with_logits
+            self.loss_fun = sparse_softmax_cross_entropy_with_logits
 
-    def call(self, y_pred: ITensor, y_true: ITensor, axis: int=-1) -> ITensor:
+    def call(self, y_pred: ITensor, y_true: ITensor) -> ITensor:
+        y_true = y_true.cast("int64")
         if babilim.is_backend(babilim.PYTORCH_BACKEND):
             return Tensor(data=None, trainable=True, native=self.loss_fun(y_pred.native, y_true.native))
         else:
-            return Tensor(data=None, trainable=True, native=self.loss_fun(labels=y_true.native, logits=y_pred.native, axis=axis))
+            return Tensor(data=None, trainable=True, native=self.loss_fun(labels=y_true.native, logits=y_pred.native))
 
 
 class MeanSquaredError(Loss):
@@ -90,9 +90,9 @@ class MeanSquaredError(Loss):
         return ((y_pred - y_true) ** 2).mean(axis=axis)
 
 
-class CategoricalAccuracy(Loss):
+class SparseCategoricalAccuracy(Loss):
     def call(self, y_pred: ITensor, y_true: ITensor, axis: int=-1) -> ITensor:
         pred_class = y_pred.argmax(axis=axis)
-        true_class = y_true.argmax(axis=axis)
+        true_class = y_true.cast("int64")
         correct_predictions = pred_class == true_class
         return correct_predictions.cast("float32").mean()

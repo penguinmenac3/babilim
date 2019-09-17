@@ -36,8 +36,6 @@ def _train(config: Config, model, dataset, optimizer, lr_schedule, loss, metrics
     N = len(dataset)
     
     # Setup the training loop
-    loss.reset_avg()
-    metrics.reset_avg()
     variables = model.trainable_variables
 
     # Loop over the dataset and update weights.

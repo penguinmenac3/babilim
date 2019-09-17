@@ -1,4 +1,5 @@
 import math
+import torch
 from torch.nn import Conv2d as _Conv2d
 from torch.nn.init import orthogonal_
 
@@ -32,6 +33,8 @@ class Conv2D(ILayer):
         in_channels = features.shape[1]
         self.conv = _Conv2d(in_channels, self.filters, self.kernel_size, self.stride, self.padding, self.dilation)
         self.conv.weight.data = self.kernel_initializer(self.conv.weight.data)
+        if torch.cuda.is_available():
+            self.conv = self.conv.to(torch.device("cuda"))
         self.weight = Tensor(data=None, trainable=True, native=self.conv.weight, name=self.name + "/kernel")
         self.bias = Tensor(data=None, trainable=True, native=self.conv.bias, name=self.name + "/bias")
 

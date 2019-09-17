@@ -1,4 +1,5 @@
 import math
+import torch
 from torch.nn import BatchNorm1d, BatchNorm2d, BatchNorm3d
 
 from babilim.layers.ilayer import ILayer
@@ -21,10 +22,14 @@ class BatchNormalization(ILayer):
             self.bn = BatchNorm3d(features.shape[1])
         else:
             raise RuntimeError("Batch norm not available for other input shapes than 3, 4 or 5 dimensional.")
+        
+        if torch.cuda.is_available():
+            self.bn = self.bn.to(torch.device("cuda"))
         if self.bn.weight is not None:
             self.weight = Tensor(native=self.bn.weight)
         if self.bn.bias is not None:
             self.bias = Tensor(native=self.bn.bias)
+            
 
 
     def call(self, features):

@@ -25,6 +25,8 @@ class TensorWrapper(ITensorWrapper):
                 wrapped = wrapped or q
         elif isinstance(obj, _Tensor):
             obj = Tensor(native=obj, trainable=obj.requires_grad)
+            if not obj.native.is_cuda and torch.cuda.is_available():
+                obj.native = obj.native.to(torch.device("cuda"))
             wrapped = True
         elif isinstance(obj, np.ndarray):
             obj = Tensor(data=obj, trainable=False)
@@ -49,7 +51,7 @@ class Tensor(ITensor):
             native = torch.from_numpy(data)
             native.requires_grad = trainable
             if torch.cuda.is_available():
-                native = self.native.to(torch.device("cuda"))
+                native = native.to(torch.device("cuda"))
         elif native is not None:
             native = native
         else:

@@ -23,7 +23,6 @@ class MaxPooling2D(ILayer):
 class MaxPooling1D(ILayer):
     def __init__(self, name):
         super().__init__(name=name, layer_type="MaxPooling1D")
-        self.pool = _MaxPooling1D(kernel_size=2, stride=2)
 
     @RunOnlyOnce
     def build(self, features):

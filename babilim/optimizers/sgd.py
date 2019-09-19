@@ -3,7 +3,7 @@ from babilim.core.itensor import ITensor
 
 
 class SGD(object):
-    def __init__(self, momentum: float=0.95, dampening: float=0.01, weight_decay: float=0, nesterov: bool=True):
+    def __init__(self, momentum: float=0.95, dampening: float=0.0, weight_decay: float=0, nesterov: bool=True):
         self.momentum = momentum
         self.weight_decay = weight_decay
         self.nesterov = nesterov

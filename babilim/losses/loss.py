@@ -80,9 +80,9 @@ class SparseCrossEntropyLossFromLogits(Loss):
     def call(self, y_pred: ITensor, y_true: ITensor) -> ITensor:
         y_true = y_true.cast("int64")
         if babilim.is_backend(babilim.PYTORCH_BACKEND):
-            return Tensor(data=None, trainable=True, native=self.loss_fun(y_pred.native, y_true.native))
+            return Tensor(data=self.loss_fun(y_pred.native, y_true.native), trainable=True)
         else:
-            return Tensor(data=None, trainable=True, native=self.loss_fun(labels=y_true.native, logits=y_pred.native))
+            return Tensor(data=self.loss_fun(labels=y_true.native, logits=y_pred.native), trainable=True)
 
 
 class MeanSquaredError(Loss):

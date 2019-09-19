@@ -1,3 +1,4 @@
+from typing import Sequence, Any, Sequence, Callable, Dict
 from babilim.experiment.logging import tprint
 from typing import Sequence
 import datetime, time
@@ -9,6 +10,7 @@ from tensorboardX import SummaryWriter
 from babilim.data import Dataset
 from babilim.experiment import Config
 from babilim.core.tensor import TensorWrapper
+from babilim.optimizers.learning_rates import LearningRateSchedule
 
 
 _tensor_wrapper = TensorWrapper()
@@ -94,7 +96,7 @@ def _validate(config, model, dataset, loss, metrics, samples_seen, summary_write
     return loss.avg, metrics.avg
 
 
-def fit(model, training_dataset: Dataset, validation_dataset: Dataset, loss, metrics, config: Config, verbose: bool):
+def fit(model, training_dataset: Dataset, validation_dataset: Dataset, loss, metrics, config: Config, optim: Any, lr_schedule: LearningRateSchedule, verbose: bool):
     config.check_completness()
     if config.train_actual_checkpoint_path is None:
         raise RuntimeError("You must setup logging before calling the fit method. See babilim.experiment.logging.setup")
@@ -105,8 +107,6 @@ def fit(model, training_dataset: Dataset, validation_dataset: Dataset, loss, met
     val_summary_writer = SummaryWriter(os.path.join(chkpt_path, "val"))
 
     # Try to retrieve optional arguments from hyperparams if not specified
-    optimizer = config.train_optimizer
-    lr_scheduler = config.train_learning_rate_shedule
     epochs = config.train_epochs
     
     batched_training_dataset = training_dataset.to_pytorch()
@@ -127,7 +127,7 @@ def fit(model, training_dataset: Dataset, validation_dataset: Dataset, loss, met
     for i in range(epochs):
         loss.reset_avg()
         metrics.reset_avg()
-        _train(config, model, batched_training_dataset, optimizer, lr_scheduler, loss, metrics, samples_seen, train_summary_writer, verbose)
+        _train(config, model, batched_training_dataset, optim, lr_schedule, loss, metrics, samples_seen, train_summary_writer, verbose)
         samples_seen += len(batched_training_dataset) * config.train_batch_size
         
         loss.reset_avg()

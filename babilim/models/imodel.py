@@ -5,19 +5,20 @@ from babilim import PYTORCH_BACKEND, TF_BACKEND
 from babilim.layers.ilayer import ILayer
 from babilim.data import Dataset
 from babilim.experiment import Config
+from babilim.optimizers.learning_rates import LearningRateSchedule
 
 
 class IModel(ILayer):
     def __init__(self, name: str, layer_type: str):
         super().__init__(name, layer_type)
 
-    def fit(self, training_dataset: Dataset, validation_dataset: Dataset, loss, metrics, config: Config, verbose: bool = False):
+    def fit(self, training_dataset: Dataset, validation_dataset: Dataset, loss, metrics, config: Config, optim: Any, lr_schedule: LearningRateSchedule, verbose: bool = False):
         if babilim.is_backend(PYTORCH_BACKEND):
             from babilim.models.pt_model import fit as _fit
-            _fit(self, training_dataset, validation_dataset, loss, metrics, config, verbose)
+            _fit(self, training_dataset, validation_dataset, loss, metrics, config, optim, lr_schedule, verbose)
         elif babilim.is_backend(TF_BACKEND):
             from babilim.models.tf_model import fit as _fit
-            _fit(self, training_dataset, validation_dataset, loss, metrics, config, verbose)
+            _fit(self, training_dataset, validation_dataset, loss, metrics, config, optim, lr_schedule, verbose)
         else:
             raise NotImplementedError("Unsupported backend: {}".format(babilim.get_backend()))
 

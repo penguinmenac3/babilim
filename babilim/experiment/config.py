@@ -143,8 +143,6 @@ class Config(ConfigPart):
         self.train_checkpoint_path = "checkpoints"
         self.train_epochs = 50
         self.train_log_steps = 100
-        self.train_learning_rate_shedule = None
-        self.train_optimizer = None
 
         # Architectural parameters (like preparing the data, the model, the loss and then some metrics)
         self.arch_prepare = None
@@ -189,8 +187,6 @@ class Config(ConfigPart):
         assert Config.__has_attribute(self, "train_batch_size")
         assert Config.__has_attribute(self, "train_epochs")
         assert Config.__has_attribute(self, "train_log_steps")
-        assert Config.__has_attribute(self, "train_optimizer")
-        assert Config.__has_attribute(self, "train_learning_rate_shedule")
         assert Config.__has_attribute(self, "problem_base_dir")
 
         return True

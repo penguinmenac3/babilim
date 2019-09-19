@@ -28,7 +28,7 @@ class ILayer(object):
         self.build(*args, **kwargs)
         result = self.call(*args, **kwargs)
         if wrapped_args or wrapped_kwargs:
-            return self.__wrapper.unwrap(kwargs)
+            return self.__wrapper.unwrap(result)
         else:
             return result
 
@@ -113,6 +113,14 @@ class ILayer(object):
         for v in all_vars:
             if v.trainable:
                 train_vars.append(v)
+        return train_vars
+
+    @property
+    def trainable_variables_native(self):
+        all_vars = self.trainable_variables
+        train_vars = []
+        for v in all_vars:
+            train_vars.append(v.native)
         return train_vars
 
 _LAYER_REGISTRY: Dict[str, Dict[str, ILayer]] = defaultdict(dict)

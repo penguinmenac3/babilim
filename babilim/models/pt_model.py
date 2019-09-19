@@ -32,11 +32,19 @@ def format_time(t):
     return '%d:%02d:%02d' % (hours, minutes, seconds)
 
 
-def _train(config: Config, model, dataset, optimizer, lr_schedule, loss, metrics, samples_seen: int, summary_writer):
+def _train(config: Config, model, dataset, optimizer, lr_schedule, loss, metrics, samples_seen: int, summary_writer, verbose: bool):
     N = len(dataset)
     
     # Setup the training loop
     variables = model.trainable_variables
+    if verbose:
+        print()
+        print("*****************************")
+        print("* model.trainable_variables *")
+        print("*****************************")
+        for var in variables:
+            print("  {}: {}".format(var.name, var.shape))
+        print()
 
     # Loop over the dataset and update weights.
     for i, (x, y) in enumerate(dataset):
@@ -86,7 +94,7 @@ def _validate(config, model, dataset, loss, metrics, samples_seen, summary_write
     return loss.avg, metrics.avg
 
 
-def fit(model, training_dataset: Dataset, validation_dataset: Dataset, loss, metrics, config: Config):
+def fit(model, training_dataset: Dataset, validation_dataset: Dataset, loss, metrics, config: Config, verbose: bool):
     config.check_completness()
     if config.train_actual_checkpoint_path is None:
         raise RuntimeError("You must setup logging before calling the fit method. See babilim.experiment.logging.setup")
@@ -119,7 +127,7 @@ def fit(model, training_dataset: Dataset, validation_dataset: Dataset, loss, met
     for i in range(epochs):
         loss.reset_avg()
         metrics.reset_avg()
-        _train(config, model, batched_training_dataset, optimizer, lr_scheduler, loss, metrics, samples_seen, train_summary_writer)
+        _train(config, model, batched_training_dataset, optimizer, lr_scheduler, loss, metrics, samples_seen, train_summary_writer, verbose)
         samples_seen += len(batched_training_dataset) * config.train_batch_size
         
         loss.reset_avg()

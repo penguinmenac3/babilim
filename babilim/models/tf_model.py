@@ -33,12 +33,22 @@ def format_time(t):
 
 
 #@tf.function
-def _train(config: Config, model, dataset: Sequence, optimizer, lr_schedule, loss, metrics, samples_seen: int):
+def _train(config: Config, model, dataset: Sequence, optimizer, lr_schedule, loss, metrics, samples_seen: int, verbose: bool):
     N = len(dataset)
     
     # Setup the training loop
     loss.reset_avg()
     metrics.reset_avg()
+
+    variables = model.trainable_variables
+    if verbose:
+        print()
+        print("*****************************")
+        print("* model.trainable_variables *")
+        print("*****************************")
+        for var in variables:
+            print("  {}: {}".format(var.name, var.shape))
+        print()
 
     # Loop over the dataset and update weights.
     for i, (x, y) in enumerate(dataset):
@@ -51,7 +61,6 @@ def _train(config: Config, model, dataset: Sequence, optimizer, lr_schedule, los
             loss_results = loss(y_true=outp, y_pred=prediction)
             loss.log("total", loss_results)
             metrics(y_true=outp, y_pred=prediction)
-        variables = model.trainable_variables
         raw_vars = _tensor_wrapper.unwrap(variables)
         gradients = tape.gradient(loss_results.native, raw_vars)
         wrapped_grads, _ = _tensor_wrapper.wrap(gradients)
@@ -87,7 +96,7 @@ def _validate(config, model, dataset: Sequence, loss, metrics, samples_seen):
     return loss.avg, metrics.avg
 
 
-def fit(model, training_dataset: Dataset, validation_dataset: Dataset, loss, metrics, config: Config):
+def fit(model, training_dataset: Dataset, validation_dataset: Dataset, loss, metrics, config: Config, verbose: bool):
     config.check_completness()
     if config.train_actual_checkpoint_path is None:
         raise RuntimeError("You must setup logging before calling the fit method. See babilim.experiment.logging.setup")
@@ -123,7 +132,7 @@ def fit(model, training_dataset: Dataset, validation_dataset: Dataset, loss, met
         loss.reset_avg()
         metrics.reset_avg()
         with train_summary_writer.as_default():
-            _train(config, model, batched_training_dataset, optimizer, lr_scheduler, loss, metrics, samples_seen)
+            _train(config, model, batched_training_dataset, optimizer, lr_scheduler, loss, metrics, samples_seen, verbose)
             samples_seen += len(batched_training_dataset) * config.train_batch_size
         
         loss.reset_avg()

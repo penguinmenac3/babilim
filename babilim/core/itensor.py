@@ -10,6 +10,12 @@ class ITensorWrapper(object):
     def unwrap(self, obj: Any) -> Any:
         raise NotImplementedError()
 
+    def is_variable(self, obj: Any) -> bool:
+        raise NotImplementedError()
+
+    def wrap_variable(self, obj: Any, name: str) -> 'ITensor':
+        raise NotImplementedError()
+
 
 class ITensor(object):
     def __init__(self, native, name: str = "unnamed"):

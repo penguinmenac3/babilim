@@ -48,6 +48,12 @@ class TensorWrapper(ITensorWrapper):
             out = obj.native
         return out
 
+    def is_variable(self, obj: Any) -> bool:
+        return isinstance(obj, tf.Variable)
+
+    def wrap_variable(self, obj: Any, name: str) -> 'ITensor':
+        return Tensor(native=obj, trainable=obj.trainable, name=name)
+
 
 class Tensor(ITensor):
     def __init__(self, data: np.ndarray = None, trainable: bool = False, native=None, name:str = "unnamed"):

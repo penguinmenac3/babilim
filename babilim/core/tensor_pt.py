@@ -25,6 +25,7 @@ class TensorWrapper(ITensorWrapper):
                 wrapped = wrapped or q
         elif isinstance(obj, _Tensor):
             obj = Tensor(native=obj, trainable=obj.requires_grad)
+            # FIXME is this required? obj should already be cuda
             if not obj.native.is_cuda and torch.cuda.is_available():
                 obj.native = obj.native.to(torch.device("cuda"))
             wrapped = True
@@ -43,6 +44,17 @@ class TensorWrapper(ITensorWrapper):
         if isinstance(obj, Tensor):
             obj = obj.native
         return obj
+
+    def is_variable(self, obj: Any) -> bool:
+        return isinstance(obj, _Tensor)
+
+    def wrap_variable(self, obj: Any, name: str) -> 'ITensor':
+        obj = Tensor(native=obj, trainable=obj.requires_grad, name=name)
+        # FIXME is this required? obj should already be cuda
+        if not obj.native.is_cuda and torch.cuda.is_available():
+            obj.native = obj.native.to(torch.device("cuda"))
+        return obj
+
 
 class Tensor(ITensor):
     def __init__(self, data: np.ndarray = None, trainable=False, native: _Tensor=None, name: str="unnamed"):

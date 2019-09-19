@@ -173,4 +173,4 @@ if __name__ == "__main__":
     metrics = FashionMnistMetrics()
 
     # Fit our model to the data using our loss and report the metrics.
-    model.fit(train, val, loss, metrics, config)  # XXX fix fit method to work with lr and optim
+    model.fit(train, val, loss, metrics, config, verbose=True)  # XXX fix fit method to work with lr and optim

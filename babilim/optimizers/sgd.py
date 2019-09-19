@@ -12,9 +12,11 @@ class SGD(object):
 
     def apply_gradients(self, gradients: Iterable[ITensor], variables: Iterable[ITensor], learning_rate: float) -> None:
         for grad, var in zip(gradients, variables):
+            if grad is None:
+                continue
             d_p = grad
             if self.weight_decay != 0:
-                dp += var * self.weight_decay
+                d_p += var * self.weight_decay
             if self.momentum != 0:
                 if var.name not in self.state:
                     buf = self.state[var.name] = d_p.copy()

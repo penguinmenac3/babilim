@@ -11,13 +11,13 @@ class IModel(ILayer):
     def __init__(self, name: str, layer_type: str):
         super().__init__(name, layer_type)
 
-    def fit(self, training_dataset: Dataset, validation_dataset: Dataset, loss, metrics, config: Config):
+    def fit(self, training_dataset: Dataset, validation_dataset: Dataset, loss, metrics, config: Config, verbose: bool = False):
         if babilim.is_backend(PYTORCH_BACKEND):
             from babilim.models.pt_model import fit as _fit
-            _fit(self, training_dataset, validation_dataset, loss, metrics, config)
+            _fit(self, training_dataset, validation_dataset, loss, metrics, config, verbose)
         elif babilim.is_backend(TF_BACKEND):
             from babilim.models.tf_model import fit as _fit
-            _fit(self, training_dataset, validation_dataset, loss, metrics, config)
+            _fit(self, training_dataset, validation_dataset, loss, metrics, config, verbose)
         else:
             raise NotImplementedError("Unsupported backend: {}".format(babilim.get_backend()))
 

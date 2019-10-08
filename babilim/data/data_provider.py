@@ -20,7 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 from typing import Iterable, List, Any, Sequence
+import traceback
 import os
+import sys
 import pickle
 
 from babilim.experiment.config import Config
@@ -40,8 +42,20 @@ class Dataset(Sequence):
     def __init__(self, config: Config):
         self.config = config
     
-    def __getitem__(self, index: int) -> Any:
+    def getitem(self, index: int) -> Any:
         raise NotImplementedError
+
+    def __getitem__(self, index: int) -> Any:
+        # Check if len is exceeded.
+        if index >= len(self):
+            raise IndexError()
+
+        # Print index errors, they probably were an error and not intentional.
+        try:
+            return self.getitem(index)
+        except IndexError as e:
+            traceback.print_exc(file=sys.stderr)
+            raise e
 
     def __len__(self) -> int:
         raise NotImplementedError
@@ -174,7 +188,7 @@ class TransformedDataset(Dataset):
     def __len__(self) -> int:
         return len(self.dataset)
 
-    def __getitem__(self, index: int) -> Any:
+    def getitem(self, index: int) -> Any:
         return self.transformer(*self.dataset[index])
 
     @property
@@ -201,7 +215,7 @@ class _CacheDummyDataset(Dataset):
         self.cache_path = os.path.join(cache_path, version)
         self.size = len(os.listdir(self.cache_path))
  
-    def __getitem__(self, index: int) -> Any:
+    def getitem(self, index: int) -> Any:
         raise RuntimeError("This function should never be called on the dummy dataset.")
  
     def __len__(self) -> int:
@@ -249,7 +263,7 @@ class _CachedDataset(Dataset):
         self.cache_indices[index] = fp
         return value
  
-    def __getitem__(self, index: int) -> Any:
+    def getitem(self, index: int) -> Any:
         if index in self.cache_indices:
             with open(self.cache_indices[index], "rb") as f:
                 return pickle.load(f)

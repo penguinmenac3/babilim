@@ -12,6 +12,7 @@ from babilim.experiment import Config
 from babilim.optimizers import SGD
 import babilim.optimizers.learning_rates as lr
 from babilim.losses import Loss, Metrics, SparseCrossEntropyLossFromLogits, MeanSquaredError, SparseCategoricalAccuracy
+from babilim.core.image_grid import image_grid_wrap
 
 import numpy as np
 from collections import namedtuple
@@ -68,7 +69,7 @@ class FashionMnistDataset(Dataset):
         else:
             return int(len(self.valX))
 
-    def __getitem__(self, idx: int) -> Tuple[NetworkInput, NetworkOutput]:
+    def getitem(self, idx: int) -> Tuple[NetworkInput, NetworkOutput]:
         if self.training:
             label = np.array(self.trainY[idx], dtype="uint8")
             feat = np.array(self.trainX[idx], dtype="float32")
@@ -76,8 +77,8 @@ class FashionMnistDataset(Dataset):
             label = np.array(self.valY[idx], dtype="uint8")
             feat = np.array(self.valX[idx], dtype="float32")
 
-        feat = np.reshape(feat, (28, 28, 1))
-        return NetworkInput(features=feat), NetworkOutput(class_id=label)
+        feat = np.reshape(feat, (28, 28))
+        return NetworkInput(features=image_grid_wrap(feat)), NetworkOutput(class_id=label)
 
     @property
     def version(self) -> str:

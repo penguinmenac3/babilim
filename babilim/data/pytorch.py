@@ -19,16 +19,7 @@ class _PyTorchDataset(__TDataset):
 
     def __getitem__(self, idx):
         feat, label = self.dataset[idx]
-        out_f = []
-        out_l = []
-        for f in feat:
-            out_f.append(np.swapaxes(f, 0, -1))
-        for l in label:
-            if len(l.shape) > 1:
-                out_l.append(np.swapaxes(l, 0, -1))
-            else:
-                out_l.append(l)
-        return type(feat)(*out_f), type(label)(*out_l)
+        return feat, label
 
 
 def BatchedPytorchDataset(dataset: Sequence, config: Config, shuffle: bool = True, num_workers: int = 1) -> __DataLoader:

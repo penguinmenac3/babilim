@@ -73,6 +73,8 @@ class ILayer(object):
                         all_vars.append(x)
                     if self.__wrapper.is_variable(x):
                         all_vars.append(self.__wrapper.wrap_variable(x, name=self.name + "/unnamed"))
+                    if isinstance(x, object):
+                        extra_vars.extend(self.__wrapper.vars_from_object(v, self.name, k))
             elif isinstance(v, Iterable):
                 for x in v:
                     if isinstance(x, ILayer):
@@ -81,6 +83,8 @@ class ILayer(object):
                         all_vars.append(x)
                     if self.__wrapper.is_variable(x):
                         all_vars.append(self.__wrapper.wrap_variable(x, name=self.name + "/unnamed"))
+                    if isinstance(x, object):
+                        extra_vars.extend(self.__wrapper.vars_from_object(v, self.name, k))
             elif isinstance(v, ILayer):
                 all_vars.extend(v.variables)
             elif isinstance(v, ITensor):
@@ -88,13 +92,7 @@ class ILayer(object):
             elif self.__wrapper.is_variable(v):
                 all_vars.append(self.__wrapper.wrap_variable(v, name=self.name + "/" + k))
             elif isinstance(v, object):
-                for x in getattr(v, '_parameters', {}):
-                    if isinstance(v._parameters[x], ILayer):
-                        all_vars.extend(x.variables)
-                    if isinstance(v._parameters[x], ITensor):
-                        all_vars.append(x)
-                    if self.__wrapper.is_variable(v._parameters[x]):
-                        extra_vars.append(self.__wrapper.wrap_variable(v._parameters[x], name=self.name + "/" + x))
+                extra_vars.extend(self.__wrapper.vars_from_object(v, self.name, k))
                 for x in getattr(v, '__dict__', {}):
                     if isinstance(v.__dict__[x], ILayer):
                         all_vars.extend(x.variables)

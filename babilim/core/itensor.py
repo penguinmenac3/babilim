@@ -1,4 +1,4 @@
-from typing import Union, Any, Tuple, Optional
+from typing import Union, Any, Tuple, Optional, Sequence
 import numpy as np
 
 tensor_name_table = {}
@@ -14,6 +14,9 @@ class ITensorWrapper(object):
         raise NotImplementedError()
 
     def wrap_variable(self, obj: Any, name: str) -> 'ITensor':
+        raise NotImplementedError()
+
+    def vars_from_object(self, obj: Any, namespace: str, parentname: str = "unnamed") -> Sequence['ITensor']:
         raise NotImplementedError()
 
 

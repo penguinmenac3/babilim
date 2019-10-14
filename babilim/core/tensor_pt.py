@@ -55,6 +55,18 @@ class TensorWrapper(ITensorWrapper):
             obj.native = obj.native.to(torch.device("cuda"))
         return obj
 
+    def vars_from_object(self, v: Any, namespace: str, parentname: str = "unnamed") -> Sequence['ITensor']:
+        extra_vars = []
+        if getattr(v, '_parameters', False):
+            for x in getattr(v, '_parameters'):
+                if self.is_variable(v._parameters[x]):
+                    extra_vars.append(self.wrap_variable(v._parameters[x], name=namespace + "/" + x))
+        elif getattr(v, 'parameters', False):
+            for x in getattr(v, 'parameters')():
+                if self.is_variable(x):
+                    extra_vars.append(self.wrap_variable(x, name=namespace + "/" + parentname))
+        return extra_vars
+
 
 class Tensor(ITensor):
     def __init__(self, data: np.ndarray = None, trainable=False, native: _Tensor=None, name: str="unnamed"):

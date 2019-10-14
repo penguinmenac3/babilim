@@ -3,6 +3,10 @@ from typing import Tuple, Iterable, Sequence, List, Dict, Optional, Union, Any
 from babilim import PYTORCH_BACKEND, TF_BACKEND, is_backend, get_backend
 from babilim.layers.ilayer import ILayer, register_layer
 
+from babilim.layers.common.sequential import Sequential
+from babilim.layers.common.lambda_layer import Lambda
+
+
 # *******************************************************
 # Various (Conv, Linear, BatchNorm)
 # *******************************************************

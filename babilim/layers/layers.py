@@ -4,7 +4,7 @@ from babilim import PYTORCH_BACKEND, TF_BACKEND, is_backend, get_backend
 from babilim.layers.ilayer import ILayer, register_layer
 
 from babilim.layers.common.sequential import Sequential
-from babilim.layers.common.lambda_layer import Lambda
+from babilim.layers.common.wrapper_layer import Lambda
 
 
 # *******************************************************

@@ -14,7 +14,7 @@ class Lambda(ILayer):
         :param name: The name of the function.
         :param native_layer: The native layer or function to wrap. (Must accept *args and or **kwargs and return a single tensor, a list of tensors or a dict of tensors)
         """
-        super().__init__(name=name, layer_type="Sequential")
+        super().__init__(name=name, layer_type="Lambda")
         self.native_layer = native_layer
 
     def call(self, *args, **kwargs):

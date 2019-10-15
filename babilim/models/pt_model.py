@@ -6,6 +6,7 @@ import os
 import time
 
 from tensorboardX import SummaryWriter
+import torch
 
 from babilim.data import Dataset
 from babilim.experiment import Config
@@ -104,14 +105,40 @@ def fit(model, training_dataset: Dataset, validation_dataset: Dataset, loss, met
     batched_training_dataset = training_dataset.to_pytorch()
     batched_validation_dataset = validation_dataset.to_pytorch()
 
-    # Load Checkpoint
-    # TODO
-
     # Actually force model to be build by running one forward step
     tprint("Build model.")
     features, _ = next(iter(batched_training_dataset))
     inp, _ = _tensor_wrapper.wrap(features._asdict())
     model(**inp)
+    
+    # Load Checkpoint
+    epoch = 0
+    saved_models_path = os.path.join(chkpt_path, "checkpoints")
+    saved_models = sorted([os.path.join(saved_models_path, f) for f in os.listdir(saved_models_path)])
+    if len(saved_models) > 0 and os.path.exists(saved_models[-1]):
+        tprint("Loading checkpoint: {}".format(saved_models[-1]))
+        checkpoint = torch.load(saved_models[-1])
+        epoch = checkpoint["epoch"] + 1
+        if "model_state_dict" in checkpoint:
+            model.load_state_dict(checkpoint["model_state_dict"])
+        else:
+            tprint("WARNING: Could not find model_state_dict in checkpoint.")
+        if "optimizer_state_dict" in checkpoint:
+            optim.load_state_dict(checkpoint['optimizer_state_dict'])
+        else:
+            tprint("WARNING: Could not find optimizer_state_dict in checkpoint.")
+        if "loss_state_dict" in checkpoint:
+            loss.load_state_dict(checkpoint['loss_state_dict'])
+        else:
+            tprint("WARNING: Could not find loss_state_dict in checkpoint.")
+        if "metrics_state_dict" in checkpoint:
+            metrics.load_state_dict(checkpoint['metrics_state_dict'])
+        else:
+            tprint("WARNING: Could not find metrics_state_dict in checkpoint.")
+        if "lr_schedule_state_dict" in checkpoint:
+            lr_schedule.load_state_dict(checkpoint['lr_schedule_state_dict'])
+        else:
+            tprint("WARNING: Could not find lr_schedule_state_dict in checkpoint.")
 
     variables = model.trainable_variables
     if verbose:
@@ -123,10 +150,10 @@ def fit(model, training_dataset: Dataset, validation_dataset: Dataset, loss, met
             print("  {}: {}".format(var.name, var.shape))
         print()
 
-    tprint("Start training for {} epochs.".format(epochs))
-    samples_seen = 0
+    tprint("Start training for {} epochs from epoch {}.".format(epochs, epoch))
+    samples_seen = len(batched_training_dataset) * config.train_batch_size * epoch
     start = time.time()
-    for i in range(epochs):
+    for i in range(epoch, epochs):
         loss.reset_avg()
         metrics.reset_avg()
         _train(config, model, batched_training_dataset, optim, lr_schedule, loss, metrics, samples_seen, train_summary_writer, verbose)
@@ -136,7 +163,16 @@ def fit(model, training_dataset: Dataset, validation_dataset: Dataset, loss, met
         metrics.reset_avg()
         loss_results, metrics_results = _validate(config, model, batched_validation_dataset, loss, metrics, samples_seen, val_summary_writer)
 
-        # TODO save checkpoint
+        # save checkpoint
+        torch.save({
+            'epoch': epoch,
+            'model_state_dict': model.state_dict(),
+            'optimizer_state_dict': optim.state_dict(),
+            'loss_state_dict': loss.state_dict(),
+            'metrics_state_dict': metrics.state_dict(),
+            'lr_schedule_state_dict': lr_schedule.state_dict(),
+        }, os.path.join(chkpt_path, "checkpoints", "chkpt_{:09d}.pt".format(i)))
+
         elapsed_time = time.time() - start
         eta = elapsed_time / (i + 1) * (epochs - (i + 1))
         tprint("Epoch {}/{} - ETA {} - {} - {}".format(i + 1, epochs, format_time(eta),

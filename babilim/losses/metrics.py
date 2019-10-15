@@ -1,9 +1,10 @@
 from typing import Any
 import numpy as np
 from babilim.core.itensor import ITensor
+from babilim.core.statefull_object import StatefullObject
 
 
-class Metrics(object):
+class Metrics(StatefullObject):
     def __init__(self):
         self._accumulators = {}
         self._counters = {}

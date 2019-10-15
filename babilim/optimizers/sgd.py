@@ -1,8 +1,9 @@
 from typing import Iterable
 from babilim.core.itensor import ITensor
+from babilim.optimizers.optimizer import Optimizer
 
 
-class SGD(object):
+class SGD(Optimizer):
     def __init__(self, momentum: float=0.95, dampening: float=0.0, weight_decay: float=0, nesterov: bool=True):
         self.momentum = momentum
         self.weight_decay = weight_decay

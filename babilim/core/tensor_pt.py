@@ -112,7 +112,7 @@ class Tensor(ITensor):
 
     def assign(self, other: Union['Tensor', np.ndarray]) -> 'Tensor':
         if isinstance(other, np.ndarray):
-            other = other.T
+            #other = other.T
             self.assign(Tensor(data=other, trainable=self.trainable))
         else:
             self.native.data = other.native

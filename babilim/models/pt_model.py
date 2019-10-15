@@ -165,7 +165,7 @@ def fit(model, training_dataset: Dataset, validation_dataset: Dataset, loss, met
 
         # save checkpoint
         torch.save({
-            'epoch': epoch,
+            'epoch': i,
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': optim.state_dict(),
             'loss_state_dict': loss.state_dict(),

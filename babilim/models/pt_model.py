@@ -39,14 +39,6 @@ def _train(config: Config, model, dataset, optimizer, lr_schedule, loss, metrics
     
     # Setup the training loop
     variables = model.trainable_variables
-    if verbose:
-        print()
-        print("*****************************")
-        print("* model.trainable_variables *")
-        print("*****************************")
-        for var in variables:
-            print("  {}: {}".format(var.name, var.shape))
-        print()
 
     # Loop over the dataset and update weights.
     for i, (x, y) in enumerate(dataset):
@@ -120,6 +112,16 @@ def fit(model, training_dataset: Dataset, validation_dataset: Dataset, loss, met
     features, _ = next(iter(batched_training_dataset))
     inp, _ = _tensor_wrapper.wrap(features._asdict())
     model(**inp)
+
+    variables = model.trainable_variables
+    if verbose:
+        print()
+        print("*****************************")
+        print("* model.trainable_variables *")
+        print("*****************************")
+        for var in variables:
+            print("  {}: {}".format(var.name, var.shape))
+        print()
 
     tprint("Start training for {} epochs.".format(epochs))
     samples_seen = 0

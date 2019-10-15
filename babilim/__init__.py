@@ -35,7 +35,16 @@ def set_backend(backend: str):
     global _backend
     if backend not in [PYTORCH_BACKEND, TF_BACKEND]:
         raise RuntimeError("Unknown backend selected: {}".format(backend))
-    print("Using backend: {}".format(backend))
+    device = "cpu"
+    if backend == PYTORCH_BACKEND:
+        import torch
+        if torch.cuda.is_available():
+            device = "gpu"
+    else:
+        import tensorflow as tf
+        if tf.test.is_gpu_available():
+            device = "gpu"
+    print("Using backend: {}-{}".format(backend, device))
     _backend = backend
 
 def get_backend() -> str:

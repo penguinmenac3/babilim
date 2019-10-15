@@ -12,6 +12,7 @@ import entangle
 import matplotlib.pyplot as plt
 import scipy.misc
 from babilim.experiment.config import Config
+from babilim import tprint
 
 __log_file = None
 __checkpoint_path = None
@@ -21,11 +22,6 @@ __entanglement = None
 
 PYTHON_IGNORE_LIST = ["__pycache__", "*.pyc", ".ipynb_checkpoints", "checkpoints", "dist", "docs", "*.egg-info",
                       "tfrecords", "*.code-workspace", ".git"]
-
-
-def tprint(msg: str, end: str="\n"):
-    time_stamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
-    print("\r[{}] {}".format(time_stamp, msg), end=end)
 
 
 def __ignore(candidate: str, forbidden_list: List[str]) -> bool:
@@ -97,8 +93,8 @@ def _write_log(*, obj: object) -> None:
     global __entanglement
     out_str = json.dumps(obj)
     if __log_file is None:
-        print("WARING: You should setup logging before using it. Call ailab.logging.setup(...).")
-        print(out_str)
+        tprint("WARING: You should setup logging before using it. Call ailab.logging.setup(...).")
+        tprint(out_str)
     else:
         with open(__log_file, "a") as f:
             f.write(out_str + "\n")
@@ -255,7 +251,7 @@ def log_image(*, name: str, data: np.ndarray = None) -> None:
     """
     global __checkpoint_path
     if __checkpoint_path is None:
-        print("WARNING: Cannot log images when logging is not setup. Call logging.setup first")
+        tprint("WARNING: Cannot log images when logging is not setup. Call logging.setup first")
         return
     if data is None:
         plt.savefig(os.path.join(__checkpoint_path, "images", name + ".png"))
@@ -287,11 +283,11 @@ def setup(config: Config, continue_with_specific_checkpointpath: bool = False, c
 
     if continue_with_specific_checkpointpath:
         chkpt_path = config.train_checkpoint_path + "/" + continue_with_specific_checkpointpath
-        print("Continue with checkpoint: {}".format(chkpt_path))
+        tprint("Continue with checkpoint: {}".format(chkpt_path))
     elif continue_training:
         chkpts = sorted([name for name in os.listdir(config.train_checkpoint_path)])
         chkpt_path = config.train_checkpoint_path + "/" + chkpts[-1]
-        print("Latest found checkpoint: {}".format(chkpt_path))
+        tprint("Latest found checkpoint: {}".format(chkpt_path))
 
     if not os.path.exists(os.path.join(chkpt_path, "train")):
         os.makedirs(os.path.join(chkpt_path, "train"))

@@ -20,6 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import time as __time
+import datetime as __datetime
+
 
 PHASE_TRAIN = "train"
 PHASE_VALIDATION = "val"
@@ -30,6 +33,10 @@ PYTORCH_BACKEND = "pytorch"
 TF_BACKEND = "tf2"
 
 _backend = PYTORCH_BACKEND
+
+def tprint(msg: str, end: str="\n"):
+    time_stamp = __datetime.datetime.fromtimestamp(__time.time()).strftime('%Y-%m-%d %H:%M:%S')
+    print("\r[{}] {}".format(time_stamp, msg), end=end)
 
 def set_backend(backend: str):
     global _backend
@@ -44,7 +51,7 @@ def set_backend(backend: str):
         import tensorflow as tf
         if tf.test.is_gpu_available():
             device = "gpu"
-    print("Using backend: {}-{}".format(backend, device))
+    tprint("Using backend: {}-{}".format(backend, device))
     _backend = backend
 
 def get_backend() -> str:

@@ -1,0 +1,301 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Logging &amp; Checkpoints &mdash; babilim 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Layers" href="babilim.layers.html" />
+    <link rel="prev" title="Experiment" href="babilim.experiment.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> babilim
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.install.html">Install Babilim</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Packages</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="babilim.callbacks.html">Callbacks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.core.html">Core</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.experiment.html">Experiment</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Logging &amp; Checkpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.layers.html">Layers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.losses.html">Losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.optimizers.html">Optimizers &amp; Learning Rate Schedules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.utils.html">Utils</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="examples.mnist.html">MNIST Example</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">babilim</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Logging &amp; Checkpoints</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/babilim.experiment.logging.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-babilim.experiment.logging">
+<span id="logging-checkpoints"></span><h1>Logging &amp; Checkpoints<a class="headerlink" href="#module-babilim.experiment.logging" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="babilim.experiment.logging.LogCall">
+<em class="property">class </em><code class="sig-prename descclassname">babilim.experiment.logging.</code><code class="sig-name descname">LogCall</code><span class="sig-paren">(</span><em class="sig-param">*</em>, <em class="sig-param">name: str</em>, <em class="sig-param">primary: bool = False</em><span class="sig-paren">)</span><a class="headerlink" href="#babilim.experiment.logging.LogCall" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="babilim.experiment.logging.LogResult">
+<em class="property">class </em><code class="sig-prename descclassname">babilim.experiment.logging.</code><code class="sig-name descname">LogResult</code><span class="sig-paren">(</span><em class="sig-param">*</em>, <em class="sig-param">name: str</em>, <em class="sig-param">primary: bool = False</em><span class="sig-paren">)</span><a class="headerlink" href="#babilim.experiment.logging.LogResult" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="babilim.experiment.logging.connect">
+<code class="sig-prename descclassname">babilim.experiment.logging.</code><code class="sig-name descname">connect</code><span class="sig-paren">(</span><em class="sig-param">*</em>, <em class="sig-param">host: str</em>, <em class="sig-param">port: int</em>, <em class="sig-param">user: str</em>, <em class="sig-param">password: str</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#babilim.experiment.logging.connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Connect to an ailab server for live logging of the experiment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>host</strong> – Hostname of the server.</p></li>
+<li><p><strong>port</strong> – The port on which ailab-server runs.</p></li>
+<li><p><strong>user</strong> – Your username to authenticate in ailab.</p></li>
+<li><p><strong>password</strong> – Your password to authenticate in ailab.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True if the connection was established False otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="babilim.experiment.logging.log_image">
+<code class="sig-prename descclassname">babilim.experiment.logging.</code><code class="sig-name descname">log_image</code><span class="sig-paren">(</span><em class="sig-param">*</em>, <em class="sig-param">name: str</em>, <em class="sig-param">data: numpy.ndarray = None</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#babilim.experiment.logging.log_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log an image.
+:param name: The name of the image.
+:param data: The data (optional) if none is provided it is assumed that a pyplot figure should be saved.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="babilim.experiment.logging.log_value">
+<code class="sig-prename descclassname">babilim.experiment.logging.</code><code class="sig-name descname">log_value</code><span class="sig-paren">(</span><em class="sig-param">*</em>, <em class="sig-param">name: str</em>, <em class="sig-param">value: object</em>, <em class="sig-param">primary: bool = False</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#babilim.experiment.logging.log_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log a value to the file or online server.
+:param name: The name of the value to be logged.
+:param value: The actual value. It can be anything that is json serializable.
+:param primary: When primary is true this is the metric that is displayed online in the results preview.
+It should be only true for the main loss.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="babilim.experiment.logging.setup">
+<code class="sig-prename descclassname">babilim.experiment.logging.</code><code class="sig-name descname">setup</code><span class="sig-paren">(</span><em class="sig-param">config: babilim.experiment.config.Config</em>, <em class="sig-param">continue_with_specific_checkpointpath: bool = False</em>, <em class="sig-param">continue_training: bool = False</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#babilim.experiment.logging.setup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setup the logging.
+This creates the folder structure required at the place specified in config.train.checkpoint_path.
+After creating the folder structure it backs up the code of the current working directory to the folder structure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> – The configuration that is used for this run.</p></li>
+<li><p><strong>continue_with_specific_checkpointpath</strong> – When a specific checkpoint is used to continue a run, set this. This avoids creating a new folder if it is not required.</p></li>
+<li><p><strong>continue_training</strong> – Same as specific checkpoint but the checkpoint is automatically selected to be the most recent. This avoids creating a new folder if it is not required.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The path to the checkpoint folder.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="babilim.experiment.logging.update_progress">
+<code class="sig-prename descclassname">babilim.experiment.logging.</code><code class="sig-name descname">update_progress</code><span class="sig-paren">(</span><em class="sig-param">progress: float</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#babilim.experiment.logging.update_progress" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the progress value. Automatically also computes the ETA and updates it in the logs.
+:param progress: A value between 0 and 1 indicating the progress, where 1 means done.
+The value should grow monotonic.</p>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="babilim.layers.html" class="btn btn-neutral float-right" title="Layers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="babilim.experiment.html" class="btn btn-neutral float-left" title="Experiment" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Michael Fuerst
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,4 +1,0 @@
-numpy
-entangle-python
-matplotlib
-scipy

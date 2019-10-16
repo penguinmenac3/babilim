@@ -1,4 +1,0 @@
-MNIST Example
-=============
-
-TODO

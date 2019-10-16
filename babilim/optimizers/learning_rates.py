@@ -1,7 +1,8 @@
 import math
+from babilim.core.statefull_object import StatefullObject
 
 
-class LearningRateSchedule(object):
+class LearningRateSchedule(StatefullObject):
     """
     An interface to a learning rate schedule.
     It should implement a call method which converts a global_step into the current lr.

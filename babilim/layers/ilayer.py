@@ -2,14 +2,13 @@ from typing import Sequence, Any, Sequence, Callable, Dict, Iterable
 from collections import defaultdict
 import babilim
 from babilim import PYTORCH_BACKEND, TF_BACKEND
-from babilim.core.itensor import ITensor
-from babilim.core.tensor import Tensor, TensorWrapper
+from babilim.core.statefull_object import StatefullObject
 
 
 layer_name_table = {}
 
 
-class ILayer(object):
+class ILayer(StatefullObject):
     def __init__(self, name: str, layer_type: str):
         if name not in layer_name_table:
             layer_name_table[name] = 1
@@ -19,16 +18,15 @@ class ILayer(object):
             self.__name = "{}_{}".format(name, numbering)
             layer_name_table[name] += 1
         self.__layer_type = layer_type
-        self.__wrapper = TensorWrapper()
 
     def __call__(self, *args, **kwargs) -> Any:
         # ensure that call gets called with ITensor objects but the caller can use native tensors.
-        args, wrapped_args = self.__wrapper.wrap(args)
-        kwargs, wrapped_kwargs = self.__wrapper.wrap(kwargs)
+        args, wrapped_args = self._wrapper.wrap(args)
+        kwargs, wrapped_kwargs = self._wrapper.wrap(kwargs)
         self.build(*args, **kwargs)
         result = self.call(*args, **kwargs)
         if wrapped_args or wrapped_kwargs:
-            return self.__wrapper.unwrap(result)
+            return self._wrapper.unwrap(result)
         else:
             return result
 
@@ -55,71 +53,6 @@ class ILayer(object):
                 modules.append(v)
                 modules.append(v.submodules)
         return modules
-    
-    @property
-    def variables(self):
-        all_vars = []
-        extra_vars = []
-        for k in self.__dict__:
-            v = self.__dict__[k]
-            if isinstance(v, str):
-                pass
-            elif isinstance(v, Dict):
-                for k in v:
-                    x = v[k]
-                    if isinstance(x, ILayer):
-                        all_vars.extend(x.variables)
-                    if isinstance(x, ITensor):
-                        all_vars.append(x)
-                    if self.__wrapper.is_variable(x):
-                        all_vars.append(self.__wrapper.wrap_variable(x, name=self.name + "/unnamed"))
-                    if isinstance(x, object):
-                        extra_vars.extend(self.__wrapper.vars_from_object(v, self.name, k))
-            elif isinstance(v, Iterable):
-                for x in v:
-                    if isinstance(x, ILayer):
-                        all_vars.extend(x.variables)
-                    if isinstance(x, ITensor):
-                        all_vars.append(x)
-                    if self.__wrapper.is_variable(x):
-                        all_vars.append(self.__wrapper.wrap_variable(x, name=self.name + "/unnamed"))
-                    if isinstance(x, object):
-                        extra_vars.extend(self.__wrapper.vars_from_object(v, self.name, k))
-            elif isinstance(v, ILayer):
-                all_vars.extend(v.variables)
-            elif isinstance(v, ITensor):
-                all_vars.append(v)
-            elif self.__wrapper.is_variable(v):
-                all_vars.append(self.__wrapper.wrap_variable(v, name=self.name + "/" + k))
-            elif isinstance(v, object):
-                extra_vars.extend(self.__wrapper.vars_from_object(v, self.name, k))
-                for x in getattr(v, '__dict__', {}):
-                    if isinstance(v.__dict__[x], ILayer):
-                        all_vars.extend(x.variables)
-                    if isinstance(v.__dict__[x], ITensor):
-                        all_vars.append(x)
-                    if self.__wrapper.is_variable(v.__dict__[x]):
-                        extra_vars.append(self.__wrapper.wrap_variable(v.__dict__[x], name=self.name + "/" + x))
-        if len(all_vars) == 0:
-            all_vars.extend(extra_vars)
-        return all_vars
-
-    @property
-    def trainable_variables(self):
-        all_vars = self.variables
-        train_vars = []
-        for v in all_vars:
-            if v.trainable:
-                train_vars.append(v)
-        return train_vars
-
-    @property
-    def trainable_variables_native(self):
-        all_vars = self.trainable_variables
-        train_vars = []
-        for v in all_vars:
-            train_vars.append(v.native)
-        return train_vars
 
 _LAYER_REGISTRY: Dict[str, Dict[str, ILayer]] = defaultdict(dict)
 

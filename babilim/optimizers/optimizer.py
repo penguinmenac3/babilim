@@ -1,7 +1,9 @@
 from typing import Iterable
 from babilim.core.itensor import ITensor
+from babilim.core.statefull_object import StatefullObject
 
-class Optimizer(object):
+
+class Optimizer(StatefullObject):
     def apply_gradients(self, gradients: Iterable[ITensor], variables: Iterable[ITensor], learning_rate: float) -> None:
         """
         This method applies the gradients to variables.

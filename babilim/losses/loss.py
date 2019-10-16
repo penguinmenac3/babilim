@@ -3,9 +3,10 @@ import numpy as np
 import babilim
 from babilim.core.itensor import ITensor
 from babilim.core.tensor import Tensor
+from babilim.core.statefull_object import StatefullObject
 
 
-class Loss(object):
+class Loss(StatefullObject):
     def __init__(self):
         self._accumulators = {}
         self._counters = {}

@@ -1,6 +1,7 @@
 from typing import Sequence, Any, Sequence, Callable, Dict
 from collections import defaultdict
 import babilim
+from babilim import tprint
 from babilim import PYTORCH_BACKEND, TF_BACKEND
 from babilim.layers.ilayer import ILayer
 from babilim.data import Dataset
@@ -22,6 +23,23 @@ class IModel(ILayer):
         else:
             raise NotImplementedError("Unsupported backend: {}".format(babilim.get_backend()))
 
+    def load(self, model_file):
+        if babilim.is_backend(PYTORCH_BACKEND):
+            import torch
+            checkpoint = torch.load(model_file)
+            if "model_state_dict" in checkpoint:
+                self.load_state_dict(checkpoint["model_state_dict"])
+            else:
+                tprint("WARNING: Could not find model_state_dict in checkpoint.")
+        else:
+            raise NotImplemented("Not yet implemented for tf2.")
+
+    def save(self, model_file):
+        if babilim.is_backend(PYTORCH_BACKEND):
+            import torch
+            torch.save({'model_state_dict': self.state_dict()}, model_file)
+        else:
+            raise NotImplemented("Not yet implemented for tf2.")
 
 _MODEL_REGISTRY: Dict[str, Dict[str, IModel]] = defaultdict(dict)
 

@@ -31,7 +31,7 @@ class ILayer(StatefullObject):
             return result
 
     def build(self, *args, **kwargs) -> None:
-        raise NotImplementedError("Every layer must implement this method.")
+        pass
 
     def call(self, *args, **kwargs) -> Any:
         raise NotImplementedError("Every layer must implement this method.")

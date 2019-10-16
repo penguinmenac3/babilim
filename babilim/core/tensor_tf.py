@@ -54,7 +54,7 @@ class TensorWrapper(ITensorWrapper):
     def wrap_variable(self, obj: Any, name: str) -> 'ITensor':
         return Tensor(native=obj, trainable=obj.trainable, name=name)
 
-    def vars_from_object(self, v: Any, namespace: str, parentname: str = "unnamed") -> Sequence['ITensor']:
+    def vars_from_object(self, v: Any, namespace: str, defaultname: str = "unnamed") -> Sequence['ITensor']:
         extra_vars = []
         # TODO is there something special to tensorflow or keras modules?
         if getattr(v, '_parameters', False):
@@ -64,7 +64,7 @@ class TensorWrapper(ITensorWrapper):
         elif getattr(v, 'parameters', False):
             for x in getattr(v, 'parameters')():
                 if self.is_variable(x):
-                    extra_vars.append(self.wrap_variable(x, name=namespace + "/" + parentname))
+                    extra_vars.append(self.wrap_variable(x, name=namespace + "/" + defaultname))
         return extra_vars
 
 

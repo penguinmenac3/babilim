@@ -16,7 +16,7 @@ class ITensorWrapper(object):
     def wrap_variable(self, obj: Any, name: str) -> 'ITensor':
         raise NotImplementedError()
 
-    def vars_from_object(self, obj: Any, namespace: str, parentname: str = "unnamed") -> Sequence['ITensor']:
+    def vars_from_object(self, obj: Any, namespace: str, defaultname: str = "unnamed") -> Sequence['ITensor']:
         raise NotImplementedError()
 
 

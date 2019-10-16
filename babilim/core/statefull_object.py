@@ -5,16 +5,17 @@ from babilim import PYTORCH_BACKEND, TF_BACKEND
 from babilim.core.itensor import ITensor
 from babilim.core.tensor import Tensor, TensorWrapper
 
+
 class StatefullObject(object):
     _wrapper = TensorWrapper()
-    name = "unnamed"
+    name = "StatefullObject"
 
     @property
     def variables(self):
         all_vars = []
         extra_vars = []
-        for k in self.__dict__:
-            v = self.__dict__[k]
+        for member_name in self.__dict__:
+            v = self.__dict__[member_name]
             if isinstance(v, str):
                 pass
             elif isinstance(v, Dict):
@@ -25,9 +26,9 @@ class StatefullObject(object):
                     if isinstance(x, ITensor):
                         all_vars.append(x)
                     if self._wrapper.is_variable(x):
-                        all_vars.append(self._wrapper.wrap_variable(x, name=self.name + "/unnamed"))
+                        all_vars.append(self._wrapper.wrap_variable(x, name=self.name + "/" + member_name + "/" + k))
                     if isinstance(x, object):
-                        extra_vars.extend(self._wrapper.vars_from_object(v, self.name, k))
+                        extra_vars.extend(self._wrapper.vars_from_object(v, self.name + "/" + member_name + "/" + k))
             elif isinstance(v, Iterable):
                 for x in v:
                     if isinstance(x, StatefullObject):
@@ -35,24 +36,24 @@ class StatefullObject(object):
                     if isinstance(x, ITensor):
                         all_vars.append(x)
                     if self._wrapper.is_variable(x):
-                        all_vars.append(self._wrapper.wrap_variable(x, name=self.name + "/unnamed"))
+                        all_vars.append(self._wrapper.wrap_variable(x, name=self.name + "/" + member_name + "/unnamed"))
                     if isinstance(x, object):
-                        extra_vars.extend(self._wrapper.vars_from_object(v, self.name, k))
+                        extra_vars.extend(self._wrapper.vars_from_object(v, self.name + "/" + member_name + "/unnamed"))
             elif isinstance(v, StatefullObject):
                 all_vars.extend(v.variables)
             elif isinstance(v, ITensor):
                 all_vars.append(v)
             elif self._wrapper.is_variable(v):
-                all_vars.append(self._wrapper.wrap_variable(v, name=self.name + "/" + k))
+                all_vars.append(self._wrapper.wrap_variable(v, name=self.name + "/" + member_name))
             elif isinstance(v, object):
-                extra_vars.extend(self._wrapper.vars_from_object(v, self.name, k))
+                extra_vars.extend(self._wrapper.vars_from_object(v, self.name + "/" + member_name))
                 for x in getattr(v, '__dict__', {}):
                     if isinstance(v.__dict__[x], StatefullObject):
-                        all_vars.extend(x.variables)
+                        all_vars.extend(v.__dict__[x].variables)
                     if isinstance(v.__dict__[x], ITensor):
-                        all_vars.append(x)
+                        all_vars.append(v.__dict__[x])
                     if self._wrapper.is_variable(v.__dict__[x]):
-                        extra_vars.append(self._wrapper.wrap_variable(v.__dict__[x], name=self.name + "/" + x))
+                        extra_vars.append(self._wrapper.wrap_variable(v.__dict__[x], name=self.name + "/" + member_name + "/" + x))
         if len(all_vars) == 0:
             all_vars.extend(extra_vars)
         return all_vars

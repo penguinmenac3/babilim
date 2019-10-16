@@ -35,11 +35,11 @@ class ILayer(StatefullObject):
 
     def call(self, *args, **kwargs) -> Any:
         raise NotImplementedError("Every layer must implement this method.")
-
+    
     @property
     def name(self):
         return self.__name
-    
+
     @property
     def layer_type(self):
         return self.__layer_type

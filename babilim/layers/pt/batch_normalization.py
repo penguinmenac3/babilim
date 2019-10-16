@@ -25,10 +25,6 @@ class BatchNormalization(ILayer):
         
         if torch.cuda.is_available():
             self.bn = self.bn.to(torch.device("cuda"))
-        if self.bn.weight is not None:
-            self.weight = Tensor(native=self.bn.weight)
-        if self.bn.bias is not None:
-            self.bias = Tensor(native=self.bn.bias)
             
 
 

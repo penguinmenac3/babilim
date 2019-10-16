@@ -6,6 +6,9 @@ from torch import Tensor as _Tensor
 from babilim.core.itensor import ITensor, ITensorWrapper
 
 
+_variable_wrappers = {}
+
+
 class TensorWrapper(ITensorWrapper):
     def wrap(self, obj: Any) -> Any:
         wrapped = False
@@ -49,13 +52,16 @@ class TensorWrapper(ITensorWrapper):
         return isinstance(obj, _Tensor)
 
     def wrap_variable(self, obj: Any, name: str) -> 'ITensor':
-        obj = Tensor(native=obj, trainable=obj.requires_grad, name=name)
-        # FIXME is this required? obj should already be cuda
-        if not obj.native.is_cuda and torch.cuda.is_available():
-            obj.native = obj.native.to(torch.device("cuda"))
-        return obj
+        if obj in _variable_wrappers:
+            return _variable_wrappers[obj]
+        else:
+            obj = Tensor(native=obj, trainable=obj.requires_grad, name=name)
+            if not obj.native.is_cuda and torch.cuda.is_available():
+                obj.native = obj.native.to(torch.device("cuda"))
+            _variable_wrappers[obj.native] = obj
+            return obj
 
-    def vars_from_object(self, v: Any, namespace: str, parentname: str = "unnamed") -> Sequence['ITensor']:
+    def vars_from_object(self, v: Any, namespace: str, defaultname: str = "unnamed") -> Sequence['ITensor']:
         extra_vars = []
         if getattr(v, '_parameters', False):
             for x in getattr(v, '_parameters'):
@@ -64,7 +70,7 @@ class TensorWrapper(ITensorWrapper):
         elif getattr(v, 'parameters', False):
             for x in getattr(v, 'parameters')():
                 if self.is_variable(x):
-                    extra_vars.append(self.wrap_variable(x, name=namespace + "/" + parentname))
+                    extra_vars.append(self.wrap_variable(x, name=namespace + "/" + defaultname))
         return extra_vars
 
 
@@ -74,7 +80,7 @@ class Tensor(ITensor):
             data = data.T
             native = torch.from_numpy(data)
             native.requires_grad = trainable
-            if torch.cuda.is_available():
+            if torch.cuda.is_available() and not native.is_cuda:
                 native = native.to(torch.device("cuda"))
         elif native is not None:
             native = native

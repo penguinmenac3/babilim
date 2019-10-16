@@ -20,6 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+__all__ = ['PHASE_TRAIN', 'PHASE_VALIDATION', 'PHASE_TRAINVAL',
+           'PHASE_TEST', 'PYTORCH_BACKEND', 'TF_BACKEND', 'set_backend', 'get_backend', 'is_backend', 'ITensor', 'Tensor', 'RunOnlyOnce']
 
 PHASE_TRAIN = "train"
 PHASE_VALIDATION = "val"
@@ -32,6 +34,15 @@ TF_BACKEND = "tf2"
 _backend = PYTORCH_BACKEND
 
 def set_backend(backend: str):
+    """
+    Set the backend which babilim uses.
+
+    Should be either babilim.PYTORCH_BACKEND or babilim.TF_BACKEND.
+    
+    :param backend: The backend which should be used.
+    :type backend: str
+    :raises RuntimeError: When the backend is invalid or unknown.
+    """
     global _backend
     if backend not in [PYTORCH_BACKEND, TF_BACKEND]:
         raise RuntimeError("Unknown backend selected: {}".format(backend))
@@ -39,10 +50,23 @@ def set_backend(backend: str):
     _backend = backend
 
 def get_backend() -> str:
+    """foobar
+    
+    :return: [description]
+    :rtype: str
+    """
     return _backend
 
 def is_backend(backend: str) -> bool:
+    """Foo
+    
+    :param backend: [description]
+    :type backend: str
+    :return: [description]
+    :rtype: bool
+    """
     return _backend == backend
 
 from babilim.core.itensor import ITensor
 from babilim.core.tensor import Tensor
+from babilim.annotations import RunOnlyOnce

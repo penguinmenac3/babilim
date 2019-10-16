@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 __all__ = ['PHASE_TRAIN', 'PHASE_VALIDATION', 'PHASE_TRAINVAL',
-           'PHASE_TEST', 'PYTORCH_BACKEND', 'TF_BACKEND', 'set_backend', 'get_backend', 'is_backend', 'ITensor', 'Tensor', 'RunOnlyOnce', 'trint']
+           'PHASE_TEST', 'PYTORCH_BACKEND', 'TF_BACKEND', 'set_backend', 'get_backend', 'is_backend', 'ITensor', 'Tensor', 'RunOnlyOnce', 'tprint']
 
 
 import time as __time

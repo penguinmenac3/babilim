@@ -27,7 +27,7 @@ def register_binary_fmt(type_char: str, fmt: str) -> Callable[[Callable], Callab
     The fmt must specify the types of the arguments of the class.
     To use the write feature a class must implement a serialize function, but for only reading it is not required.
 
-    Example:
+    Example::
 
         @register_binary_fmt(type_char="T", fmt="bb[e]e[s]e")
         class ExampleType(object):

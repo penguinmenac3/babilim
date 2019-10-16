@@ -266,11 +266,8 @@ def setup(config: Config, continue_with_specific_checkpointpath: bool = False, c
     After creating the folder structure it backs up the code of the current working directory to the folder structure.
 
     :param config: The configuration that is used for this run.
-    :param continue_with_specific_checkpointpath: When a specific checkpoint is used to continue a run, set this.
-    This avoids creating a new folder if it is not required.
-    :param continue_training: Same as specific checkpoint but the checkpoint
-    is automatically selected to be the most recent.
-    This avoids creating a new folder if it is not required.
+    :param continue_with_specific_checkpointpath: When a specific checkpoint is used to continue a run, set this. This avoids creating a new folder if it is not required.
+    :param continue_training: Same as specific checkpoint but the checkpoint is automatically selected to be the most recent. This avoids creating a new folder if it is not required.
     :return: The path to the checkpoint folder.
     """
     global __log_file

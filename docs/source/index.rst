@@ -5,13 +5,11 @@ TODO general hello there.
 
 .. toctree::
    :caption: Getting Started
-   :name: mastertoc
 
    tutorials.install
 
 .. toctree::
    :caption: Packages
-   :name: mastertoc
 
    babilim.callbacks
    babilim.core
@@ -26,7 +24,6 @@ TODO general hello there.
 
 .. toctree::
    :caption: Examples
-   :name: mastertoc
 
    examples.mnist
 

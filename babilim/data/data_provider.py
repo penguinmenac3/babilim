@@ -135,7 +135,10 @@ class Dataset(Sequence):
         """
         Creates a tfrecord dataset from the dataset.
 
-        Currently not implemented. Use .as_cached(...).to_keras() instead.
+        .. warning::
+
+            Currently not implemented. Use .as_cached(...).to_keras() instead.
+
         """
         raise NotImplementedError("This is not implemented yet. Use dataset.as_cached(...).to_keras() instead.")
 

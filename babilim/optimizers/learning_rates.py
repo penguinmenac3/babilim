@@ -3,6 +3,8 @@ from babilim.core.statefull_object import StatefullObject
 
 
 class LearningRateSchedule(StatefullObject):
+    def __init__(self):
+        super().__init__(name="LearningRateSchedule")
     """
     An interface to a learning rate schedule.
     It should implement a call method which converts a global_step into the current lr.
@@ -18,6 +20,7 @@ class Const(LearningRateSchedule):
         
         :param lr: The learning rate that should be set.
         """
+        super().__init__()
         self.lr = lr
 
     def __call__(self, global_step: int) -> float:
@@ -34,6 +37,7 @@ class Exponential(LearningRateSchedule):
         :param initial_lr: The learning rate from which is started.
         :param k: The decay rate.
         """
+        super().__init__()
         self.initial_lr = initial_lr
         self.k = k
 
@@ -51,6 +55,7 @@ class StepDecay(LearningRateSchedule):
         :param drop: By what the learning rate is multiplied every steps_per_drop steps.
         :param steps_per_drop: How many steps should be done between drops.
         """
+        super().__init__()
         self.initial_lr = initial_lr
         self.drop = drop
         self.steps_per_drop = steps_per_drop

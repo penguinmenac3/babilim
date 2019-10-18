@@ -19,13 +19,45 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-from typing import Iterable, List, Any, Sequence
+from typing import Iterable, List, Any, Sequence, Iterator
 import traceback
 import os
 import sys
 import pickle
 
+import babilim
 from babilim.experiment.config import Config
+from babilim.core.tensor import TensorWrapper
+
+
+class TensorDataset(Iterable):
+    def __init__(self, native_dataset):
+        self._tensor_wrapper = TensorWrapper()
+        self.native_dataset = native_dataset
+        self.native_dataset_iter = iter(native_dataset)
+
+    def __iter__(self) -> Iterator:
+        class TensorDatasetIterator(Iterator):
+            def __init__(self, native_dataset, tensor_wrapper):
+                self._tensor_wrapper = tensor_wrapper
+                self.native_dataset_iter = iter(native_dataset)
+
+            def __next__(self) -> Any:
+                # Print index errors, they probably were an error and not intentional.
+                try:
+                    x, y = next(self.native_dataset_iter)
+                    inp, _ = self._tensor_wrapper.wrap(x._asdict())
+                    outp, _ = self._tensor_wrapper.wrap(y._asdict())
+                    inp = type(x)(**inp)
+                    outp = type(y)(**outp)
+                    return inp, outp
+                except IndexError as e:
+                    traceback.print_exc(file=sys.stderr)
+                    raise e
+        return TensorDatasetIterator(self.native_dataset, self._tensor_wrapper)
+
+    def __len__(self) -> int:
+        return len(self.native_dataset)
 
 
 class Dataset(Sequence):
@@ -130,6 +162,19 @@ class Dataset(Sequence):
         """
         from babilim.data.pytorch import BatchedPytorchDataset
         return BatchedPytorchDataset(self, self.config, shuffle, num_workers)
+
+    def to_native(self) -> TensorDataset:
+        """
+        TODO
+        """
+        data = None
+        if babilim.is_backend(babilim.PYTORCH_BACKEND):
+            data = self.to_pytorch()
+        elif babilim.is_backend(babilim.TF_BACKEND):
+            data = self.to_keras()
+        else:
+            raise NotImplementedError("Other backends than pytorch and tf2 are not implemented.")
+        return TensorDataset(data)
 
     def to_tfrecord(self):
         """

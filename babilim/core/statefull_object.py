@@ -97,5 +97,4 @@ class StatefullObject(object):
 
     def load_state_dict(self, state_dict):
         for var in self.variables:
-            #print("Loading: {}".format(var.name))
             var.assign(state_dict[var.name])

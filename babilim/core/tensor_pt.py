@@ -52,14 +52,12 @@ class TensorWrapper(ITensorWrapper):
         return isinstance(obj, _Tensor)
 
     def wrap_variable(self, obj: Any, name: str) -> 'ITensor':
-        if obj in _variable_wrappers:
-            return _variable_wrappers[obj]
-        else:
-            obj = Tensor(native=obj, trainable=obj.requires_grad, name=name)
-            if not obj.native.is_cuda and torch.cuda.is_available():
-                obj.native = obj.native.to(torch.device("cuda"))
-            _variable_wrappers[obj.native] = obj
-            return obj
+        if obj not in _variable_wrappers:
+            tmp = Tensor(native=obj, trainable=obj.requires_grad, name=name)
+            if not tmp.native.is_cuda and torch.cuda.is_available():
+                tmp.native = tmp.native.to(torch.device("cuda"))
+            _variable_wrappers[obj] = tmp
+        return _variable_wrappers[obj]
 
     def vars_from_object(self, v: Any, namespace: str, defaultname: str = "unnamed") -> Sequence['ITensor']:
         extra_vars = []

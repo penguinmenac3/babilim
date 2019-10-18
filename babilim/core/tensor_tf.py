@@ -6,6 +6,9 @@ from tensorflow import Tensor as _Tensor
 from babilim.core.itensor import ITensor, ITensorWrapper
 
 
+_variable_wrappers = {}
+
+
 class TensorWrapper(ITensorWrapper):
     def wrap(self, obj: Any) -> Any:
         wrapped = False
@@ -52,7 +55,9 @@ class TensorWrapper(ITensorWrapper):
         return isinstance(obj, tf.Variable)
 
     def wrap_variable(self, obj: Any, name: str) -> 'ITensor':
-        return Tensor(native=obj, trainable=obj.trainable, name=name)
+        if obj not in _variable_wrappers:
+            _variable_wrappers[obj] = Tensor(native=obj, trainable=obj.trainable, name=name)
+        return _variable_wrappers[obj]
 
     def vars_from_object(self, v: Any, namespace: str, defaultname: str = "unnamed") -> Sequence['ITensor']:
         extra_vars = []

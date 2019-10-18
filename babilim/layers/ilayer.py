@@ -5,18 +5,9 @@ from babilim import PYTORCH_BACKEND, TF_BACKEND
 from babilim.core.statefull_object import StatefullObject
 
 
-layer_name_table = {}
-
-
 class ILayer(StatefullObject):
     def __init__(self, name: str, layer_type: str):
-        if name not in layer_name_table:
-            layer_name_table[name] = 1
-            self.__name = name
-        else:
-            numbering = layer_name_table[name]
-            self.__name = "{}_{}".format(name, numbering)
-            layer_name_table[name] += 1
+        super().__init__(name)
         self.__layer_type = layer_type
 
     def __call__(self, *args, **kwargs) -> Any:
@@ -35,10 +26,6 @@ class ILayer(StatefullObject):
 
     def call(self, *args, **kwargs) -> Any:
         raise NotImplementedError("Every layer must implement this method.")
-    
-    @property
-    def name(self):
-        return self.__name
 
     @property
     def layer_type(self):

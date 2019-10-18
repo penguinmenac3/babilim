@@ -32,7 +32,7 @@ def Tensor(*, data: Union[np.ndarray, Any], trainable: bool, name: str="unnamed"
         return _Tensor(data, trainable, native, name)
     elif babilim.get_backend() == TF_BACKEND:
         from babilim.core.tensor_tf import Tensor as _Tensor
-        from torch import Tensor as _TfTensor
+        from tensorflow import Tensor as _TfTensor
         native = None
         if isinstance(data, _TfTensor):
             native = data

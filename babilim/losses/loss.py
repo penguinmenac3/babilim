@@ -8,6 +8,7 @@ from babilim.core.statefull_object import StatefullObject
 
 class Loss(StatefullObject):
     def __init__(self):
+        super().__init__("Loss")
         self._accumulators = {}
         self._counters = {}
 

@@ -4,6 +4,9 @@ from babilim.core.statefull_object import StatefullObject
 
 
 class Optimizer(StatefullObject):
+    def __init__(self):
+        super().__init__("Optimizer")
+
     def apply_gradients(self, gradients: Iterable[ITensor], variables: Iterable[ITensor], learning_rate: float) -> None:
         """
         This method applies the gradients to variables.

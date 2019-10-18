@@ -5,6 +5,7 @@ from babilim.optimizers.optimizer import Optimizer
 
 class SGD(Optimizer):
     def __init__(self, momentum: float=0.95, dampening: float=0.0, weight_decay: float=0, nesterov: bool=True):
+        super().__init__()
         self.momentum = momentum
         self.weight_decay = weight_decay
         self.nesterov = nesterov

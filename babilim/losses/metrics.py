@@ -6,6 +6,7 @@ from babilim.core.statefull_object import StatefullObject
 
 class Metrics(StatefullObject):
     def __init__(self):
+        super().__init__("Metrics")
         self._accumulators = {}
         self._counters = {}
 

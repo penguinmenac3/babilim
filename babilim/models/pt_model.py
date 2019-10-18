@@ -8,6 +8,7 @@ import time
 from tensorboardX import SummaryWriter
 import torch
 
+from babilim.core import GradientTape
 from babilim.data import Dataset
 from babilim.experiment import Config
 from babilim.core.tensor import TensorWrapper
@@ -37,6 +38,10 @@ def format_time(t):
 
 def _train(config: Config, model, dataset, optimizer, lr_schedule, loss, metrics, samples_seen: int, summary_writer, verbose: bool):
     N = len(dataset)
+
+    # Setup the training loop
+    loss.reset_avg()
+    metrics.reset_avg()
     
     # Setup the training loop
     variables = model.trainable_variables
@@ -44,23 +49,18 @@ def _train(config: Config, model, dataset, optimizer, lr_schedule, loss, metrics
     # Loop over the dataset and update weights.
     for i, (x, y) in enumerate(dataset):
         # Forward pass, computing gradients and applying them
-        for var in variables:
-            if var.native.grad is not None:
-                    var.native.grad.detach_()
-                    var.native.grad.zero_()
-        inp, _ = _tensor_wrapper.wrap(x._asdict())
-        outp, _ = _tensor_wrapper.wrap(y._asdict())
-        outp = type(y)(**outp)
-        prediction = model(**inp)
-        loss_results = loss(y_true=outp, y_pred=prediction)
-        loss.log("total", loss_results)
-        metrics(y_true=outp, y_pred=prediction)
+        with GradientTape(variables) as tape:
+            inp, _ = _tensor_wrapper.wrap(x._asdict())
+            outp, _ = _tensor_wrapper.wrap(y._asdict())
+            outp = type(y)(**outp)
+            prediction = model(**inp)
+            loss_results = loss(y_true=outp, y_pred=prediction)
+            loss.log("total", loss_results)
+            metrics(y_true=outp, y_pred=prediction)
         # Translate those to something usefull...
-        loss_results.native.backward()
-        gradients = [var.native.grad for var in variables]
-        wrapped_grads, _ = _tensor_wrapper.wrap(gradients)
+        gradients = tape.gradient(loss_results)
         lr = lr_schedule(samples_seen / config.train_batch_size)
-        optimizer.apply_gradients(wrapped_grads, variables, lr)
+        optimizer.apply_gradients(gradients, variables, lr)
         
         # Update global variables and log the variables
         samples_seen += config.train_batch_size

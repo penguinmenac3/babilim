@@ -6,9 +6,23 @@ from babilim.core.itensor import ITensor
 from babilim.core.tensor import Tensor, TensorWrapper
 
 
+_statefull_object_name_table = {}
+
+
 class StatefullObject(object):
-    _wrapper = TensorWrapper()
-    name = "StatefullObject"
+    def __init__(self, name):
+        self._wrapper = TensorWrapper()
+        if name not in _statefull_object_name_table:
+            _statefull_object_name_table[name] = 1
+            self.__name = name
+        else:
+            numbering = _statefull_object_name_table[name]
+            self.__name = "{}_{}".format(name, numbering)
+            _statefull_object_name_table[name] += 1
+
+    @property
+    def name(self):
+        return self.__name
 
     @property
     def variables(self):

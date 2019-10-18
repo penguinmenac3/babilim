@@ -5,6 +5,8 @@ import datetime, time
 import os
 import time
 import tensorflow as tf
+
+from babilim.core import GradientTape
 from babilim.data import Dataset
 from babilim.experiment import Config
 from babilim.core.tensor import TensorWrapper
@@ -47,7 +49,7 @@ def _train(config: Config, model, dataset: Sequence, optimizer, lr_schedule, los
     # Loop over the dataset and update weights.
     for i, (x, y) in enumerate(dataset):
         # Forward pass, computing gradients and applying them
-        with tf.GradientTape() as tape:
+        with GradientTape(variables) as tape:
             inp, _ = _tensor_wrapper.wrap(x._asdict())
             outp, _ = _tensor_wrapper.wrap(y._asdict())
             outp = type(y)(**outp)
@@ -55,11 +57,9 @@ def _train(config: Config, model, dataset: Sequence, optimizer, lr_schedule, los
             loss_results = loss(y_true=outp, y_pred=prediction)
             loss.log("total", loss_results)
             metrics(y_true=outp, y_pred=prediction)
-        raw_vars = _tensor_wrapper.unwrap(variables)
-        gradients = tape.gradient(loss_results.native, raw_vars)
-        wrapped_grads, _ = _tensor_wrapper.wrap(gradients)
+        gradients = tape.gradient(loss_results)
         lr = lr_schedule(samples_seen / config.train_batch_size)
-        optimizer.apply_gradients(wrapped_grads, variables, lr)
+        optimizer.apply_gradients(gradients, variables, lr)
         
         # Update global variables and log the variables
         samples_seen += config.train_batch_size

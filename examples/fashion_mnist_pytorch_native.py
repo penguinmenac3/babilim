@@ -4,7 +4,7 @@ import babilim.experiment.logging as logging
 from babilim.experiment.logging import tprint
 from babilim import PYTORCH_BACKEND, TF_BACKEND, PHASE_TRAIN, PHASE_TEST, PHASE_VALIDATION
 from babilim.annotations import RunOnlyOnce
-from babilim.models import IModel, register_model
+from babilim.models import IModel
 from babilim.core.itensor import ITensor
 from babilim.core.tensor import Tensor
 from babilim.layers import BatchNormalization, Conv2D, MaxPooling2D, GlobalAveragePooling2D, ReLU, Flatten
@@ -82,7 +82,6 @@ class FashionMnistDataset(Dataset):
         return "FashionMnistDataset"
 
 
-@register_model("FashionMnistModel")
 class FashionMnistModel(IModel):
     def __init__(self, config: FashionMnistConfig, name: str = "FashionMnistModel"):
         super().__init__(name, layer_type="FashionMnistModel")

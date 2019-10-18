@@ -40,21 +40,3 @@ class ILayer(StatefullObject):
                 modules.append(v)
                 modules.append(v.submodules)
         return modules
-
-_LAYER_REGISTRY: Dict[str, Dict[str, ILayer]] = defaultdict(dict)
-
-def register_layer(name: str, backend: str = None) -> Callable:
-    def register_layer_decorator(layer):
-        if backend is None:
-            _LAYER_REGISTRY[TF_BACKEND][name] = layer
-            _LAYER_REGISTRY[PYTORCH_BACKEND][name] = layer
-        else:
-            _LAYER_REGISTRY[backend][name] = layer
-        return layer
-    return register_layer_decorator
-
-
-def get_layer(name: str) -> ILayer:
-    if name not in _LAYER_REGISTRY[babilim.get_backend()]:
-        raise RuntimeError("Layer {} was never registered. Did you forget to import the file in which it gets defined? Or annotating it with @register_layer(...)?".format(name))
-    return _LAYER_REGISTRY[babilim.get_backend()][name]

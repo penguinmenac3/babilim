@@ -179,23 +179,3 @@ class IModel(ILayer):
 
     def save(self, model_file):
         np.savez_compressed(model_file, **{'model_state_dict': self.state_dict()})
-
-
-_MODEL_REGISTRY: Dict[str, Dict[str, IModel]] = defaultdict(dict)
-
-
-def register_model(name: str, backend: str = None) -> Callable:
-    def register_layer_decorator(model):
-        if backend is None:
-            _MODEL_REGISTRY[PYTORCH_BACKEND][name] = model
-            _MODEL_REGISTRY[TF_BACKEND][name] = model
-        else:
-            _MODEL_REGISTRY[backend][name] = model
-        return model
-    return register_layer_decorator
-
-
-def get_model(name: str) -> IModel:
-    if name not in _MODEL_REGISTRY[babilim.get_backend()]:
-        raise RuntimeError("Layer {} was never registered. Did you forget to import the file in which it gets defined? Or annotating it with @register_layer(...)?".format(name))
-    return _MODEL_REGISTRY[babilim.get_backend()][name]

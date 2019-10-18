@@ -1,11 +1,8 @@
 from typing import Callable
 from babilim.core.tensor import Tensor
-from babilim.layers.ilayer import ILayer, register_layer
-from babilim import PYTORCH_BACKEND, TF_BACKEND
+from babilim.layers.ilayer import ILayer
 
 
-@register_layer(TF_BACKEND, "Lambda")
-@register_layer(PYTORCH_BACKEND, "Lambda")
 class Lambda(ILayer):
     def __init__(self, name: str, native_layer: Callable):
         """

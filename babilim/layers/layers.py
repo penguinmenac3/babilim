@@ -1,7 +1,7 @@
 from typing import Tuple, Iterable, Sequence, List, Dict, Optional, Union, Any
 
 from babilim import PYTORCH_BACKEND, TF_BACKEND, is_backend, get_backend
-from babilim.layers.ilayer import ILayer, register_layer
+from babilim.layers.ilayer import ILayer
 
 from babilim.layers.common.sequential import Sequential
 from babilim.layers.common.wrapper_layer import Lambda
@@ -11,8 +11,7 @@ from babilim.layers.common.wrapper_layer import Lambda
 # Various (Conv, Linear, BatchNorm)
 # *******************************************************
 
-@register_layer(TF_BACKEND, "Flatten")
-@register_layer(PYTORCH_BACKEND, "Flatten")
+
 def Flatten(name:str = "Flatten") -> ILayer:
     if is_backend(PYTORCH_BACKEND):
         from babilim.layers.pt.flatten import Flatten as _Flatten
@@ -23,8 +22,7 @@ def Flatten(name:str = "Flatten") -> ILayer:
     else:
         raise NotImplementedError("The backend {} is not implemented by this layer.".format(get_backend()))
 
-@register_layer(TF_BACKEND, "Linear")
-@register_layer(PYTORCH_BACKEND, "Linear")
+
 def Linear(out_features: int, name:str ="Linear") -> ILayer:
     """A simple linear layer.
 
@@ -51,8 +49,7 @@ def Linear(out_features: int, name:str ="Linear") -> ILayer:
     else:
         raise NotImplementedError("The backend {} is not implemented by this layer.".format(get_backend()))
 
-@register_layer(TF_BACKEND, "Conv2D")
-@register_layer(PYTORCH_BACKEND, "Conv2D")
+
 def Conv2D(filters: int, kernel_size: Tuple[int, int], name: str = "Conv2D",
            padding: Optional[str] = None, strides: Tuple[int, int] = (1, 1),
            dilation_rate: Tuple[int, int] = (1, 1), kernel_initializer: Optional[Any] = None) -> ILayer:
@@ -85,8 +82,7 @@ def Conv2D(filters: int, kernel_size: Tuple[int, int], name: str = "Conv2D",
     else:
         raise NotImplementedError("The backend {} is not implemented by this layer.".format(get_backend()))
 
-@register_layer(TF_BACKEND, "BatchNormalization")
-@register_layer(PYTORCH_BACKEND, "BatchNormalization")
+
 def BatchNormalization(name:str ="BatchNormalization") -> ILayer:
     """TODO
     
@@ -114,8 +110,7 @@ def BatchNormalization(name:str ="BatchNormalization") -> ILayer:
 # Pooling
 # *******************************************************
 
-@register_layer(TF_BACKEND, "MaxPooling2D")
-@register_layer(PYTORCH_BACKEND, "MaxPooling2D")
+
 def MaxPooling2D(name:str ="MaxPooling2D") -> ILayer:
     """TODO
     
@@ -139,8 +134,7 @@ def MaxPooling2D(name:str ="MaxPooling2D") -> ILayer:
     else:
         raise NotImplementedError("The backend {} is not implemented by this layer.".format(get_backend()))
 
-@register_layer(TF_BACKEND, "MaxPooling1D")
-@register_layer(PYTORCH_BACKEND, "MaxPooling1D")
+
 def MaxPooling1D(name:str ="MaxPooling1D") -> ILayer:
     """TODO
     
@@ -164,8 +158,7 @@ def MaxPooling1D(name:str ="MaxPooling1D") -> ILayer:
     else:
         raise NotImplementedError("The backend {} is not implemented by this layer.".format(get_backend()))
 
-@register_layer(TF_BACKEND, "GlobalAveragePooling2D")
-@register_layer(PYTORCH_BACKEND, "GlobalAveragePooling2D")
+
 def GlobalAveragePooling2D(name:str ="GlobalAveragePooling2D") -> ILayer:
     """TODO
     
@@ -193,8 +186,7 @@ def GlobalAveragePooling2D(name:str ="GlobalAveragePooling2D") -> ILayer:
 # Activation Functions
 # *******************************************************
 
-@register_layer(TF_BACKEND, "ReLU")
-@register_layer(PYTORCH_BACKEND, "ReLU")
+
 def ReLU(name:str ="ReLU") -> ILayer:
     """TODO
     

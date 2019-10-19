@@ -20,8 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-__all__ = ['PHASE_TRAIN', 'PHASE_VALIDATION', 'PHASE_TRAINVAL',
-           'PHASE_TEST', 'PYTORCH_BACKEND', 'TF_BACKEND', 'set_backend', 'get_backend', 'is_backend', 'tprint']
+__all__ = ['tprint', 'set_backend', 'get_backend', 'is_backend']
 
 
 import time as __time
@@ -39,7 +38,21 @@ TF_BACKEND = "tf2"
 _backend = PYTORCH_BACKEND
 
 
-def tprint(msg: str, end: str="\n"):
+def tprint(msg: str, end: str="\n") -> None:
+    """
+    Print something with a timestamp.
+    Useful for logging.
+    Babilim internally uses this for all its log messages.
+
+    .. code-block:: python
+
+        from babilim import tprint
+        tprint("This is a log message.")
+        # [yyyy-mm-dd HH:MM:SS] This is a log message.
+
+    :param msg: The message to print.
+    :param end: The line ending. Defaults to "\n" but can be set to "" to not have a linebreak.
+    """
     time_stamp = __datetime.datetime.fromtimestamp(__time.time()).strftime('%Y-%m-%d %H:%M:%S')
     print("\r[{}] {}".format(time_stamp, msg), end=end)
 
@@ -49,6 +62,13 @@ def set_backend(backend: str):
     Set the backend which babilim uses.
 
     Should be either babilim.PYTORCH_BACKEND or babilim.TF_BACKEND.
+
+    .. code-block:: python
+
+        import babilim
+        babilim.set_backend(babilim.PYTORCH_BACKEND)
+        # or
+        babilim.set_backend(babilim.TF_BACKEND)
     
     :param backend: The backend which should be used.
     :type backend: str
@@ -71,20 +91,35 @@ def set_backend(backend: str):
 
 
 def get_backend() -> str:
-    """foobar
+    """
+    Get what backend is currently set.
+
+    .. code-block:: python
+
+        import babilim
+        print(babilim.get_backend())
     
-    :return: [description]
+    :return: The backend string.
     :rtype: str
     """
     return _backend
 
 
 def is_backend(backend: str) -> bool:
-    """Foo
+    """
+    Check if the currently set backend is the one to check against.
+
+
+    .. code-block:: python
+
+        import babilim
+        if babilim.is_backend(babilim.PYTORCH_BACKEND):
+            # do pytorch specific stuff
+            pass
     
-    :param backend: [description]
+    :param backend: The backend to check against
     :type backend: str
-    :return: [description]
+    :return: True if the set backend is equal to the provided backend.
     :rtype: bool
     """
     return _backend == backend

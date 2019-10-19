@@ -155,7 +155,7 @@ if __name__ == "__main__":
 
     # Create our configuration (containing all hyperparameters)
     config = FashionMnistConfig()
-    logging.setup(config, continue_training=True)
+    logging.setup(config, continue_training=False)
 
     # Load the data
     train = FashionMnistDataset(config, PHASE_TRAIN)

@@ -210,12 +210,8 @@ class NativeModelWrapper(IModel):
 
         # call function
         result = self.model(*args, **kwargs)
+        result_raw = result._asdict()
 
         # Wrap results
-        if isinstance(result, dict):
-            result = {k: Tensor(data=result[k], trainable=True) for k in result}
-        elif isinstance(result, list):
-            result = [Tensor(data=res, trainable=True) for res in result]
-        else:
-            result = Tensor(data=result, trainable=True)
-        return result
+        result_raw = {k: Tensor(data=result_raw[k], trainable=True) for k in result_raw}
+        return type(result)(**result_raw)

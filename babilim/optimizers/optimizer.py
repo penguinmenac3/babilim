@@ -1,6 +1,7 @@
 from typing import Iterable
 from babilim.core.itensor import ITensor
 from babilim.core.statefull_object import StatefullObject
+from babilim.core import RunOnlyOnce
 
 
 class Optimizer(StatefullObject):
@@ -16,3 +17,30 @@ class Optimizer(StatefullObject):
         :param learning_rate: The learning rate which is currently used.
         """
         raise NotImplementedError("Apply gradients must be implemented by every optimizer.")
+
+
+class NativePytorchOptimizerWrapper(Optimizer):
+    def __init__(self, optimizer_class, model, **kwargs):
+        """
+        Wrap a native pytorch optimizer as a babilim optimizer.
+
+        :param optimizer_class: The class which should be wrapped (not an instance).
+         For example "optimizer_class=torch.optim.SGD".
+        :param model: The model that is used (instance of type IModel).
+        :param kwargs: The arguments for the optimizer on initialization.
+        """
+        super().__init__()
+        self.optimizer_class = optimizer_class
+        self.kwargs = kwargs
+        self.model = model
+        self.optim = None
+
+    @RunOnlyOnce
+    def build(self, lr):
+        self.optim = self.optimizer_class(self.model.trainable_variables_native, lr=lr, **self.kwargs)
+
+    def apply_gradients(self, gradients: Iterable[ITensor], variables: Iterable[ITensor], learning_rate: float) -> None:
+        self.build(learning_rate)
+        for param_group in self.optim.param_groups:
+            param_group['lr'] = learning_rate
+        self.optim.step()

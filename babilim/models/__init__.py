@@ -1,3 +1,3 @@
-from babilim.models.imodel import IModel
+from babilim.models.imodel import IModel, NativeModelWrapper
 
-__all__ = ['IModel']
+__all__ = ['IModel', 'NativeModelWrapper']

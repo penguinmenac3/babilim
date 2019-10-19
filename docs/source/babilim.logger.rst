@@ -1,5 +1,5 @@
-Logging & Checkpoints
-=====================
+Logger (Logging & Checkpoints)
+==============================
 
 .. automodule:: babilim.logger
    :members:

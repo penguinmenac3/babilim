@@ -23,8 +23,7 @@ class Loss(StatefullObject):
         """
         loss = self.call(y_pred, y_true)
         return loss
-    
-    
+
     def call(self,
                  y_pred: Any,
                  y_true: Any) -> ITensor:
@@ -67,6 +66,38 @@ class Loss(StatefullObject):
             avgs[k] = self._accumulators[k] / self._counters[k]
         return avgs
 
+
+class NativeLossWrapper(Loss):
+    def __init__(self, loss):
+        """
+        Wrap a native loss as a babilim loss.
+
+        The wrapped object must have the following signature:
+
+            Callable(y_pred, y_true, log_val) -> Tensor
+
+        where log_val will be a function which can be used for logging scalar tensors/values.
+
+        :param loss: The loss that should be wrapped.
+        """
+        super().__init__()
+        self.loss = loss
+
+    def call(self, y_pred: Any, y_true: Any) -> ITensor:
+        # Unwrap arguments
+        tmp = y_true._asdict()
+        y_true_tmp = {k: tmp[k].native for k in tmp}
+        y_true = type(y_true)(**y_true_tmp)
+
+        tmp = y_pred._asdict()
+        y_pred_tmp = {k: tmp[k].native for k in tmp}
+        y_pred = type(y_pred)(**y_pred_tmp)
+
+        # call function
+        result = self.loss(y_pred=y_pred, y_true=y_true,
+                           log_val=lambda name, tensor: self.log(name, Tensor(data=tensor, trainable=True)))
+
+        return Tensor(data=result, trainable=True)
 
 
 class SparseCrossEntropyLossFromLogits(Loss):

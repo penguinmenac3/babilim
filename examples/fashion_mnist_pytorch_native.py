@@ -5,16 +5,19 @@ import babilim.logger as logging
 import babilim.optimizers.learning_rates as lr
 
 from babilim import PYTORCH_BACKEND, PHASE_TRAIN, PHASE_VALIDATION
-from babilim.core import RunOnlyOnce, ITensor, Tensor
+from babilim.core import RunOnlyOnce
 from babilim.data import Dataset, image_grid_wrap
 from babilim.experiment import Config
-from babilim.layers import BatchNormalization, Conv2D, MaxPooling2D, GlobalAveragePooling2D, ReLU, Flatten
-from babilim.losses import Loss, Metrics, SparseCrossEntropyLossFromLogits, SparseCategoricalAccuracy
-from babilim.models import IModel
+from babilim.losses import NativeMetricsWrapper, NativeLossWrapper
+from babilim.models import NativeModelWrapper
+from babilim.optimizers import NativePytorchOptimizerWrapper
 
-# Use torch optimizer and Linear layer for example
-from torch.nn import Linear
+import torch
+from torch import Tensor
+from torch.nn import Linear, Module, BatchNorm2d, Conv2d
+from torch.nn.functional import relu, max_pool2d, avg_pool2d
 from torch.optim import SGD
+from torch.nn import CrossEntropyLoss
 from torchvision.datasets import FashionMNIST
 
 import numpy as np
@@ -78,122 +81,126 @@ class FashionMnistDataset(Dataset):
         return "FashionMnistDataset"
 
 
-class FashionMnistModel(IModel):
-    def __init__(self, config: FashionMnistConfig, name: str = "FashionMnistModel"):
-        super().__init__(name, layer_type="FashionMnistModel")
-        # Store config so it is availible in build.
+class FashionMnistModel(Module):
+    def __init__(self, config: FashionMnistConfig):
+        super().__init__()
         self.config = config
+        self.layers = []
 
-        # Babilim Layers should be initialized in __init__ but could also be initialized in build. (Both would work)
-        self.linear = []
-        self.linear.append(BatchNormalization())
-        self.linear.append(Conv2D(filters=12, kernel_size=(3, 3)))
-        self.linear.append(ReLU())
-        self.linear.append(MaxPooling2D())
+    def register(self, layer):
+        if torch.cuda.is_available():
+            layer = layer.to(torch.device("cuda"))
+        self.__setattr__("layer_{}".format(len(self.layers)), layer)
+        return layer
 
-        self.linear.append(BatchNormalization())
-        self.linear.append(Conv2D(filters=18, kernel_size=(3, 3)))
-        self.linear.append(ReLU())
-        self.linear.append(MaxPooling2D())
+    def make_bn(self, features):
+        self.layers.append(self.register(BatchNorm2d(features.shape[1])))
+        return self.layers[-1](features)
 
-        self.linear.append(BatchNormalization())
-        self.linear.append(Conv2D(filters=18, kernel_size=(3, 3)))
-        self.linear.append(ReLU())
-        self.linear.append(MaxPooling2D())
+    def make_conv2d(self, features, filters, kernel_size):
+        px = int((kernel_size[0] - 1) / 2)
+        py = int((kernel_size[1] - 1) / 2)
+        padding = (px, py)
+        self.layers.append(self.register(Conv2d(features.shape[1], filters, kernel_size, (1, 1), padding)))
+        return self.layers[-1](features)
 
-        self.linear.append(BatchNormalization())
-        self.linear.append(Conv2D(filters=18, kernel_size=(3, 3)))
-        self.linear.append(ReLU())
-        self.linear.append(GlobalAveragePooling2D())
+    def make_relu(self, features):
+        self.layers.append(relu)
+        return self.layers[-1](features)
 
-        self.linear.append(BatchNormalization())
-        self.linear.append(Flatten())
+    def make_max_pool_2d(self, features):
+        self.layers.append(lambda x: max_pool2d(x, (2, 2)))
+        return self.layers[-1](features)
+
+    def make_global_avg_pool_2d(self, features):
+        self.layers.append(lambda x: avg_pool2d(x, features.size()[2:]))
+        return self.layers[-1](features)
+
+    def make_flatten(self, features):
+        self.layers.append(lambda x: x.view(x.shape[0], -1))
+        return self.layers[-1](features)
+
+    def make_linear(self, net, out_features):
+        self.layers.append(self.register(Linear(in_features=net.shape[-1], out_features=out_features)))
+        return self.layers[-1](net)
 
     @RunOnlyOnce
-    def build(self, features: ITensor):
-        # I am lazy, so I just forward pass the features to know what input shape the linear unit has.
+    def build(self, features):
         net = features
-        for l in self.linear:
-            net = l(net)
-        num_feats = net.shape[-1]
-        
-        # now that the input features are known create the remainder of the network.
-        self.l1 = Linear(in_features=num_feats,out_features=18)
-        self.relu = ReLU()
-        self.l2 = Linear(in_features=18, out_features=self.config.problem_number_of_categories)
+        net = self.make_bn(net)
+        net = self.make_conv2d(net, 12, (3, 3))
+        net = self.make_relu(net)
+        net = self.make_max_pool_2d(net)
+        net = self.make_bn(net)
+        net = self.make_conv2d(net, 18, (3, 3))
+        net = self.make_relu(net)
+        net = self.make_max_pool_2d(net)
+        net = self.make_bn(net)
+        net = self.make_conv2d(net, 18, (3, 3))
+        net = self.make_relu(net)
+        net = self.make_max_pool_2d(net)
+        net = self.make_bn(net)
+        net = self.make_conv2d(net, 18, (3, 3))
+        net = self.make_relu(net)
+        net = self.make_global_avg_pool_2d(net)
+        net = self.make_bn(net)
+        net = self.make_flatten(net)
+        net = self.make_linear(net, 18)
+        net = self.make_relu(net)
+        net = self.make_linear(net, self.config.problem_number_of_categories)
 
-    def call(self, features: ITensor) -> NetworkOutput:
-        babilim_tensor = features
-        for l in self.linear:
-            babilim_tensor = l(babilim_tensor)
-        pytorch_tensor = babilim_tensor.native
-        pytorch_tensor = self.l1(pytorch_tensor)
-        pytorch_tensor = self.relu(pytorch_tensor)
-        pytorch_tensor = self.l2(pytorch_tensor)
-        babilim_tensor = Tensor(data=pytorch_tensor, trainable=True)
-        return NetworkOutput(class_id=babilim_tensor)
+    def forward(self, features) -> NetworkOutput:
+        tensor = features
+        for l in self.layers:
+            tensor = l(tensor)
+        return NetworkOutput(class_id=tensor)
 
 
-class FashionMnistLoss(Loss):
+class FashionMnistLoss(Module):
     def __init__(self):
         super().__init__()
-        self.ce = SparseCrossEntropyLossFromLogits()
+        self.ce = CrossEntropyLoss()
 
-    def call(self, y_pred: NetworkOutput, y_true: NetworkOutput) -> ITensor:
-        #tprint("y_pred={} y_true={}".format(y_pred.class_id.shape, y_true.class_id.shape))
-        return self.ce(y_pred.class_id, y_true.class_id).mean()
+    def forward(self, y_pred: NetworkOutput, y_true: NetworkOutput, log_val) -> Tensor:
+        return self.ce(y_pred.class_id, y_true.class_id.long()).mean()
 
 
-class FashionMnistMetrics(Metrics):
+class FashionMnistMetrics(Module):
     def __init__(self):
         super().__init__()
-        self.ce = SparseCrossEntropyLossFromLogits()
-        self.ca = SparseCategoricalAccuracy()
+        self.ce = CrossEntropyLoss()
 
-    def call(self, y_pred: NetworkOutput, y_true: NetworkOutput) -> None:
-        self.log("ce", self.ce(y_pred.class_id, y_true.class_id).mean())
-        self.log("ca", self.ca(y_pred.class_id, y_true.class_id).mean())
+    def ca(self, y_pred: Tensor, y_true: Tensor):
+        pred_class = y_pred.argmax(dim=-1)
+        true_class = y_true.long()
+        correct_predictions = pred_class == true_class
+        return correct_predictions.float().mean()
 
-
-class MySGD(object):
-    def __init__(self, model: IModel, momentum: float=0.95, dampening: float=0.00, weight_decay: float=0, nesterov: bool=True):
-        self.momentum = momentum
-        self.weight_decay = weight_decay
-        self.nesterov = nesterov
-        self.dampening = dampening
-        self.model = model
-
-    @RunOnlyOnce
-    def build(self, lr):
-        self.sgd = SGD(self.model.trainable_variables_native, lr=lr, momentum=self.momentum, dampening=self.dampening, weight_decay=self.weight_decay, nesterov=self.nesterov)
-
-    def apply_gradients(self, gradients: Iterable[ITensor], variables: Iterable[ITensor], learning_rate: float) -> None:
-        self.build(learning_rate)
-        for param_group in self.sgd.param_groups:
-            param_group['lr'] = learning_rate
-        self.sgd.step()
+    def forward(self, y_pred: NetworkOutput, y_true: NetworkOutput, log_val) -> None:
+        log_val("ce", self.ce(y_pred.class_id, y_true.class_id.long()).mean())
+        log_val("ca", self.ca(y_pred.class_id, y_true.class_id).mean())
 
 
 if __name__ == "__main__":
     babilim.set_backend(PYTORCH_BACKEND)
 
-    # Create our configuration (containing all hyperparameters)
+    # Create our configuration (containing all hyper parameters)
     config = FashionMnistConfig()
-    logging.setup(config)
+    logging.setup(config, continue_training=False)
 
     # Load the data
     train = FashionMnistDataset(config, PHASE_TRAIN)
     val = FashionMnistDataset(config, PHASE_VALIDATION)
 
     # Create a model.
-    model = FashionMnistModel(config)
+    model = NativeModelWrapper(FashionMnistModel(config), name="FashionMnistModel")
 
-    # Create a loss and some metrics (if your loss has hyperparameters use config for that)
-    loss = FashionMnistLoss()
-    metrics = FashionMnistMetrics()
+    # Create a loss and some metrics (if your loss has hyper parameters use config for that)
+    loss = NativeLossWrapper(FashionMnistLoss())
+    metrics = NativeMetricsWrapper(FashionMnistMetrics())
 
     # Create optimizer
-    optim = MySGD(model)
+    optim = NativePytorchOptimizerWrapper(SGD, model, momentum=0.95, dampening=0.0, weight_decay=0.0, nesterov=True)
 
     # Fit our model to the data using our loss and report the metrics.
     model.fit(train, val, loss, metrics, config, optim, config.train_learning_rate_shedule, verbose=True)

@@ -1,8 +1,5 @@
-from typing import Sequence, Any, Sequence, Callable, Dict
-from collections import defaultdict
-import babilim
-from babilim import tprint
-from babilim import PYTORCH_BACKEND, TF_BACKEND
+from typing import Any
+from babilim import tprint, Tensor, RunOnlyOnce
 from babilim.layers.ilayer import ILayer
 from babilim.data import Dataset, TensorDataset
 from babilim.experiment import Config
@@ -15,7 +12,7 @@ from babilim.core import GradientTape
 
 
 class IModel(ILayer):
-    def __init__(self, name: str, layer_type: str):
+    def __init__(self, name: str, layer_type: str = "Model"):
         super().__init__(name, layer_type)
 
     def __dict_to_str(self, data):
@@ -179,3 +176,46 @@ class IModel(ILayer):
 
     def save(self, model_file):
         np.savez_compressed(model_file, **{'model_state_dict': self.state_dict()})
+
+
+class NativeModelWrapper(IModel):
+    def __init__(self, model, name: str, layer_type: str = "NativeModel"):
+        """
+        Wrap a native model to be trained and used as a babilim model.
+
+        The model can have a build function which is then used, but it does not need to.
+
+        :param model: The model that should be wrapped.
+        :param name: The name of the model.
+        :param layer_type: The layer type. Defaults to NativeModel.
+        """
+        super().__init__(name=name, layer_type=layer_type)
+        self.model = model
+
+    @RunOnlyOnce
+    def build(self, *args, **kwargs) -> None:
+        build = getattr(self.model, "build", None)
+        if callable(build):
+            # Unwrap arguments
+            args = [feature.native for feature in args]
+            kwargs = {k: kwargs[k].native for k in kwargs}
+
+            # Call the build
+            build(*args, **kwargs)
+
+    def call(self, *args, **kwargs) -> Any:
+        # Unwrap arguments
+        args = [feature.native for feature in args]
+        kwargs = {k: kwargs[k].native for k in kwargs}
+
+        # call function
+        result = self.model(*args, **kwargs)
+
+        # Wrap results
+        if isinstance(result, dict):
+            result = {k: Tensor(data=result[k], trainable=True) for k in result}
+        elif isinstance(result, list):
+            result = [Tensor(data=res, trainable=True) for res in result]
+        else:
+            result = Tensor(data=result, trainable=True)
+        return result

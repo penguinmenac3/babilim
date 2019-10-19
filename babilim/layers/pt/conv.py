@@ -1,11 +1,10 @@
-import math
 import torch
 from torch.nn import Conv2d as _Conv2d
 from torch.nn.init import orthogonal_
 
 from babilim.layers.ilayer import ILayer
 from babilim.core.tensor_pt import Tensor
-from babilim.annotations import RunOnlyOnce
+from babilim.core.annotations import RunOnlyOnce
 
 
 class Conv2D(ILayer):

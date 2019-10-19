@@ -1,10 +1,8 @@
-import math
-import tensorflow as tf
 from tensorflow.keras.layers import BatchNormalization as _BN
 
 from babilim.layers.ilayer import ILayer
 from babilim.core.tensor_tf import Tensor
-from babilim.annotations import RunOnlyOnce
+from babilim.core.annotations import RunOnlyOnce
 
 
 class BatchNormalization(ILayer):

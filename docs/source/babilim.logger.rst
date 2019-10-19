@@ -1,7 +1,7 @@
 Logging & Checkpoints
 =====================
 
-.. automodule:: babilim.experiment.logging
+.. automodule:: babilim.logger
    :members:
    :undoc-members:
    :show-inheritance:

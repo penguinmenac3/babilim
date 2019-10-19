@@ -1,12 +1,9 @@
-import math
-import tensorflow as tf
 from tensorflow.keras.layers import Conv2D as _Conv2D
-from tensorflow.keras.regularizers import l2
 from tensorflow.keras.initializers import Orthogonal
 
 from babilim.layers.ilayer import ILayer
 from babilim.core.tensor_tf import Tensor
-from babilim.annotations import RunOnlyOnce
+from babilim.core.annotations import RunOnlyOnce
 
 
 class Conv2D(ILayer):

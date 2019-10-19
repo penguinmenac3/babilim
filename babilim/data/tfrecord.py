@@ -23,18 +23,14 @@
 import os
 from os import listdir
 from os.path import isfile, join
-import sys
 import json
-import filecmp
 import numpy as np
 from multiprocessing import Pool
 import tensorflow as tf
-from setproctitle import setproctitle
 from tensorflow.keras.utils import Sequence
 
 from babilim import PHASE_TRAINVAL, PHASE_TEST, PHASE_TRAIN, PHASE_VALIDATION
-from babilim.experiment import Config, import_config
-from babilim.experiment.logging import _log_code, _is_code_log_up_to_date
+from babilim.logger.logger import _log_code, _is_code_log_up_to_date
 
 def _bytes_feature(value):
     return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))

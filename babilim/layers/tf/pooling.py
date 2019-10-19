@@ -1,5 +1,3 @@
-import math
-import tensorflow as tf
 from tensorflow.keras.layers import MaxPooling2D as _MaxPooling2D
 from tensorflow.keras.layers import MaxPooling1D as _MaxPooling1D
 from tensorflow.keras.layers import GlobalAveragePooling2D as _GlobalAveragePooling2D
@@ -7,7 +5,7 @@ from tensorflow.keras.layers import GlobalAveragePooling1D as _GlobalAveragePool
 
 from babilim.layers.ilayer import ILayer
 from babilim.core.tensor_tf import Tensor
-from babilim.annotations import RunOnlyOnce
+from babilim.core.annotations import RunOnlyOnce
 
 
 class MaxPooling2D(ILayer):

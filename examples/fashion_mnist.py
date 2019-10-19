@@ -1,21 +1,19 @@
 from typing import Tuple
-import babilim
-import babilim.experiment.logging as logging
-from babilim.experiment.logging import tprint
-from babilim import PYTORCH_BACKEND, TF_BACKEND, PHASE_TRAIN, PHASE_TEST, PHASE_VALIDATION
-from babilim.annotations import RunOnlyOnce
-from babilim.models import IModel
-from babilim.core.itensor import ITensor
-from babilim.layers import BatchNormalization, Conv2D, MaxPooling2D, GlobalAveragePooling2D, Linear, ReLU, Flatten
-from babilim.data import Dataset
-from babilim.experiment import Config
-from babilim.optimizers import SGD
-import babilim.optimizers.learning_rates as lr
-from babilim.losses import Loss, Metrics, SparseCrossEntropyLossFromLogits, MeanSquaredError, SparseCategoricalAccuracy
-from babilim.core.image_grid import image_grid_wrap
-
 import numpy as np
 from collections import namedtuple
+
+import babilim
+import babilim.logger as logging
+import babilim.optimizers.learning_rates as lr
+
+from babilim import PYTORCH_BACKEND, TF_BACKEND, PHASE_TRAIN, PHASE_VALIDATION
+from babilim.core import ITensor, RunOnlyOnce
+from babilim.data import Dataset, image_grid_wrap
+from babilim.experiment import Config
+from babilim.layers import BatchNormalization, Conv2D, MaxPooling2D, GlobalAveragePooling2D, Linear, ReLU, Flatten
+from babilim.losses import Loss, Metrics, SparseCrossEntropyLossFromLogits, SparseCategoricalAccuracy
+from babilim.models import IModel
+from babilim.optimizers import SGD
 
 
 # Create some named tuple for our inputs and outputs so we do not confuse them.

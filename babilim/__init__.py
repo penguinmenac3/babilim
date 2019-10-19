@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 __all__ = ['PHASE_TRAIN', 'PHASE_VALIDATION', 'PHASE_TRAINVAL',
-           'PHASE_TEST', 'PYTORCH_BACKEND', 'TF_BACKEND', 'set_backend', 'get_backend', 'is_backend', 'ITensor', 'Tensor', 'RunOnlyOnce', 'tprint']
+           'PHASE_TEST', 'PYTORCH_BACKEND', 'TF_BACKEND', 'set_backend', 'get_backend', 'is_backend', 'tprint']
 
 
 import time as __time
@@ -38,9 +38,11 @@ TF_BACKEND = "tf2"
 
 _backend = PYTORCH_BACKEND
 
+
 def tprint(msg: str, end: str="\n"):
     time_stamp = __datetime.datetime.fromtimestamp(__time.time()).strftime('%Y-%m-%d %H:%M:%S')
     print("\r[{}] {}".format(time_stamp, msg), end=end)
+
 
 def set_backend(backend: str):
     """
@@ -67,6 +69,7 @@ def set_backend(backend: str):
     tprint("Using backend: {}-{}".format(backend, device))
     _backend = backend
 
+
 def get_backend() -> str:
     """foobar
     
@@ -74,6 +77,7 @@ def get_backend() -> str:
     :rtype: str
     """
     return _backend
+
 
 def is_backend(backend: str) -> bool:
     """Foo
@@ -84,7 +88,3 @@ def is_backend(backend: str) -> bool:
     :rtype: bool
     """
     return _backend == backend
-
-from babilim.core.itensor import ITensor
-from babilim.core.tensor import Tensor
-from babilim.annotations import RunOnlyOnce

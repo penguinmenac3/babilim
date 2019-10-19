@@ -1,9 +1,8 @@
-import math
 from torch.nn.functional import relu
 
 from babilim.layers.ilayer import ILayer
 from babilim.core.tensor_pt import Tensor
-from babilim.annotations import RunOnlyOnce
+from babilim.core.annotations import RunOnlyOnce
 
 
 class ReLU(ILayer):

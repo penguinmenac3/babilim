@@ -1,12 +1,7 @@
 Core
 ====
 
-.. automodule:: babilim
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-.. automodule:: babilim.core.image_grid
+.. automodule:: babilim.core
    :members:
    :undoc-members:
    :show-inheritance:

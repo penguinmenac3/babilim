@@ -1,6 +1,7 @@
 import babilim
 import numpy as np
 
+
 def image_grid_wrap(data: np.ndarray) -> np.ndarray:
     """
     Prepares 2D grid information to be used in your neural network.

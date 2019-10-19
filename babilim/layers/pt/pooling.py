@@ -1,4 +1,3 @@
-import math
 from torch.nn.functional import max_pool2d as _MaxPooling2D
 from torch.nn.functional import max_pool1d as _MaxPooling1D
 from torch.nn.functional import avg_pool2d as _AveragePooling2D
@@ -6,7 +5,7 @@ from torch.nn.functional import avg_pool1d as _AveragePooling1D
 
 from babilim.layers.ilayer import ILayer
 from babilim.core.tensor_pt import Tensor
-from babilim.annotations import RunOnlyOnce
+from babilim.core.annotations import RunOnlyOnce
 
 
 class MaxPooling2D(ILayer):

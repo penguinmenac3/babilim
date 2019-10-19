@@ -11,11 +11,12 @@ TODO general hello there.
 .. toctree::
    :caption: Packages
 
+   babilim
    babilim.callbacks
    babilim.core
    babilim.data
    babilim.experiment
-   babilim.experiment.logging
+   babilim.logger
    babilim.layers
    babilim.losses
    babilim.models

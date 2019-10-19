@@ -1,11 +1,10 @@
-import math
 import torch
 from torch.nn import BatchNorm1d, BatchNorm2d, BatchNorm3d
 
 from babilim.layers.ilayer import ILayer
 from babilim.core.itensor import ITensor
 from babilim.core.tensor_pt import Tensor
-from babilim.annotations import RunOnlyOnce
+from babilim.core.annotations import RunOnlyOnce
 
 
 class BatchNormalization(ILayer):

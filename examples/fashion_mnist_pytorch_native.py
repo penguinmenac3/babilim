@@ -1,21 +1,18 @@
 from typing import Tuple, Iterable
+
 import babilim
-import babilim.experiment.logging as logging
-from babilim.experiment.logging import tprint
-from babilim import PYTORCH_BACKEND, TF_BACKEND, PHASE_TRAIN, PHASE_TEST, PHASE_VALIDATION
-from babilim.annotations import RunOnlyOnce
-from babilim.models import IModel
-from babilim.core.itensor import ITensor
-from babilim.core.tensor import Tensor
-from babilim.layers import BatchNormalization, Conv2D, MaxPooling2D, GlobalAveragePooling2D, ReLU, Flatten
-from babilim.data import Dataset
-from babilim.experiment import Config
+import babilim.logger as logging
 import babilim.optimizers.learning_rates as lr
-from babilim.losses import Loss, Metrics, SparseCrossEntropyLossFromLogits, MeanSquaredError, SparseCategoricalAccuracy
-from babilim.core.image_grid import image_grid_wrap
+
+from babilim import PYTORCH_BACKEND, PHASE_TRAIN, PHASE_VALIDATION
+from babilim.core import RunOnlyOnce, ITensor, Tensor
+from babilim.data import Dataset, image_grid_wrap
+from babilim.experiment import Config
+from babilim.layers import BatchNormalization, Conv2D, MaxPooling2D, GlobalAveragePooling2D, ReLU, Flatten
+from babilim.losses import Loss, Metrics, SparseCrossEntropyLossFromLogits, SparseCategoricalAccuracy
+from babilim.models import IModel
 
 # Use torch optimizer and Linear layer for example
-import torch
 from torch.nn import Linear
 from torch.optim import SGD
 from torchvision.datasets import FashionMNIST
@@ -35,7 +32,6 @@ class FashionMnistConfig(Config):
         self.problem_number_of_categories = 10
         self.problem_samples = 1875 * 32
         self.problem_base_dir = "datasets"
-        #self.problem_tf_records_path = "tfrecords"
 
         self.train_epochs = 20
         self.train_l2_weight = 0.01

@@ -1,5 +1,6 @@
 from typing import Any
-from babilim import tprint, Tensor, RunOnlyOnce
+from babilim import tprint
+from babilim.core import Tensor, RunOnlyOnce, GradientTape
 from babilim.layers.ilayer import ILayer
 from babilim.data import Dataset, TensorDataset
 from babilim.experiment import Config
@@ -8,7 +9,6 @@ import os
 import time
 import numpy as np
 from tensorboardX import SummaryWriter
-from babilim.core import GradientTape
 
 
 class IModel(ILayer):
@@ -78,7 +78,7 @@ class IModel(ILayer):
         config.check_completness()
         if config.train_actual_checkpoint_path is None:
             raise RuntimeError(
-                "You must setup logging before calling the fit method. See babilim.experiment.logging.setup")
+                "You must setup logger before calling the fit method. See babilim.experiment.logger.setup")
         chkpt_path = config.train_actual_checkpoint_path
 
         # Summary writers

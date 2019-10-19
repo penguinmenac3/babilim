@@ -93,7 +93,7 @@ def _write_log(*, obj: object) -> None:
     global __entanglement
     out_str = json.dumps(obj)
     if __log_file is None:
-        tprint("WARING: You should setup logging before using it. Call ailab.logging.setup(...).")
+        tprint("WARING: You should setup logger before using it. Call ailab.logger.setup(...).")
         tprint(out_str)
     else:
         with open(__log_file, "a") as f:
@@ -251,7 +251,7 @@ def log_image(*, name: str, data: np.ndarray = None) -> None:
     """
     global __checkpoint_path
     if __checkpoint_path is None:
-        tprint("WARNING: Cannot log images when logging is not setup. Call logging.setup first")
+        tprint("WARNING: Cannot log images when logger is not setup. Call logger.setup first")
         return
     if data is None:
         plt.savefig(os.path.join(__checkpoint_path, "images", name + ".png"))
@@ -261,7 +261,7 @@ def log_image(*, name: str, data: np.ndarray = None) -> None:
 
 def setup(config: Config, continue_with_specific_checkpointpath: bool = False, continue_training: bool = False) -> str:
     """
-    Setup the logging.
+    Setup the logger.
     This creates the folder structure required at the place specified in config.train.checkpoint_path.
     After creating the folder structure it backs up the code of the current working directory to the folder structure.
 
@@ -273,7 +273,7 @@ def setup(config: Config, continue_with_specific_checkpointpath: bool = False, c
     global __log_file
     global __checkpoint_path
     if __log_file is not None:
-        raise RuntimeError("You must not setup logging twice!")
+        raise RuntimeError("You must not setup logger twice!")
     time_stamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d_%H.%M.%S')
     chkpt_path = config.train_checkpoint_path + "/" + time_stamp
     chkpt_path = chkpt_path + "_" + config.train_experiment_name
@@ -303,9 +303,9 @@ def setup(config: Config, continue_with_specific_checkpointpath: bool = False, c
     return chkpt_path
 
 
-def connect(*, host: str, port: int, user: str, password: str) -> bool:
+def connect_ailab(*, host: str, port: int, user: str, password: str) -> bool:
     """
-    Connect to an ailab server for live logging of the experiment.
+    Connect to an ailab server for live logger of the experiment.
 
     :param host: Hostname of the server.
     :param port: The port on which ailab-server runs.
@@ -315,7 +315,7 @@ def connect(*, host: str, port: int, user: str, password: str) -> bool:
     """
     global __entanglement
     if __entanglement is not None:
-        raise RuntimeError("You must not connect to a server for live logging twice!")
+        raise RuntimeError("You must not connect to a server for live logger twice!")
     __entanglement = entangle.connect(host=host, port=port, user=user, password=password)
     if __entanglement is None:
         return False

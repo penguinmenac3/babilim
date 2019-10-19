@@ -1,16 +1,14 @@
 import math
-import torch
 from torch.nn.parameter import Parameter
 import torch.nn.functional as F
 from torch.nn import init
-from torch.nn import Module
 
 import torch
 import torch.nn as nn
 
 from babilim.layers.ilayer import ILayer
 from babilim.core.tensor_pt import Tensor
-from babilim.annotations import RunOnlyOnce
+from babilim.core.annotations import RunOnlyOnce
 
 
 class Linear(ILayer):

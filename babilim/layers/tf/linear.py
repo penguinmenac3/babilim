@@ -1,10 +1,8 @@
-import math
-import tensorflow as tf
 from tensorflow.keras.layers import Dense
 
 from babilim.layers.ilayer import ILayer
 from babilim.core.tensor_tf import Tensor
-from babilim.annotations import RunOnlyOnce
+from babilim.core.annotations import RunOnlyOnce
 
 
 class Linear(ILayer):

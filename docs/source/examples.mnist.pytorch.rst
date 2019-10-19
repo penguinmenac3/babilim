@@ -14,7 +14,19 @@ Follow them and come back to this tutorial afterwards.
 
 **5. Implementing the model**
 
-TODO
+Implementing a pytorch native model is a bit more involved.
+First we want all variables to be automatically and immediately pushed to the gpu, so we can use the build forward pass to compute layer input shapes.
+For that we create a register(layer) function which pushes the layer to the gpu if a gpu is available and adds it to the object as a variable so it is tracked.
+
+After that we define a couple of helper functions for creating layers, so it is easier to create them in the build function.
+All layers that have state are registered with our model class.
+
+Using those helper functions in the build function finally the architecture is created.
+Note how we do not need to specify input dimensions by using the forward pass to build our model.
+
+Since all layers have been added to self.layers we only need to loop over the array and call every layer in the forward function.
+The forward as well as the build function expect as input all fields of the NetworkInput namedtuple.
+However, only the forward method has a return type which must be of type NetworkOutput (the namedtuple defined in step 2).
 
 .. code-block:: python
 
@@ -147,7 +159,18 @@ However, it does not have a return type and no effect on the optimization.
 
 **7. Training it**
 
-TODO
+Finally we can write code which glues everything together.
+First select the pytorch backend.
+Then, create a configuration and use it to setup the logger module.
+After that you can create your dataset for training and validation by instantiating the class created in step 4.
+
+To train our pytorch model with a pytorch optimizer, loss and metrics, we need to use the native wrappers.
+For the optimizer there is a special NativePytorchOptimizerWrapper, whereas the rest is supported by a generic wrapper.
+Also our model from step 5 can be instantiated as well as the loss and metrics from step 6.
+However, the instances need to be wrapped.
+Finally we select an optimizer (typically SGD is fine) and wrap the optimizer class directly without instantiating.
+This is required, since the pytorch optimizer needs the variables to optimize on creation, but they are not yet created on the gpu, this happens as a first step in the fit method or whenever you call the model.
+
 
 .. code-block:: python
 

@@ -3,7 +3,7 @@ import numpy as np
 from collections import namedtuple
 
 import babilim
-import babilim.logger as logging
+import babilim.logger as logger
 import babilim.optimizers.learning_rates as lr
 
 from babilim import PYTORCH_BACKEND, TF_BACKEND, PHASE_TRAIN, PHASE_VALIDATION
@@ -86,10 +86,13 @@ class FashionMnistDataset(Dataset):
 class FashionMnistModel(IModel):
     def __init__(self, config: FashionMnistConfig, name: str = "FashionMnistModel"):
         super().__init__(name, layer_type="FashionMnistModel")
-        l2_weight = config.train_l2_weight
-        out_features = config.problem_number_of_categories
+        self.config = config
         self.linear = []
-        
+
+    @RunOnlyOnce
+    def build(self, features: ITensor):
+        out_features = self.config.problem_number_of_categories
+
         self.linear.append(BatchNormalization())
         self.linear.append(Conv2D(filters=12, kernel_size=(3, 3)))
         self.linear.append(ReLU())
@@ -116,16 +119,10 @@ class FashionMnistModel(IModel):
         self.linear.append(ReLU())
         self.linear.append(Linear(out_features=out_features))
 
-    @RunOnlyOnce
-    def build(self, features: ITensor):
-        pass
-
     def call(self, features: ITensor) -> NetworkOutput:
         net = features
         for l in self.linear:
-            #print(l.name)
             net = l(net)
-            #print(net.shape)
         return NetworkOutput(class_id=net)
 
 
@@ -135,7 +132,6 @@ class FashionMnistLoss(Loss):
         self.ce = SparseCrossEntropyLossFromLogits()
 
     def call(self, y_pred: NetworkOutput, y_true: NetworkOutput) -> ITensor:
-        #tprint("y_pred={} y_true={}".format(y_pred.class_id.shape, y_true.class_id.shape))
         return self.ce(y_pred.class_id, y_true.class_id).mean()
 
 
@@ -155,7 +151,7 @@ if __name__ == "__main__":
 
     # Create our configuration (containing all hyperparameters)
     config = FashionMnistConfig()
-    logging.setup(config, continue_training=False)
+    logger.setup(config, continue_training=False)
 
     # Load the data
     train = FashionMnistDataset(config, PHASE_TRAIN)

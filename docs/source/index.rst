@@ -79,6 +79,7 @@ Babilim is an attempt to unite the two to talk in a language compatible with bot
    :hidden:
 
    examples.mnist
+   examples.mnist.pytorch
 
 Indices and tables
 ==================

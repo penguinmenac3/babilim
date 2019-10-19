@@ -1,7 +1,7 @@
 from typing import Tuple, Iterable
 
 import babilim
-import babilim.logger as logging
+import babilim.logger as logger
 import babilim.optimizers.learning_rates as lr
 
 from babilim import PYTORCH_BACKEND, PHASE_TRAIN, PHASE_VALIDATION
@@ -186,7 +186,7 @@ if __name__ == "__main__":
 
     # Create our configuration (containing all hyper parameters)
     config = FashionMnistConfig()
-    logging.setup(config, continue_training=False)
+    logger.setup(config, continue_training=False)
 
     # Load the data
     train = FashionMnistDataset(config, PHASE_TRAIN)

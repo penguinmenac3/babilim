@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Experiment" href="babilim.experiment.html" />
+    <link rel="next" title="Experiment Configuration" href="babilim.experiment.html" />
     <link rel="prev" title="Core" href="babilim.core.html" /> 
 </head>
 
@@ -90,20 +90,22 @@
 </ul>
 <p class="caption"><span class="caption-text">Packages</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="babilim.html">Main Package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.callbacks.html">Callbacks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.core.html">Core</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="babilim.experiment.html">Experiment</a></li>
-<li class="toctree-l1"><a class="reference internal" href="babilim.experiment.logging.html">Logging &amp; Checkpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.experiment.html">Experiment Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.layers.html">Layers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="babilim.losses.html">Losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.logger.html">Logging &amp; Checkpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.losses.html">Losses &amp; Metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.models.html">Models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="babilim.optimizers.html">Optimizers &amp; Learning Rate Schedules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.optimizers.html">Optimizers &amp; Learning Rates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.utils.html">Utils</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Examples</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="examples.mnist.html">MNIST Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.mnist.html">MNIST Example (Babilim)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.mnist.pytorch.html">MNIST Example (Pytorch Native)</a></li>
 </ul>
 
             
@@ -168,9 +170,51 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-babilim.data">
-<span id="data"></span><h1>Data<a class="headerlink" href="#module-babilim.data" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
+  <div class="section" id="data">
+<h1>Data<a class="headerlink" href="#data" title="Permalink to this headline">¶</a></h1>
+<p>The data package is all about data handling.</p>
+<p><strong>Dataset</strong> is the most important class in the data package.
+Every babilim project and even non babilim projects must/should have a Dataset-class.
+This class defines an easy interface to your dataset.
+You implement the <cite>version</cite>-property, <cite>__len__(self)</cite> and <cite>getitem(self, index)</cite> methods and the Dataset takes care of the rest.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">babilim</span>
+<span class="kn">from</span> <span class="nn">babilim.experiment</span> <span class="kn">import</span> <span class="n">Config</span>
+<span class="kn">from</span> <span class="nn">babilim.data</span> <span class="kn">import</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">image_grid_wrap</span>
+
+<span class="k">class</span> <span class="nc">MyFancyDataset</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">phase</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="c1"># TODO do some preprocessing of your dataset, e.g. figuring out what files you want to use</span>
+        <span class="c1"># and defining what file gets opened by an index.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filenames</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filenames</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">getitem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">NetworkInput</span><span class="p">,</span> <span class="n">NetworkOutput</span><span class="p">]:</span>
+        <span class="c1"># TODO load your image and class label for the training example with index idx.</span>
+        <span class="c1"># (Note this is not a batch but a single example)</span>
+        <span class="k">return</span> <span class="n">NetworkInput</span><span class="p">(</span><span class="n">features</span><span class="o">=</span><span class="n">image_grid_wrap</span><span class="p">(</span><span class="n">image</span><span class="p">)),</span> <span class="n">NetworkOutput</span><span class="p">(</span><span class="n">class_id</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;MyFancyDataset&quot;</span>
+
+<span class="c1"># Create your training dataset</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">MyFancyDataset</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">babilim</span><span class="o">.</span><span class="n">PHASE_TRAIN</span><span class="p">)</span>
+
+<span class="c1"># If you want to manually train your model, you can get a native dataset with batching in one line</span>
+<span class="n">batched_tensor_dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">to_native</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><strong>Transformer</strong> and a <strong>TransformedDataset</strong> can be used to apply minor transformations to your dataset.
+A typical use-case would be applying an encoding required for a specific neural network (e.g. one hot encoding).
+<em>It should not be used for complex transformations and any transformation that changes the length of your dataset, use a dataset wrapper for that.</em></p>
+<p><strong>image_grid_wrap</strong> and <strong>image_grid_unwrap</strong> are functions which must be applied on any image input data for your network.
+This ensures that the dimensions are correct for both pytorch and tensorflow since they both need different representations for image grid data.</p>
+<p>A lot more features can be found in this package (like binary data loading helpers, MultiZipReaders to help reading from zipped datasets and more).</p>
+<p><strong>Autogenerated Documentation</strong></p>
+<span class="target" id="module-babilim.data"></span><dl class="class">
 <dt id="babilim.data.Dataset">
 <em class="property">class </em><code class="sig-prename descclassname">babilim.data.</code><code class="sig-name descname">Dataset</code><span class="sig-paren">(</span><em class="sig-param">config: babilim.experiment.config.Config</em><span class="sig-paren">)</span><a class="headerlink" href="#babilim.data.Dataset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">typing.Sequence</span></code></p>
@@ -234,6 +278,12 @@ This enables subsequent callers to buffer this dataset and update their buffers 
 <code class="sig-name descname">to_keras</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#babilim.data.Dataset.to_keras" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts the dataset into a batched keras dataset.</p>
 <p>The type will be tf.keras.Sequence.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="babilim.data.Dataset.to_native">
+<code class="sig-name descname">to_native</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; babilim.data.data_provider.TensorDataset<a class="headerlink" href="#babilim.data.Dataset.to_native" title="Permalink to this definition">¶</a></dt>
+<dd><p>TODO</p>
 </dd></dl>
 
 <dl class="method">
@@ -307,6 +357,12 @@ This enables subsequent callers to buffer this dataset and update their buffers 
 <dt id="babilim.data.ComposeTransforms">
 <em class="property">class </em><code class="sig-prename descclassname">babilim.data.</code><code class="sig-name descname">ComposeTransforms</code><span class="sig-paren">(</span><em class="sig-param">transforms: Iterable[babilim.data.data_provider.Transformer]</em><span class="sig-paren">)</span><a class="headerlink" href="#babilim.data.ComposeTransforms" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">babilim.data.data_provider.Transformer</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="babilim.data.TensorDataset">
+<em class="property">class </em><code class="sig-prename descclassname">babilim.data.</code><code class="sig-name descname">TensorDataset</code><span class="sig-paren">(</span><em class="sig-param">native_dataset</em><span class="sig-paren">)</span><a class="headerlink" href="#babilim.data.TensorDataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">typing.Iterable</span></code></p>
 </dd></dl>
 
 <dl class="function">
@@ -446,6 +502,33 @@ Usefull for downloading small datasets.</p>
 
 </dd></dl>
 
+<dl class="function">
+<dt id="babilim.data.image_grid_wrap">
+<code class="sig-prename descclassname">babilim.data.</code><code class="sig-name descname">image_grid_wrap</code><span class="sig-paren">(</span><em class="sig-param">data: numpy.ndarray</em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="headerlink" href="#babilim.data.image_grid_wrap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepares 2D grid information to be used in your neural network.
+This is required for all data that should be usable by a 2D Convolution.</p>
+<p>If your data has shape [H, W] it gets transformed to [H, W, 1] automatically.
+For pytorch the data gets further reordered in a channel first order [C, H, W].</p>
+<dl class="simple">
+<dt>Arguments:</dt><dd><p>data {np.ndarray} – The data that should be prepared.</p>
+</dd>
+<dt>Returns:</dt><dd><p>np.ndarray – A numpy ndarray with the prepared image/grid data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="babilim.data.image_grid_unwrap">
+<code class="sig-prename descclassname">babilim.data.</code><code class="sig-name descname">image_grid_unwrap</code><span class="sig-paren">(</span><em class="sig-param">data: numpy.ndarray</em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="headerlink" href="#babilim.data.image_grid_unwrap" title="Permalink to this definition">¶</a></dt>
+<dd><p>For pytorch the data gets reordered in a channel last order [H, W, C].</p>
+<dl class="simple">
+<dt>Arguments:</dt><dd><p>data {np.ndarray} – The data that should be unwrapped.</p>
+</dd>
+<dt>Returns:</dt><dd><p>np.ndarray – A numpy ndarray with the unwrapped image/grid data.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 
 
@@ -456,7 +539,7 @@ Usefull for downloading small datasets.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="babilim.experiment.html" class="btn btn-neutral float-right" title="Experiment" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="babilim.experiment.html" class="btn btn-neutral float-right" title="Experiment Configuration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="babilim.core.html" class="btn btn-neutral float-left" title="Core" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

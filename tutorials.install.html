@@ -35,8 +35,8 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Callbacks" href="babilim.callbacks.html" />
-    <link rel="prev" title="Babilim - Develop for tf2 or pytorch" href="index.html" /> 
+    <link rel="next" title="Main Package" href="babilim.html" />
+    <link rel="prev" title="Babilim - Deep Learning across Pytorch and TF2" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -90,20 +90,22 @@
 </ul>
 <p class="caption"><span class="caption-text">Packages</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="babilim.html">Main Package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.callbacks.html">Callbacks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.core.html">Core</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.data.html">Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="babilim.experiment.html">Experiment</a></li>
-<li class="toctree-l1"><a class="reference internal" href="babilim.experiment.logging.html">Logging &amp; Checkpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.experiment.html">Experiment Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.layers.html">Layers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="babilim.losses.html">Losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.logger.html">Logging &amp; Checkpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.losses.html">Losses &amp; Metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.models.html">Models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="babilim.optimizers.html">Optimizers &amp; Learning Rate Schedules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.optimizers.html">Optimizers &amp; Learning Rates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.utils.html">Utils</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Examples</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="examples.mnist.html">MNIST Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.mnist.html">MNIST Example (Babilim)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.mnist.pytorch.html">MNIST Example (Pytorch Native)</a></li>
 </ul>
 
             
@@ -170,7 +172,21 @@
             
   <div class="section" id="install-babilim">
 <h1>Install Babilim<a class="headerlink" href="#install-babilim" title="Permalink to this headline">¶</a></h1>
-<p>TODO</p>
+<p>Using <em>conda or virtualenv is highly recommended</em> if you do not already use them.</p>
+<p><strong>1. Install your backend</strong></p>
+<p>Follow the official instructions <a class="reference external" href="https://pytorch.org/get-started/locally/">here (pytorch)</a> or <a class="reference external" href="https://www.tensorflow.org/install">here (tf2)</a>.
+If you don’t know which one to choose, roll a dice, it does not matter for this framework.</p>
+<p><strong>2. Install babilim</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Stable Version</span>
+pip install babilim
+
+<span class="c1"># Bleeding Edge</span>
+pip install git+https://github.com/penguinmenac3/babilim.git
+</pre></div>
+</div>
+<p>Done it is as easy as that.
+Maybe try out one of our examples next?
+See the list of examples on the left.</p>
 </div>
 
 
@@ -181,10 +197,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="babilim.callbacks.html" class="btn btn-neutral float-right" title="Callbacks" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="babilim.html" class="btn btn-neutral float-right" title="Main Package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral float-left" title="Babilim - Develop for tf2 or pytorch" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Babilim - Deep Learning across Pytorch and TF2" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

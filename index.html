@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Babilim - Develop for tf2 or pytorch &mdash; babilim 0.0.1 documentation</title>
+  <title>Babilim - Deep Learning across Pytorch and TF2 &mdash; babilim 0.0.1 documentation</title>
   
 
   
@@ -89,20 +89,22 @@
 </ul>
 <p class="caption"><span class="caption-text">Packages</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="babilim.html">Main Package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.callbacks.html">Callbacks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.core.html">Core</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.data.html">Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="babilim.experiment.html">Experiment</a></li>
-<li class="toctree-l1"><a class="reference internal" href="babilim.experiment.logging.html">Logging &amp; Checkpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.experiment.html">Experiment Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.layers.html">Layers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="babilim.losses.html">Losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.logger.html">Logging &amp; Checkpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.losses.html">Losses &amp; Metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.models.html">Models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="babilim.optimizers.html">Optimizers &amp; Learning Rate Schedules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.optimizers.html">Optimizers &amp; Learning Rates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.utils.html">Utils</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Examples</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="examples.mnist.html">MNIST Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.mnist.html">MNIST Example (Babilim)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.mnist.pytorch.html">MNIST Example (Pytorch Native)</a></li>
 </ul>
 
             
@@ -148,7 +150,7 @@
     
       <li><a href="#">Docs</a> &raquo;</li>
         
-      <li>Babilim - Develop for tf2 or pytorch</li>
+      <li>Babilim - Deep Learning across Pytorch and TF2</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -167,9 +169,47 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="babilim-develop-for-tf2-or-pytorch">
-<h1>Babilim - Develop for tf2 or pytorch<a class="headerlink" href="#babilim-develop-for-tf2-or-pytorch" title="Permalink to this headline">¶</a></h1>
-<p>TODO general hello there.</p>
+  <div class="section" id="babilim-deep-learning-across-pytorch-and-tf2">
+<h1>Babilim - Deep Learning across Pytorch and TF2<a class="headerlink" href="#babilim-deep-learning-across-pytorch-and-tf2" title="Permalink to this headline">¶</a></h1>
+<p>TODO Teaser Image with Logo of babilim.</p>
+<div class="section" id="what-is-babilim">
+<h2>What is Babilim?<a class="headerlink" href="#what-is-babilim" title="Permalink to this headline">¶</a></h2>
+<p>Babilim is a Deep Learning Framework designed for ease of use like Keras.
+The API is designed to be intuitive and easy while allowing for complex production or research models.
+On top of that babilim runs on top of Tensorflow 2 or Pytorch, whichever you prefer.</p>
+<p>Babilim was designed for:</p>
+<ul class="simple">
+<li><p>Intuitive ease of use,</p></li>
+<li><p>a unified development experience across pytorch and tf2,</p></li>
+<li><p>flexibility for research and robustness for production</p></li>
+</ul>
+</div>
+<div class="section" id="selecting-your-backend">
+<h2>Selecting your backend<a class="headerlink" href="#selecting-your-backend" title="Permalink to this headline">¶</a></h2>
+<p>Since babilim is designed for multiple backends (tensorflow 2 and pytorch), it gives you the choice which should be used.
+When your company/university uses one of the two frameworks you are fine to use or you can follow your personal preference for private projects.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">babilim</span>
+<span class="n">babilim</span><span class="o">.</span><span class="n">set_backend</span><span class="p">(</span><span class="n">babilim</span><span class="o">.</span><span class="n">PYTORCH_BACKEND</span><span class="p">)</span>
+<span class="c1"># or</span>
+<span class="n">babilim</span><span class="o">.</span><span class="n">set_backend</span><span class="p">(</span><span class="n">babilim</span><span class="o">.</span><span class="n">TF_BACKEND</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="design-principles">
+<h2>Design Principles<a class="headerlink" href="#design-principles" title="Permalink to this headline">¶</a></h2>
+<p>TODO</p>
+</div>
+<div class="section" id="tutorials-examples">
+<h2>Tutorials &amp; Examples<a class="headerlink" href="#tutorials-examples" title="Permalink to this headline">¶</a></h2>
+<p>TODO</p>
+</div>
+<div class="section" id="why-called-babilim">
+<h2>Why called babilim?<a class="headerlink" href="#why-called-babilim" title="Permalink to this headline">¶</a></h2>
+<p><strong>TL;DR</strong> Referencing to Tower of Babel.</p>
+<p>The Tower of Babel narrative in Genesis 11:1-9 is a myth about mankind building a tower that could reach into the heavens.
+However, the attempt gets set back and fails because they started speaking different languages and were no longer able to understand each other.</p>
+<p>Luckily for AI development there is only two major frameworks which share nearly all market share.
+Babilim is an attempt to unite the two to talk in a language compatible with both.</p>
 <div class="toctree-wrapper compound">
 <p class="caption"><span class="caption-text">Getting Started</span></p>
 <ul>
@@ -177,25 +217,9 @@
 </ul>
 </div>
 <div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Packages</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="babilim.callbacks.html">Callbacks</a></li>
-<li class="toctree-l1"><a class="reference internal" href="babilim.core.html">Core</a></li>
-<li class="toctree-l1"><a class="reference internal" href="babilim.data.html">Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="babilim.experiment.html">Experiment</a></li>
-<li class="toctree-l1"><a class="reference internal" href="babilim.experiment.logging.html">Logging &amp; Checkpoints</a></li>
-<li class="toctree-l1"><a class="reference internal" href="babilim.layers.html">Layers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="babilim.losses.html">Losses</a></li>
-<li class="toctree-l1"><a class="reference internal" href="babilim.models.html">Models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="babilim.optimizers.html">Optimizers &amp; Learning Rate Schedules</a></li>
-<li class="toctree-l1"><a class="reference internal" href="babilim.utils.html">Utils</a></li>
-</ul>
 </div>
 <div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Examples</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="examples.mnist.html">MNIST Example</a></li>
-</ul>
+</div>
 </div>
 </div>
 <div class="section" id="indices-and-tables">

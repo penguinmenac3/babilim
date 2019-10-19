@@ -90,20 +90,22 @@
 </ul>
 <p class="caption"><span class="caption-text">Packages</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="babilim.html">Main Package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.callbacks.html">Callbacks</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Core</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.data.html">Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="babilim.experiment.html">Experiment</a></li>
-<li class="toctree-l1"><a class="reference internal" href="babilim.experiment.logging.html">Logging &amp; Checkpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.experiment.html">Experiment Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.layers.html">Layers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="babilim.losses.html">Losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.logger.html">Logging &amp; Checkpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.losses.html">Losses &amp; Metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.models.html">Models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="babilim.optimizers.html">Optimizers &amp; Learning Rate Schedules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.optimizers.html">Optimizers &amp; Learning Rates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.utils.html">Utils</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Examples</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="examples.mnist.html">MNIST Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.mnist.html">MNIST Example (Babilim)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.mnist.pytorch.html">MNIST Example (Pytorch Native)</a></li>
 </ul>
 
             
@@ -168,113 +170,45 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-babilim">
-<span id="core"></span><h1>Core<a class="headerlink" href="#module-babilim" title="Permalink to this headline">¶</a></h1>
-<dl class="function">
-<dt id="babilim.set_backend">
-<code class="sig-prename descclassname">babilim.</code><code class="sig-name descname">set_backend</code><span class="sig-paren">(</span><em class="sig-param">backend: str</em><span class="sig-paren">)</span><a class="headerlink" href="#babilim.set_backend" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set the backend which babilim uses.</p>
-<p>Should be either babilim.PYTORCH_BACKEND or babilim.TF_BACKEND.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>backend</strong> (<em>str</em>) – The backend which should be used.</p>
-</dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><strong>RuntimeError</strong> – When the backend is invalid or unknown.</p>
-</dd>
-</dl>
-</dd></dl>
+  <div class="section" id="core">
+<h1>Core<a class="headerlink" href="#core" title="Permalink to this headline">¶</a></h1>
+<p>The core module contains all core features of babilim.
+This include Tensor, GradientTape, RunOnlyOnce-Annotation and StatefullObject.</p>
+<p>A <strong>Tensor</strong> is the basic building block of every deep learning framework.
+Babilim tensor works very similar to pytorch and tf2 tensors and you will need almost no adaption.</p>
+<p><strong>StatefullObjects</strong> are objects which contain weight tensors and computations.
+The Model, Optimizer, Losses and even Metrics are StatefullObjects.
+StatefullObjects allow saving their state and reloading it from a checkpoint.</p>
+<p>The <strong>GradientTape</strong> is records gradients in a block it surrounds.
+It is typically used in a training loop as in this example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Extract from IModel::train_epoch</span>
+<span class="k">with</span> <span class="n">GradientTape</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span> <span class="k">as</span> <span class="n">tape</span><span class="p">:</span>
+    <span class="n">prediction</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="o">**</span><span class="n">x</span><span class="o">.</span><span class="n">_asdict</span><span class="p">())</span>
+    <span class="n">loss_results</span> <span class="o">=</span> <span class="n">loss</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">prediction</span><span class="p">)</span>
+    <span class="n">loss</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;total&quot;</span><span class="p">,</span> <span class="n">loss_results</span><span class="p">)</span>
+    <span class="n">metrics</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">prediction</span><span class="p">)</span>
+<span class="c1"># Translate those to something usefull...</span>
+<span class="n">gradients</span> <span class="o">=</span> <span class="n">tape</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">loss_results</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <strong>RunOnlyOnce</strong> annotation is a powerfull annotation to write build methods or any function that you want to call multiple times but only execute once.
+A typical example is in a model, where the build function creates the variables and the call is the forward pass.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@RunOnlyOnce</span>
+<span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">:</span> <span class="n">ITensor</span><span class="p">):</span>
+    <span class="c1"># TODO create your variables in here.</span>
+    <span class="c1"># This method is only executed once thanks to @RunOnlyOnce</span>
+    <span class="k">pass</span>
 
-<dl class="function">
-<dt id="babilim.get_backend">
-<code class="sig-prename descclassname">babilim.</code><code class="sig-name descname">get_backend</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#babilim.get_backend" title="Permalink to this definition">¶</a></dt>
-<dd><p>foobar</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>[description]</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
-<dt id="babilim.is_backend">
-<code class="sig-prename descclassname">babilim.</code><code class="sig-name descname">is_backend</code><span class="sig-paren">(</span><em class="sig-param">backend: str</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#babilim.is_backend" title="Permalink to this definition">¶</a></dt>
-<dd><p>Foo</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>backend</strong> (<em>str</em>) – [description]</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>[description]</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>bool</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="class">
-<dt id="babilim.ITensor">
-<em class="property">class </em><code class="sig-prename descclassname">babilim.</code><code class="sig-name descname">ITensor</code><span class="sig-paren">(</span><em class="sig-param">native</em>, <em class="sig-param">name: str = 'unnamed'</em><span class="sig-paren">)</span><a class="headerlink" href="#babilim.ITensor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="method">
-<dt id="babilim.ITensor.argmax">
-<code class="sig-name descname">argmax</code><span class="sig-paren">(</span><em class="sig-param">axis: Optional[int] = None</em><span class="sig-paren">)</span> &#x2192; babilim.core.itensor.ITensor<a class="headerlink" href="#babilim.ITensor.argmax" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="babilim.ITensor.assign">
-<code class="sig-name descname">assign</code><span class="sig-paren">(</span><em class="sig-param">other: Union[ITensor, numpy.ndarray]</em><span class="sig-paren">)</span> &#x2192; babilim.core.itensor.ITensor<a class="headerlink" href="#babilim.ITensor.assign" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="babilim.ITensor.cast">
-<code class="sig-name descname">cast</code><span class="sig-paren">(</span><em class="sig-param">dtype</em><span class="sig-paren">)</span> &#x2192; babilim.core.itensor.ITensor<a class="headerlink" href="#babilim.ITensor.cast" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="babilim.ITensor.copy">
-<code class="sig-name descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; babilim.core.itensor.ITensor<a class="headerlink" href="#babilim.ITensor.copy" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="babilim.ITensor.mean">
-<code class="sig-name descname">mean</code><span class="sig-paren">(</span><em class="sig-param">axis: Optional[int] = None</em><span class="sig-paren">)</span> &#x2192; babilim.core.itensor.ITensor<a class="headerlink" href="#babilim.ITensor.mean" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="babilim.ITensor.name">
-<em class="property">property </em><code class="sig-name descname">name</code><a class="headerlink" href="#babilim.ITensor.name" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="babilim.ITensor.numpy">
-<code class="sig-name descname">numpy</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="headerlink" href="#babilim.ITensor.numpy" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="babilim.ITensor.shape">
-<em class="property">property </em><code class="sig-name descname">shape</code><a class="headerlink" href="#babilim.ITensor.shape" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="babilim.ITensor.stop_gradients">
-<code class="sig-name descname">stop_gradients</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; babilim.core.itensor.ITensor<a class="headerlink" href="#babilim.ITensor.stop_gradients" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="babilim.ITensor.trainable">
-<em class="property">property </em><code class="sig-name descname">trainable</code><a class="headerlink" href="#babilim.ITensor.trainable" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="function">
-<dt id="babilim.Tensor">
-<code class="sig-prename descclassname">babilim.</code><code class="sig-name descname">Tensor</code><span class="sig-paren">(</span><em class="sig-param">*, data: Union[numpy.ndarray, Any], trainable: bool, name: str = 'unnamed'</em><span class="sig-paren">)</span> &#x2192; babilim.core.itensor.ITensor<a class="headerlink" href="#babilim.Tensor" title="Permalink to this definition">¶</a></dt>
+<span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">:</span> <span class="n">ITensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NetworkOutput</span><span class="p">:</span>
+    <span class="n">net</span> <span class="o">=</span> <span class="n">features</span>
+    <span class="c1"># TODO put your network forward pass here</span>
+    <span class="k">return</span> <span class="n">NetworkOutput</span><span class="p">(</span><span class="n">class_id</span><span class="o">=</span><span class="n">net</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Autogenerated Documentation</strong></p>
+<span class="target" id="module-babilim.core"></span><dl class="function">
+<dt id="babilim.core.Tensor">
+<code class="sig-prename descclassname">babilim.core.</code><code class="sig-name descname">Tensor</code><span class="sig-paren">(</span><em class="sig-param">*, data: Union[numpy.ndarray, Any], trainable: bool, name: str = 'unnamed'</em><span class="sig-paren">)</span> &#x2192; babilim.core.itensor.ITensor<a class="headerlink" href="#babilim.core.Tensor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a babilim tensor from a native tensor or numpy array.</p>
 <dl class="simple">
 <dt>Arguments:</dt><dd><p>data {Union[np.ndarray, Any]} – [description]
@@ -290,41 +224,106 @@ trainable {bool} – [description]</p>
 </dd></dl>
 
 <dl class="class">
-<dt id="babilim.RunOnlyOnce">
-<em class="property">class </em><code class="sig-prename descclassname">babilim.</code><code class="sig-name descname">RunOnlyOnce</code><span class="sig-paren">(</span><em class="sig-param">f</em><span class="sig-paren">)</span><a class="headerlink" href="#babilim.RunOnlyOnce" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">babilim.annotations.ClassDecorator</span></code></p>
-</dd></dl>
-
-<dl class="function">
-<dt id="babilim.tprint">
-<code class="sig-prename descclassname">babilim.</code><code class="sig-name descname">tprint</code><span class="sig-paren">(</span><em class="sig-param">msg: str</em>, <em class="sig-param">end: str = '\n'</em><span class="sig-paren">)</span><a class="headerlink" href="#babilim.tprint" title="Permalink to this definition">¶</a></dt>
+<dt id="babilim.core.ITensor">
+<em class="property">class </em><code class="sig-prename descclassname">babilim.core.</code><code class="sig-name descname">ITensor</code><span class="sig-paren">(</span><em class="sig-param">native</em>, <em class="sig-param">name: str = 'unnamed'</em><span class="sig-paren">)</span><a class="headerlink" href="#babilim.core.ITensor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="babilim.core.ITensor.argmax">
+<code class="sig-name descname">argmax</code><span class="sig-paren">(</span><em class="sig-param">axis: Optional[int] = None</em><span class="sig-paren">)</span> &#x2192; babilim.core.itensor.ITensor<a class="headerlink" href="#babilim.core.ITensor.argmax" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<span class="target" id="module-babilim.core.image_grid"></span><dl class="function">
-<dt id="babilim.core.image_grid.image_grid_unwrap">
-<code class="sig-prename descclassname">babilim.core.image_grid.</code><code class="sig-name descname">image_grid_unwrap</code><span class="sig-paren">(</span><em class="sig-param">data: numpy.ndarray</em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="headerlink" href="#babilim.core.image_grid.image_grid_unwrap" title="Permalink to this definition">¶</a></dt>
-<dd><p>For pytorch the data gets reordered in a channel last order [H, W, C].</p>
-<dl class="simple">
-<dt>Arguments:</dt><dd><p>data {np.ndarray} – The data that should be unwrapped.</p>
-</dd>
-<dt>Returns:</dt><dd><p>np.ndarray – A numpy ndarray with the unwrapped image/grid data.</p>
-</dd>
-</dl>
+<dl class="method">
+<dt id="babilim.core.ITensor.assign">
+<code class="sig-name descname">assign</code><span class="sig-paren">(</span><em class="sig-param">other: Union[ITensor, numpy.ndarray]</em><span class="sig-paren">)</span> &#x2192; babilim.core.itensor.ITensor<a class="headerlink" href="#babilim.core.ITensor.assign" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="babilim.core.ITensor.cast">
+<code class="sig-name descname">cast</code><span class="sig-paren">(</span><em class="sig-param">dtype</em><span class="sig-paren">)</span> &#x2192; babilim.core.itensor.ITensor<a class="headerlink" href="#babilim.core.ITensor.cast" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="babilim.core.ITensor.copy">
+<code class="sig-name descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; babilim.core.itensor.ITensor<a class="headerlink" href="#babilim.core.ITensor.copy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="babilim.core.ITensor.mean">
+<code class="sig-name descname">mean</code><span class="sig-paren">(</span><em class="sig-param">axis: Optional[int] = None</em><span class="sig-paren">)</span> &#x2192; babilim.core.itensor.ITensor<a class="headerlink" href="#babilim.core.ITensor.mean" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="babilim.core.ITensor.name">
+<em class="property">property </em><code class="sig-name descname">name</code><a class="headerlink" href="#babilim.core.ITensor.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="babilim.core.ITensor.numpy">
+<code class="sig-name descname">numpy</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="headerlink" href="#babilim.core.ITensor.numpy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="babilim.core.ITensor.shape">
+<em class="property">property </em><code class="sig-name descname">shape</code><a class="headerlink" href="#babilim.core.ITensor.shape" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="babilim.core.ITensor.stop_gradients">
+<code class="sig-name descname">stop_gradients</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; babilim.core.itensor.ITensor<a class="headerlink" href="#babilim.core.ITensor.stop_gradients" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="babilim.core.ITensor.trainable">
+<em class="property">property </em><code class="sig-name descname">trainable</code><a class="headerlink" href="#babilim.core.ITensor.trainable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="babilim.core.RunOnlyOnce">
+<em class="property">class </em><code class="sig-prename descclassname">babilim.core.</code><code class="sig-name descname">RunOnlyOnce</code><span class="sig-paren">(</span><em class="sig-param">f</em><span class="sig-paren">)</span><a class="headerlink" href="#babilim.core.RunOnlyOnce" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">babilim.core.annotations.ClassDecorator</span></code></p>
 </dd></dl>
 
 <dl class="function">
-<dt id="babilim.core.image_grid.image_grid_wrap">
-<code class="sig-prename descclassname">babilim.core.image_grid.</code><code class="sig-name descname">image_grid_wrap</code><span class="sig-paren">(</span><em class="sig-param">data: numpy.ndarray</em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="headerlink" href="#babilim.core.image_grid.image_grid_wrap" title="Permalink to this definition">¶</a></dt>
-<dd><p>Prepares 2D grid information to be used in your neural network.
-This is required for all data that should be usable by a 2D Convolution.</p>
-<p>If your data has shape [H, W] it gets transformed to [H, W, 1] automatically.
-For pytorch the data gets further reordered in a channel first order [C, H, W].</p>
-<dl class="simple">
-<dt>Arguments:</dt><dd><p>data {np.ndarray} – The data that should be prepared.</p>
-</dd>
-<dt>Returns:</dt><dd><p>np.ndarray – A numpy ndarray with the prepared image/grid data.</p>
-</dd>
-</dl>
+<dt id="babilim.core.GradientTape">
+<code class="sig-prename descclassname">babilim.core.</code><code class="sig-name descname">GradientTape</code><span class="sig-paren">(</span><em class="sig-param">variables</em><span class="sig-paren">)</span><a class="headerlink" href="#babilim.core.GradientTape" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="babilim.core.StatefullObject">
+<em class="property">class </em><code class="sig-prename descclassname">babilim.core.</code><code class="sig-name descname">StatefullObject</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="headerlink" href="#babilim.core.StatefullObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="babilim.core.StatefullObject.load_state_dict">
+<code class="sig-name descname">load_state_dict</code><span class="sig-paren">(</span><em class="sig-param">state_dict</em><span class="sig-paren">)</span><a class="headerlink" href="#babilim.core.StatefullObject.load_state_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="babilim.core.StatefullObject.name">
+<em class="property">property </em><code class="sig-name descname">name</code><a class="headerlink" href="#babilim.core.StatefullObject.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="babilim.core.StatefullObject.state_dict">
+<code class="sig-name descname">state_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#babilim.core.StatefullObject.state_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="babilim.core.StatefullObject.trainable_variables">
+<em class="property">property </em><code class="sig-name descname">trainable_variables</code><a class="headerlink" href="#babilim.core.StatefullObject.trainable_variables" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="babilim.core.StatefullObject.trainable_variables_native">
+<em class="property">property </em><code class="sig-name descname">trainable_variables_native</code><a class="headerlink" href="#babilim.core.StatefullObject.trainable_variables_native" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="babilim.core.StatefullObject.variables">
+<em class="property">property </em><code class="sig-name descname">variables</code><a class="headerlink" href="#babilim.core.StatefullObject.variables" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 </div>

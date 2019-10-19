@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Experiment &mdash; babilim 0.0.1 documentation</title>
+  <title>Experiment Configuration &mdash; babilim 0.0.1 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Logging &amp; Checkpoints" href="babilim.experiment.logging.html" />
+    <link rel="next" title="Layers" href="babilim.layers.html" />
     <link rel="prev" title="Data" href="babilim.data.html" /> 
 </head>
 
@@ -90,20 +90,22 @@
 </ul>
 <p class="caption"><span class="caption-text">Packages</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="babilim.html">Main Package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.callbacks.html">Callbacks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.core.html">Core</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.data.html">Data</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Experiment</a></li>
-<li class="toctree-l1"><a class="reference internal" href="babilim.experiment.logging.html">Logging &amp; Checkpoints</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Experiment Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.layers.html">Layers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="babilim.losses.html">Losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.logger.html">Logging &amp; Checkpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.losses.html">Losses &amp; Metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.models.html">Models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="babilim.optimizers.html">Optimizers &amp; Learning Rate Schedules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.optimizers.html">Optimizers &amp; Learning Rates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.utils.html">Utils</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Examples</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="examples.mnist.html">MNIST Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.mnist.html">MNIST Example (Babilim)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.mnist.pytorch.html">MNIST Example (Pytorch Native)</a></li>
 </ul>
 
             
@@ -149,7 +151,7 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Experiment</li>
+      <li>Experiment Configuration</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -168,9 +170,39 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-babilim.experiment">
-<span id="experiment"></span><h1>Experiment<a class="headerlink" href="#module-babilim.experiment" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
+  <div class="section" id="experiment-configuration">
+<h1>Experiment Configuration<a class="headerlink" href="#experiment-configuration" title="Permalink to this headline">¶</a></h1>
+<p>This package is about your experiment and data configuration.
+DeepLearning has a lot of hyperparameters, your experiment configuration is one central place where all of them should live.
+This will ensure that you do not miss out on any of them.</p>
+<p>Every configuration must define the following, to allow for <cite>IModel::fit</cite> to work:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">babilim.optimizers.learning_rates</span> <span class="kn">as</span> <span class="nn">lr</span>
+<span class="kn">from</span> <span class="nn">babilim.experiment</span> <span class="kn">import</span> <span class="n">Config</span>
+
+<span class="k">class</span> <span class="nc">MyConfig</span><span class="p">(</span><span class="n">Config</span><span class="p">):</span>
+<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+    <span class="c1"># Define your problem</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">problem_base_dir</span> <span class="o">=</span> <span class="s2">&quot;$HOME/datasets&quot;</span>  <span class="c1"># use env variables</span>
+
+    <span class="c1"># Define how to train your model</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">train_epochs</span> <span class="o">=</span> <span class="mi">20</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">train_l2_weight</span> <span class="o">=</span> <span class="mf">0.01</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">train_batch_size</span> <span class="o">=</span> <span class="mi">32</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">train_log_steps</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">train_experiment_name</span> <span class="o">=</span> <span class="s2">&quot;Next_NeurIPS_Paper&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">train_checkpoint_path</span> <span class="o">=</span> <span class="s2">&quot;/trash/checkpoints&quot;</span>  <span class="c1"># absolute or relative paths</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">train_learning_rate_shedule</span> <span class="o">=</span> <span class="n">lr</span><span class="o">.</span><span class="n">Exponential</span><span class="p">(</span><span class="n">initial_lr</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mf">5e-5</span><span class="p">)</span>
+
+    <span class="c1"># Define your architecture parameters</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">arch_use_fancy_stuff</span> <span class="o">=</span> <span class="bp">True</span>  <span class="c1"># Not actually required...</span>
+</pre></div>
+</div>
+<p>As demonstrated with <cite>arch_use_fancy_stuff</cite> you can add any parameters you want to your config.
+Also keep in mind, that your config is python code, so you can use inheritance (make use of it intelligently).</p>
+<p>Even though dynamic importing of configs is supported with <strong>import_config</strong>, you should NOT use it due to missing type safety on dynamic import.</p>
+<p><strong>Autogenerated Documentation</strong></p>
+<span class="target" id="module-babilim.experiment"></span><dl class="class">
 <dt id="babilim.experiment.Config">
 <em class="property">class </em><code class="sig-prename descclassname">babilim.experiment.</code><code class="sig-name descname">Config</code><a class="headerlink" href="#babilim.experiment.Config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">babilim.experiment.config.ConfigPart</span></code></p>
@@ -231,7 +263,7 @@ Automatically imports the most specific config from a given file.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="babilim.experiment.logging.html" class="btn btn-neutral float-right" title="Logging &amp; Checkpoints" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="babilim.layers.html" class="btn btn-neutral float-right" title="Layers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="babilim.data.html" class="btn btn-neutral float-left" title="Data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

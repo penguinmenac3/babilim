@@ -1,0 +1,407 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>MNIST Example (Pytorch Native) &mdash; babilim 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="MNIST Example (Babilim)" href="examples.mnist.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> babilim
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.install.html">Install Babilim</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="babilim.html">Main Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.callbacks.html">Callbacks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.core.html">Core</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.experiment.html">Experiment Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.layers.html">Layers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.logger.html">Logging &amp; Checkpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.losses.html">Losses &amp; Metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.optimizers.html">Optimizers &amp; Learning Rates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.utils.html">Utils</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Examples</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="examples.mnist.html">MNIST Example (Babilim)</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">MNIST Example (Pytorch Native)</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">babilim</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>MNIST Example (Pytorch Native)</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/examples.mnist.pytorch.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="mnist-example-pytorch-native">
+<h1>MNIST Example (Pytorch Native)<a class="headerlink" href="#mnist-example-pytorch-native" title="Permalink to this headline">¶</a></h1>
+<p>This example shows how to implement a simple network solving MNIST with babilim but with the network, loss, metrics  and optimizer written in pytorch.
+The focus is not to create the shortest possible solution, but rather to show how babilim works.
+The example is build in a way it can be applied to other problems as well.</p>
+<p>The full code can be found <a class="reference external" href="https://github.com/penguinmenac3/babilim/blob/master/examples/fashion_mnist_pytorch_native.py">here on github</a>.</p>
+<p><strong>1.-4. Follow instructions in MNIST Example (Babilim)</strong></p>
+<p>These steps are the same as in the MNIST Example (Babilim).
+Follow them and come back to this tutorial afterwards.</p>
+<p><strong>5. Implementing the model</strong></p>
+<p>Implementing a pytorch native model is a bit more involved.
+First we want all variables to be automatically and immediately pushed to the gpu, so we can use the build forward pass to compute layer input shapes.
+For that we create a register(layer) function which pushes the layer to the gpu if a gpu is available and adds it to the object as a variable so it is tracked.</p>
+<p>After that we define a couple of helper functions for creating layers, so it is easier to create them in the build function.
+All layers that have state are registered with our model class.</p>
+<p>Using those helper functions in the build function finally the architecture is created.
+Note how we do not need to specify input dimensions by using the forward pass to build our model.</p>
+<p>Since all layers have been added to self.layers we only need to loop over the array and call every layer in the forward function.
+The forward as well as the build function expect as input all fields of the NetworkInput namedtuple.
+However, only the forward method has a return type which must be of type NetworkOutput (the namedtuple defined in step 2).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torch.nn</span> <span class="kn">import</span> <span class="n">Linear</span><span class="p">,</span> <span class="n">Module</span><span class="p">,</span> <span class="n">BatchNorm2d</span><span class="p">,</span> <span class="n">Conv2d</span>
+<span class="kn">from</span> <span class="nn">torch.nn.functional</span> <span class="kn">import</span> <span class="n">relu</span><span class="p">,</span> <span class="n">max_pool2d</span><span class="p">,</span> <span class="n">avg_pool2d</span>
+
+<span class="k">class</span> <span class="nc">FashionMnistModel</span><span class="p">(</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">FashionMnistConfig</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layer</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
+            <span class="n">layer</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="s2">&quot;layer_{}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">)),</span> <span class="n">layer</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">layer</span>
+
+    <span class="k">def</span> <span class="nf">make_bn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="n">features</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">](</span><span class="n">features</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">make_conv2d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">kernel_size</span><span class="p">):</span>
+        <span class="n">px</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">kernel_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">py</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">kernel_size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">padding</span> <span class="o">=</span> <span class="p">(</span><span class="n">px</span><span class="p">,</span> <span class="n">py</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">features</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">filters</span><span class="p">,</span> <span class="n">kernel_size</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">padding</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">](</span><span class="n">features</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">make_relu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">relu</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">](</span><span class="n">features</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">make_max_pool_2d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">max_pool2d</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">](</span><span class="n">features</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">make_global_avg_pool_2d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">avg_pool2d</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">features</span><span class="o">.</span><span class="n">size</span><span class="p">()[</span><span class="mi">2</span><span class="p">:]))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">](</span><span class="n">features</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">make_flatten</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">](</span><span class="n">features</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">make_linear</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">net</span><span class="p">,</span> <span class="n">out_features</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">Linear</span><span class="p">(</span><span class="n">in_features</span><span class="o">=</span><span class="n">net</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">out_features</span><span class="o">=</span><span class="n">out_features</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">](</span><span class="n">net</span><span class="p">)</span>
+
+    <span class="nd">@RunOnlyOnce</span>
+    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">):</span>
+        <span class="n">net</span> <span class="o">=</span> <span class="n">features</span>
+        <span class="n">net</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_bn</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
+        <span class="n">net</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_conv2d</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="n">net</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_relu</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
+        <span class="n">net</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_max_pool_2d</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
+        <span class="n">net</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_bn</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
+        <span class="n">net</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_conv2d</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="n">net</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_relu</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
+        <span class="n">net</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_max_pool_2d</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
+        <span class="n">net</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_bn</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
+        <span class="n">net</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_conv2d</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="n">net</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_relu</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
+        <span class="n">net</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_max_pool_2d</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
+        <span class="n">net</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_bn</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
+        <span class="n">net</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_conv2d</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="n">net</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_relu</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
+        <span class="n">net</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_global_avg_pool_2d</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
+        <span class="n">net</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_bn</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
+        <span class="n">net</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_flatten</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
+        <span class="n">net</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_linear</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="mi">18</span><span class="p">)</span>
+        <span class="n">net</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_relu</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
+        <span class="n">net</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_linear</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">problem_number_of_categories</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NetworkOutput</span><span class="p">:</span>
+        <span class="n">tensor</span> <span class="o">=</span> <span class="n">features</span>
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">:</span>
+            <span class="n">tensor</span> <span class="o">=</span> <span class="n">l</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">NetworkOutput</span><span class="p">(</span><span class="n">class_id</span><span class="o">=</span><span class="n">tensor</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>6. Defining the Loss and Metrics</strong></p>
+<p>With a model, the last step before training is to setup some losses and metrics.</p>
+<p>The loss is pretty simple. It is a class implementing a call function which has three parameters.
+The first parameter is y_pred representing the actual network output, and y_true is the intended network output as returned by the dataset.
+The last parameter log_val(name, tensor) is a function that can be used to log intermediate computations such as partial losses.
+The return type of the loss is a single Tensor, the loss that should be optimized.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torch.nn</span> <span class="kn">import</span> <span class="n">Module</span>
+<span class="kn">from</span> <span class="nn">torch.nn</span> <span class="kn">import</span> <span class="n">CrossEntropyLoss</span>
+
+<span class="k">class</span> <span class="nc">FashionMnistLoss</span><span class="p">(</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ce</span> <span class="o">=</span> <span class="n">CrossEntropyLoss</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">:</span> <span class="n">NetworkOutput</span><span class="p">,</span> <span class="n">y_true</span><span class="p">:</span> <span class="n">NetworkOutput</span><span class="p">,</span> <span class="n">log_val</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ce</span><span class="p">(</span><span class="n">y_pred</span><span class="o">.</span><span class="n">class_id</span><span class="p">,</span> <span class="n">y_true</span><span class="o">.</span><span class="n">class_id</span><span class="o">.</span><span class="n">long</span><span class="p">())</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The metric is very similar to the loss. It is a class implementing a call function which has three parameters.
+The first parameter is y_pred representing the actual network output, and y_true is the intended network output as returned by the dataset.
+The last parameter log_val(name, tensor) is a function that can be used to log the computed metrics.
+However, it does not have a return type and no effect on the optimization.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">Tensor</span>
+<span class="kn">from</span> <span class="nn">torch.nn</span> <span class="kn">import</span> <span class="n">Module</span>
+<span class="kn">from</span> <span class="nn">torch.nn</span> <span class="kn">import</span> <span class="n">CrossEntropyLoss</span>
+
+<span class="k">class</span> <span class="nc">FashionMnistMetrics</span><span class="p">(</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ce</span> <span class="o">=</span> <span class="n">CrossEntropyLoss</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">ca</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">y_true</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">):</span>
+        <span class="n">pred_class</span> <span class="o">=</span> <span class="n">y_pred</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">true_class</span> <span class="o">=</span> <span class="n">y_true</span><span class="o">.</span><span class="n">long</span><span class="p">()</span>
+        <span class="n">correct_predictions</span> <span class="o">=</span> <span class="n">pred_class</span> <span class="o">==</span> <span class="n">true_class</span>
+        <span class="k">return</span> <span class="n">correct_predictions</span><span class="o">.</span><span class="n">float</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">:</span> <span class="n">NetworkOutput</span><span class="p">,</span> <span class="n">y_true</span><span class="p">:</span> <span class="n">NetworkOutput</span><span class="p">,</span> <span class="n">log_val</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">log_val</span><span class="p">(</span><span class="s2">&quot;ce&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ce</span><span class="p">(</span><span class="n">y_pred</span><span class="o">.</span><span class="n">class_id</span><span class="p">,</span> <span class="n">y_true</span><span class="o">.</span><span class="n">class_id</span><span class="o">.</span><span class="n">long</span><span class="p">())</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+        <span class="n">log_val</span><span class="p">(</span><span class="s2">&quot;ca&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ca</span><span class="p">(</span><span class="n">y_pred</span><span class="o">.</span><span class="n">class_id</span><span class="p">,</span> <span class="n">y_true</span><span class="o">.</span><span class="n">class_id</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+</pre></div>
+</div>
+<p><strong>7. Training it</strong></p>
+<p>Finally we can write code which glues everything together.
+First select the pytorch backend.
+Then, create a configuration and use it to setup the logger module.
+After that you can create your dataset for training and validation by instantiating the class created in step 4.</p>
+<p>To train our pytorch model with a pytorch optimizer, loss and metrics, we need to use the native wrappers.
+For the optimizer there is a special NativePytorchOptimizerWrapper, whereas the rest is supported by a generic wrapper.
+Also our model from step 5 can be instantiated as well as the loss and metrics from step 6.
+However, the instances need to be wrapped.
+Finally we select an optimizer (typically SGD is fine) and wrap the optimizer class directly without instantiating.
+This is required, since the pytorch optimizer needs the variables to optimize on creation, but they are not yet created on the gpu, this happens as a first step in the fit method or whenever you call the model.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">babilim.logger</span> <span class="kn">as</span> <span class="nn">logger</span>
+<span class="kn">from</span> <span class="nn">babilim</span> <span class="kn">import</span> <span class="n">PYTORCH_BACKEND</span><span class="p">,</span> <span class="n">PHASE_TRAIN</span><span class="p">,</span> <span class="n">PHASE_VALIDATION</span>
+<span class="kn">from</span> <span class="nn">babilim.losses</span> <span class="kn">import</span> <span class="n">NativeMetricsWrapper</span><span class="p">,</span> <span class="n">NativeLossWrapper</span>
+<span class="kn">from</span> <span class="nn">babilim.models</span> <span class="kn">import</span> <span class="n">NativeModelWrapper</span>
+<span class="kn">from</span> <span class="nn">babilim.optimizers</span> <span class="kn">import</span> <span class="n">NativePytorchOptimizerWrapper</span>
+
+<span class="kn">from</span> <span class="nn">torch.optim</span> <span class="kn">import</span> <span class="n">SGD</span>
+
+<span class="n">babilim</span><span class="o">.</span><span class="n">set_backend</span><span class="p">(</span><span class="n">PYTORCH_BACKEND</span><span class="p">)</span>
+
+<span class="c1"># Create our configuration (containing all hyper parameters)</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">FashionMnistConfig</span><span class="p">()</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">continue_training</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+<span class="c1"># Load the data</span>
+<span class="n">train</span> <span class="o">=</span> <span class="n">FashionMnistDataset</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">PHASE_TRAIN</span><span class="p">)</span>
+<span class="n">val</span> <span class="o">=</span> <span class="n">FashionMnistDataset</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">PHASE_VALIDATION</span><span class="p">)</span>
+
+<span class="c1"># Create a model.</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">NativeModelWrapper</span><span class="p">(</span><span class="n">FashionMnistModel</span><span class="p">(</span><span class="n">config</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;FashionMnistModel&quot;</span><span class="p">)</span>
+
+<span class="c1"># Create a loss and some metrics (if your loss has hyper parameters use config for that)</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="n">NativeLossWrapper</span><span class="p">(</span><span class="n">FashionMnistLoss</span><span class="p">())</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">NativeMetricsWrapper</span><span class="p">(</span><span class="n">FashionMnistMetrics</span><span class="p">())</span>
+
+<span class="c1"># Create optimizer</span>
+<span class="n">optim</span> <span class="o">=</span> <span class="n">NativePytorchOptimizerWrapper</span><span class="p">(</span><span class="n">SGD</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">dampening</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">nesterov</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="c1"># Fit our model to the data using our loss and report the metrics.</span>
+<span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">optim</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">train_learning_rate_shedule</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>8. What next?</strong></p>
+<p>Solve your own problem in a similar manner.
+Dive into the detailed api documentation and even have peeks at the code to become a true master in using babilim.</p>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="examples.mnist.html" class="btn btn-neutral float-left" title="MNIST Example (Babilim)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Michael Fuerst
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

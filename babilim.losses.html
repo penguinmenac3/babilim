@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Losses &mdash; babilim 0.0.1 documentation</title>
+  <title>Losses &amp; Metrics &mdash; babilim 0.0.1 documentation</title>
   
 
   
@@ -36,7 +36,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Models" href="babilim.models.html" />
-    <link rel="prev" title="Layers" href="babilim.layers.html" /> 
+    <link rel="prev" title="Logging &amp; Checkpoints" href="babilim.logger.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -90,20 +90,22 @@
 </ul>
 <p class="caption"><span class="caption-text">Packages</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="babilim.html">Main Package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.callbacks.html">Callbacks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.core.html">Core</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.data.html">Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="babilim.experiment.html">Experiment</a></li>
-<li class="toctree-l1"><a class="reference internal" href="babilim.experiment.logging.html">Logging &amp; Checkpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.experiment.html">Experiment Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.layers.html">Layers</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.logger.html">Logging &amp; Checkpoints</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Losses &amp; Metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.models.html">Models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="babilim.optimizers.html">Optimizers &amp; Learning Rate Schedules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.optimizers.html">Optimizers &amp; Learning Rates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.utils.html">Utils</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Examples</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="examples.mnist.html">MNIST Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.mnist.html">MNIST Example (Babilim)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.mnist.pytorch.html">MNIST Example (Pytorch Native)</a></li>
 </ul>
 
             
@@ -149,7 +151,7 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Losses</li>
+      <li>Losses &amp; Metrics</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -168,9 +170,46 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-babilim.losses">
-<span id="losses"></span><h1>Losses<a class="headerlink" href="#module-babilim.losses" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
+  <div class="section" id="losses-metrics">
+<h1>Losses &amp; Metrics<a class="headerlink" href="#losses-metrics" title="Permalink to this headline">¶</a></h1>
+<p><strong>Loss</strong></p>
+<p>The loss ties your network output and the dataset labels together.
+It is a function that expects two inputs, one for the network outputs y_pred and one for the dataset labels y_true.</p>
+<p>There are pre implemented loss functions which work on tensors, but for your problem you will need to define your own custom loss.
+However, your custom loss can internally use existing losses.
+This is because the network output and dataset output is typed and generic losses do not have those types.
+The reason behind that is simply a level of type safety for you.</p>
+<p>The simple example below shows how a classification loss could look for your problem:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">babilim.core</span> <span class="kn">import</span> <span class="n">ITensor</span>
+<span class="kn">from</span> <span class="nn">babilim.losses</span> <span class="kn">import</span> <span class="n">Loss</span><span class="p">,</span> <span class="n">SparseCrossEntropyLossFromLogits</span>
+
+<span class="k">class</span> <span class="nc">MyLoss</span><span class="p">(</span><span class="n">Loss</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ce</span> <span class="o">=</span> <span class="n">SparseCrossEntropyLossFromLogits</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">:</span> <span class="n">NetworkOutput</span><span class="p">,</span> <span class="n">y_true</span><span class="p">:</span> <span class="n">NetworkOutput</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ITensor</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ce</span><span class="p">(</span><span class="n">y_pred</span><span class="o">.</span><span class="n">class_id</span><span class="p">,</span> <span class="n">y_true</span><span class="o">.</span><span class="n">class_id</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><strong>Metrics</strong></p>
+<p>Metrics are similar to a loss, however, they do not return any tensor for optimization and have the sole purpose of giving you insight in your network.</p>
+<p>A simple example could be the following:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">babilim.losses</span> <span class="kn">import</span> <span class="n">Metrics</span><span class="p">,</span> <span class="n">SparseCrossEntropyLossFromLogits</span><span class="p">,</span> <span class="n">SparseCategoricalAccuracy</span>
+
+<span class="k">class</span> <span class="nc">FashionMnistMetrics</span><span class="p">(</span><span class="n">Metrics</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ce</span> <span class="o">=</span> <span class="n">SparseCrossEntropyLossFromLogits</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ca</span> <span class="o">=</span> <span class="n">SparseCategoricalAccuracy</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">:</span> <span class="n">NetworkOutput</span><span class="p">,</span> <span class="n">y_true</span><span class="p">:</span> <span class="n">NetworkOutput</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;ce&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ce</span><span class="p">(</span><span class="n">y_pred</span><span class="o">.</span><span class="n">class_id</span><span class="p">,</span> <span class="n">y_true</span><span class="o">.</span><span class="n">class_id</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;ca&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ca</span><span class="p">(</span><span class="n">y_pred</span><span class="o">.</span><span class="n">class_id</span><span class="p">,</span> <span class="n">y_true</span><span class="o">.</span><span class="n">class_id</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+</pre></div>
+</div>
+<p><strong>Autogenerated Documentation</strong></p>
+<span class="target" id="module-babilim.losses"></span><dl class="class">
 <dt id="babilim.losses.Metrics">
 <em class="property">class </em><code class="sig-prename descclassname">babilim.losses.</code><code class="sig-name descname">Metrics</code><a class="headerlink" href="#babilim.losses.Metrics" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">babilim.core.statefull_object.StatefullObject</span></code></p>
@@ -251,6 +290,46 @@
 </dd></dl>
 
 <dl class="class">
+<dt id="babilim.losses.NativeLossWrapper">
+<em class="property">class </em><code class="sig-prename descclassname">babilim.losses.</code><code class="sig-name descname">NativeLossWrapper</code><span class="sig-paren">(</span><em class="sig-param">loss</em><span class="sig-paren">)</span><a class="headerlink" href="#babilim.losses.NativeLossWrapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">babilim.losses.loss.Loss</span></code></p>
+<dl class="method">
+<dt id="babilim.losses.NativeLossWrapper.call">
+<code class="sig-name descname">call</code><span class="sig-paren">(</span><em class="sig-param">y_pred: Any</em>, <em class="sig-param">y_true: Any</em><span class="sig-paren">)</span> &#x2192; babilim.core.itensor.ITensor<a class="headerlink" href="#babilim.losses.NativeLossWrapper.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implement a loss function between preds and true outputs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y_pred</strong> – The predictions of the network. Either a NamedTuple pointing at ITensors or a Dict or Tuple of ITensors.</p></li>
+<li><p><strong>y_true</strong> – The desired outputs of the network (labels). Either a NamedTuple pointing at ITensors or a Dict or Tuple of ITensors.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="babilim.losses.NativeMetricsWrapper">
+<em class="property">class </em><code class="sig-prename descclassname">babilim.losses.</code><code class="sig-name descname">NativeMetricsWrapper</code><span class="sig-paren">(</span><em class="sig-param">metrics</em><span class="sig-paren">)</span><a class="headerlink" href="#babilim.losses.NativeMetricsWrapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">babilim.losses.metrics.Metrics</span></code></p>
+<dl class="method">
+<dt id="babilim.losses.NativeMetricsWrapper.call">
+<code class="sig-name descname">call</code><span class="sig-paren">(</span><em class="sig-param">y_pred: Any</em>, <em class="sig-param">y_true: Any</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#babilim.losses.NativeMetricsWrapper.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implement a couple of metrics function between preds and true outputs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y_pred</strong> – The predictions of the network. Either a NamedTuple pointing at ITensors or a Dict or Tuple of ITensors.</p></li>
+<li><p><strong>y_true</strong> – The desired outputs of the network (labels). Either a NamedTuple pointing at ITensors or a Dict or Tuple of ITensors.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="babilim.losses.SparseCrossEntropyLossFromLogits">
 <em class="property">class </em><code class="sig-prename descclassname">babilim.losses.</code><code class="sig-name descname">SparseCrossEntropyLossFromLogits</code><a class="headerlink" href="#babilim.losses.SparseCrossEntropyLossFromLogits" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">babilim.losses.loss.Loss</span></code></p>
@@ -323,7 +402,7 @@
         <a href="babilim.models.html" class="btn btn-neutral float-right" title="Models" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="babilim.layers.html" class="btn btn-neutral float-left" title="Layers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="babilim.logger.html" class="btn btn-neutral float-left" title="Logging &amp; Checkpoints" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

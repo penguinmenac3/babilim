@@ -1,0 +1,329 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Main Package &mdash; babilim 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Callbacks" href="babilim.callbacks.html" />
+    <link rel="prev" title="Install Babilim" href="tutorials.install.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> babilim
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.install.html">Install Babilim</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Packages</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Main Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.callbacks.html">Callbacks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.core.html">Core</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.experiment.html">Experiment Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.layers.html">Layers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.logger.html">Logging &amp; Checkpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.losses.html">Losses &amp; Metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.optimizers.html">Optimizers &amp; Learning Rates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.utils.html">Utils</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="examples.mnist.html">MNIST Example (Babilim)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.mnist.pytorch.html">MNIST Example (Pytorch Native)</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">babilim</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Main Package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/babilim.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="main-package">
+<h1>Main Package<a class="headerlink" href="#main-package" title="Permalink to this headline">¶</a></h1>
+<p>The babilim package contains everything required to setup the backend and defines the different phases of the training process.</p>
+<p>You can change the backend by:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">babilim</span>
+<span class="n">babilim</span><span class="o">.</span><span class="n">set_backend</span><span class="p">(</span><span class="n">babilim</span><span class="o">.</span><span class="n">PYTORCH_BACKEND</span><span class="p">)</span>
+<span class="c1"># or</span>
+<span class="n">babilim</span><span class="o">.</span><span class="n">set_backend</span><span class="p">(</span><span class="n">babilim</span><span class="o">.</span><span class="n">TF_BACKEND</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For the different phases of training, validation and testing the following constants should be used.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Training and Validation</span>
+<span class="kn">from</span> <span class="nn">babilim</span> <span class="kn">import</span> <span class="n">PHASE_TRAIN</span><span class="p">,</span> <span class="n">PHASE_VALIDATION</span><span class="p">,</span> <span class="n">PHASE_TRAINVAL</span>
+
+<span class="c1"># Testing</span>
+<span class="kn">from</span> <span class="nn">babilim</span> <span class="kn">import</span> <span class="n">PHASE_TEST</span>
+</pre></div>
+</div>
+<p><strong>Autogenerated Documentation</strong></p>
+<span class="target" id="module-babilim"></span><dl class="function">
+<dt id="babilim.tprint">
+<code class="sig-prename descclassname">babilim.</code><code class="sig-name descname">tprint</code><span class="sig-paren">(</span><em class="sig-param">msg: str</em>, <em class="sig-param">end: str = '\n'</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#babilim.tprint" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>Print something with a timestamp.
+Useful for logging.
+Babilim internally uses this for all its log messages.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">babilim</span> <span class="kn">import</span> <span class="n">tprint</span>
+<span class="n">tprint</span><span class="p">(</span><span class="s2">&quot;This is a log message.&quot;</span><span class="p">)</span>
+<span class="c1"># [yyyy-mm-dd HH:MM:SS] This is a log message.</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">param msg</dt>
+<dd class="field-odd"><p>The message to print.</p>
+</dd>
+<dt class="field-even">param end</dt>
+<dd class="field-even"><p>The line ending. Defaults to “</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>” but can be set to “” to not have a linebreak.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="babilim.set_backend">
+<code class="sig-prename descclassname">babilim.</code><code class="sig-name descname">set_backend</code><span class="sig-paren">(</span><em class="sig-param">backend: str</em><span class="sig-paren">)</span><a class="headerlink" href="#babilim.set_backend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the backend which babilim uses.</p>
+<p>Should be either babilim.PYTORCH_BACKEND or babilim.TF_BACKEND.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">babilim</span>
+<span class="n">babilim</span><span class="o">.</span><span class="n">set_backend</span><span class="p">(</span><span class="n">babilim</span><span class="o">.</span><span class="n">PYTORCH_BACKEND</span><span class="p">)</span>
+<span class="c1"># or</span>
+<span class="n">babilim</span><span class="o">.</span><span class="n">set_backend</span><span class="p">(</span><span class="n">babilim</span><span class="o">.</span><span class="n">TF_BACKEND</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>backend</strong> (<em>str</em>) – The backend which should be used.</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>RuntimeError</strong> – When the backend is invalid or unknown.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="babilim.get_backend">
+<code class="sig-prename descclassname">babilim.</code><code class="sig-name descname">get_backend</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#babilim.get_backend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get what backend is currently set.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">babilim</span>
+<span class="k">print</span><span class="p">(</span><span class="n">babilim</span><span class="o">.</span><span class="n">get_backend</span><span class="p">())</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The backend string.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="babilim.is_backend">
+<code class="sig-prename descclassname">babilim.</code><code class="sig-name descname">is_backend</code><span class="sig-paren">(</span><em class="sig-param">backend: str</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#babilim.is_backend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if the currently set backend is the one to check against.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">babilim</span>
+<span class="k">if</span> <span class="n">babilim</span><span class="o">.</span><span class="n">is_backend</span><span class="p">(</span><span class="n">babilim</span><span class="o">.</span><span class="n">PYTORCH_BACKEND</span><span class="p">):</span>
+    <span class="c1"># do pytorch specific stuff</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>backend</strong> (<em>str</em>) – The backend to check against</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True if the set backend is equal to the provided backend.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="babilim.callbacks.html" class="btn btn-neutral float-right" title="Callbacks" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="tutorials.install.html" class="btn btn-neutral float-left" title="Install Babilim" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Michael Fuerst
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

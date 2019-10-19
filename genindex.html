@@ -89,20 +89,22 @@
 </ul>
 <p class="caption"><span class="caption-text">Packages</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="babilim.html">Main Package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.callbacks.html">Callbacks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.core.html">Core</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.data.html">Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="babilim.experiment.html">Experiment</a></li>
-<li class="toctree-l1"><a class="reference internal" href="babilim.experiment.logging.html">Logging &amp; Checkpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.experiment.html">Experiment Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.layers.html">Layers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="babilim.losses.html">Losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.logger.html">Logging &amp; Checkpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.losses.html">Losses &amp; Metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.models.html">Models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="babilim.optimizers.html">Optimizers &amp; Learning Rate Schedules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babilim.optimizers.html">Optimizers &amp; Learning Rates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="babilim.utils.html">Utils</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Examples</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="examples.mnist.html">MNIST Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.mnist.html">MNIST Example (Babilim)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.mnist.pytorch.html">MNIST Example (Pytorch Native)</a></li>
 </ul>
 
             
@@ -193,19 +195,21 @@
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="babilim.optimizers.html#babilim.optimizers.Optimizer.apply_gradients">apply_gradients() (babilim.optimizers.Optimizer method)</a>
+      <li><a href="babilim.optimizers.html#babilim.optimizers.NativePytorchOptimizerWrapper.apply_gradients">apply_gradients() (babilim.optimizers.NativePytorchOptimizerWrapper method)</a>
 
       <ul>
+        <li><a href="babilim.optimizers.html#babilim.optimizers.Optimizer.apply_gradients">(babilim.optimizers.Optimizer method)</a>
+</li>
         <li><a href="babilim.optimizers.html#babilim.optimizers.SGD.apply_gradients">(babilim.optimizers.SGD method)</a>
 </li>
       </ul></li>
-      <li><a href="babilim.core.html#babilim.ITensor.argmax">argmax() (babilim.ITensor method)</a>
+      <li><a href="babilim.core.html#babilim.core.ITensor.argmax">argmax() (babilim.core.ITensor method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="babilim.data.html#babilim.data.Dataset.as_cached">as_cached() (babilim.data.Dataset method)</a>
 </li>
-      <li><a href="babilim.core.html#babilim.ITensor.assign">assign() (babilim.ITensor method)</a>
+      <li><a href="babilim.core.html#babilim.core.ITensor.assign">assign() (babilim.core.ITensor method)</a>
 </li>
       <li><a href="babilim.losses.html#babilim.losses.Loss.avg">avg() (babilim.losses.Loss property)</a>
 
@@ -219,22 +223,22 @@
 <h2 id="B">B</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="babilim.core.html#module-babilim">babilim (module)</a>
+      <li><a href="babilim.html#module-babilim">babilim (module)</a>
 </li>
       <li><a href="babilim.callbacks.html#module-babilim.callbacks">babilim.callbacks (module)</a>
 </li>
-      <li><a href="babilim.core.html#module-babilim.core.image_grid">babilim.core.image_grid (module)</a>
+      <li><a href="babilim.core.html#module-babilim.core">babilim.core (module)</a>
 </li>
       <li><a href="babilim.data.html#module-babilim.data">babilim.data (module)</a>
 </li>
       <li><a href="babilim.experiment.html#module-babilim.experiment">babilim.experiment (module)</a>
 </li>
-      <li><a href="babilim.experiment.logging.html#module-babilim.experiment.logging">babilim.experiment.logging (module)</a>
+      <li><a href="babilim.layers.html#module-babilim.layers">babilim.layers (module)</a>
+</li>
+      <li><a href="babilim.logger.html#module-babilim.logger">babilim.logger (module)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="babilim.layers.html#module-babilim.layers">babilim.layers (module)</a>
-</li>
       <li><a href="babilim.losses.html#module-babilim.losses">babilim.losses (module)</a>
 </li>
       <li><a href="babilim.models.html#module-babilim.models">babilim.models (module)</a>
@@ -245,6 +249,12 @@
 </li>
       <li><a href="babilim.layers.html#babilim.layers.BatchNormalization">BatchNormalization() (in module babilim.layers)</a>
 </li>
+      <li><a href="babilim.models.html#babilim.models.NativeModelWrapper.build">build (babilim.models.NativeModelWrapper attribute)</a>
+
+      <ul>
+        <li><a href="babilim.optimizers.html#babilim.optimizers.NativePytorchOptimizerWrapper.build">(babilim.optimizers.NativePytorchOptimizerWrapper attribute)</a>
+</li>
+      </ul></li>
       <li><a href="babilim.layers.html#babilim.layers.ILayer.build">build() (babilim.layers.ILayer method)</a>
 </li>
   </ul></td>
@@ -266,14 +276,20 @@
 </li>
         <li><a href="babilim.losses.html#babilim.losses.Metrics.call">(babilim.losses.Metrics method)</a>
 </li>
+        <li><a href="babilim.losses.html#babilim.losses.NativeLossWrapper.call">(babilim.losses.NativeLossWrapper method)</a>
+</li>
+        <li><a href="babilim.losses.html#babilim.losses.NativeMetricsWrapper.call">(babilim.losses.NativeMetricsWrapper method)</a>
+</li>
         <li><a href="babilim.losses.html#babilim.losses.SparseCategoricalAccuracy.call">(babilim.losses.SparseCategoricalAccuracy method)</a>
 </li>
         <li><a href="babilim.losses.html#babilim.losses.SparseCrossEntropyLossFromLogits.call">(babilim.losses.SparseCrossEntropyLossFromLogits method)</a>
 </li>
+        <li><a href="babilim.models.html#babilim.models.NativeModelWrapper.call">(babilim.models.NativeModelWrapper method)</a>
+</li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="babilim.core.html#babilim.ITensor.cast">cast() (babilim.ITensor method)</a>
+      <li><a href="babilim.core.html#babilim.core.ITensor.cast">cast() (babilim.core.ITensor method)</a>
 </li>
       <li><a href="babilim.experiment.html#babilim.experiment.Config.check_completness">check_completness() (babilim.experiment.Config method)</a>
 </li>
@@ -283,13 +299,13 @@
 </li>
       <li><a href="babilim.experiment.html#babilim.experiment.ConfigPart">ConfigPart (class in babilim.experiment)</a>
 </li>
-      <li><a href="babilim.experiment.logging.html#babilim.experiment.logging.connect">connect() (in module babilim.experiment.logging)</a>
+      <li><a href="babilim.logger.html#babilim.logger.connect_ailab">connect_ailab() (in module babilim.logger)</a>
 </li>
       <li><a href="babilim.optimizers.html#babilim.optimizers.Const">Const (class in babilim.optimizers)</a>
 </li>
       <li><a href="babilim.layers.html#babilim.layers.Conv2D">Conv2D() (in module babilim.layers)</a>
 </li>
-      <li><a href="babilim.core.html#babilim.ITensor.copy">copy() (babilim.ITensor method)</a>
+      <li><a href="babilim.core.html#babilim.core.ITensor.copy">copy() (babilim.core.ITensor method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -337,13 +353,7 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="babilim.experiment.html#babilim.experiment.ConfigPart.get">get() (babilim.experiment.ConfigPart method)</a>
 </li>
-      <li><a href="babilim.core.html#babilim.get_backend">get_backend() (in module babilim)</a>
-</li>
-      <li><a href="babilim.layers.html#babilim.layers.get_layer">get_layer() (in module babilim.layers)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="babilim.models.html#babilim.models.get_model">get_model() (in module babilim.models)</a>
+      <li><a href="babilim.html#babilim.get_backend">get_backend() (in module babilim)</a>
 </li>
       <li><a href="babilim.data.html#babilim.data.Dataset.getitem">getitem() (babilim.data.Dataset method)</a>
 
@@ -351,7 +361,11 @@
         <li><a href="babilim.data.html#babilim.data.TransformedDataset.getitem">(babilim.data.TransformedDataset method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="babilim.layers.html#babilim.layers.GlobalAveragePooling2D">GlobalAveragePooling2D() (in module babilim.layers)</a>
+</li>
+      <li><a href="babilim.core.html#babilim.core.GradientTape">GradientTape() (in module babilim.core)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -361,9 +375,9 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="babilim.layers.html#babilim.layers.ILayer">ILayer (class in babilim.layers)</a>
 </li>
-      <li><a href="babilim.core.html#babilim.core.image_grid.image_grid_unwrap">image_grid_unwrap() (in module babilim.core.image_grid)</a>
+      <li><a href="babilim.data.html#babilim.data.image_grid_unwrap">image_grid_unwrap() (in module babilim.data)</a>
 </li>
-      <li><a href="babilim.core.html#babilim.core.image_grid.image_grid_wrap">image_grid_wrap() (in module babilim.core.image_grid)</a>
+      <li><a href="babilim.data.html#babilim.data.image_grid_wrap">image_grid_wrap() (in module babilim.data)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -371,9 +385,9 @@
 </li>
       <li><a href="babilim.experiment.html#babilim.experiment.import_config">import_config() (in module babilim.experiment)</a>
 </li>
-      <li><a href="babilim.core.html#babilim.is_backend">is_backend() (in module babilim)</a>
+      <li><a href="babilim.html#babilim.is_backend">is_backend() (in module babilim)</a>
 </li>
-      <li><a href="babilim.core.html#babilim.ITensor">ITensor (class in babilim)</a>
+      <li><a href="babilim.core.html#babilim.core.ITensor">ITensor (class in babilim.core)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -391,21 +405,23 @@
 </li>
       <li><a href="babilim.models.html#babilim.models.IModel.load">load() (babilim.models.IModel method)</a>
 </li>
+      <li><a href="babilim.core.html#babilim.core.StatefullObject.load_state_dict">load_state_dict() (babilim.core.StatefullObject method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="babilim.losses.html#babilim.losses.Loss.log">log() (babilim.losses.Loss method)</a>
 
       <ul>
         <li><a href="babilim.losses.html#babilim.losses.Metrics.log">(babilim.losses.Metrics method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="babilim.experiment.logging.html#babilim.experiment.logging.log_image">log_image() (in module babilim.experiment.logging)</a>
+      <li><a href="babilim.logger.html#babilim.logger.log_image">log_image() (in module babilim.logger)</a>
 </li>
-      <li><a href="babilim.experiment.logging.html#babilim.experiment.logging.log_value">log_value() (in module babilim.experiment.logging)</a>
+      <li><a href="babilim.logger.html#babilim.logger.log_value">log_value() (in module babilim.logger)</a>
 </li>
-      <li><a href="babilim.experiment.logging.html#babilim.experiment.logging.LogCall">LogCall (class in babilim.experiment.logging)</a>
+      <li><a href="babilim.logger.html#babilim.logger.LogCall">LogCall (class in babilim.logger)</a>
 </li>
-      <li><a href="babilim.experiment.logging.html#babilim.experiment.logging.LogResult">LogResult (class in babilim.experiment.logging)</a>
+      <li><a href="babilim.logger.html#babilim.logger.LogResult">LogResult (class in babilim.logger)</a>
 </li>
       <li><a href="babilim.losses.html#babilim.losses.Loss">Loss (class in babilim.losses)</a>
 </li>
@@ -419,7 +435,7 @@
 </li>
       <li><a href="babilim.layers.html#babilim.layers.MaxPooling2D">MaxPooling2D() (in module babilim.layers)</a>
 </li>
-      <li><a href="babilim.core.html#babilim.ITensor.mean">mean() (babilim.ITensor method)</a>
+      <li><a href="babilim.core.html#babilim.core.ITensor.mean">mean() (babilim.core.ITensor method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -435,15 +451,23 @@
 <h2 id="N">N</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="babilim.core.html#babilim.ITensor.name">name() (babilim.ITensor property)</a>
+      <li><a href="babilim.core.html#babilim.core.ITensor.name">name() (babilim.core.ITensor property)</a>
 
       <ul>
-        <li><a href="babilim.layers.html#babilim.layers.ILayer.name">(babilim.layers.ILayer property)</a>
+        <li><a href="babilim.core.html#babilim.core.StatefullObject.name">(babilim.core.StatefullObject property)</a>
 </li>
       </ul></li>
+      <li><a href="babilim.losses.html#babilim.losses.NativeLossWrapper">NativeLossWrapper (class in babilim.losses)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="babilim.core.html#babilim.ITensor.numpy">numpy() (babilim.ITensor method)</a>
+      <li><a href="babilim.losses.html#babilim.losses.NativeMetricsWrapper">NativeMetricsWrapper (class in babilim.losses)</a>
+</li>
+      <li><a href="babilim.models.html#babilim.models.NativeModelWrapper">NativeModelWrapper (class in babilim.models)</a>
+</li>
+      <li><a href="babilim.optimizers.html#babilim.optimizers.NativePytorchOptimizerWrapper">NativePytorchOptimizerWrapper (class in babilim.optimizers)</a>
+</li>
+      <li><a href="babilim.core.html#babilim.core.ITensor.numpy">numpy() (babilim.core.ITensor method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -477,12 +501,8 @@
 </li>
       <li><a href="babilim.data.html#babilim.data.register_binary_fmt">register_binary_fmt() (in module babilim.data)</a>
 </li>
-      <li><a href="babilim.layers.html#babilim.layers.register_layer">register_layer() (in module babilim.layers)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="babilim.models.html#babilim.models.register_model">register_model() (in module babilim.models)</a>
-</li>
       <li><a href="babilim.layers.html#babilim.layers.ReLU">ReLU() (in module babilim.layers)</a>
 </li>
       <li><a href="babilim.losses.html#babilim.losses.Loss.reset_avg">reset_avg() (babilim.losses.Loss method)</a>
@@ -491,7 +511,7 @@
         <li><a href="babilim.losses.html#babilim.losses.Metrics.reset_avg">(babilim.losses.Metrics method)</a>
 </li>
       </ul></li>
-      <li><a href="babilim.core.html#babilim.RunOnlyOnce">RunOnlyOnce (class in babilim)</a>
+      <li><a href="babilim.core.html#babilim.core.RunOnlyOnce">RunOnlyOnce (class in babilim.core)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -503,23 +523,27 @@
 </li>
       <li><a href="babilim.layers.html#babilim.layers.Sequential">Sequential (class in babilim.layers)</a>
 </li>
-      <li><a href="babilim.core.html#babilim.set_backend">set_backend() (in module babilim)</a>
+      <li><a href="babilim.html#babilim.set_backend">set_backend() (in module babilim)</a>
 </li>
-      <li><a href="babilim.experiment.logging.html#babilim.experiment.logging.setup">setup() (in module babilim.experiment.logging)</a>
+      <li><a href="babilim.logger.html#babilim.logger.setup">setup() (in module babilim.logger)</a>
 </li>
       <li><a href="babilim.optimizers.html#babilim.optimizers.SGD">SGD (class in babilim.optimizers)</a>
 </li>
-      <li><a href="babilim.core.html#babilim.ITensor.shape">shape() (babilim.ITensor property)</a>
+      <li><a href="babilim.core.html#babilim.core.ITensor.shape">shape() (babilim.core.ITensor property)</a>
+</li>
+      <li><a href="babilim.losses.html#babilim.losses.SparseCategoricalAccuracy">SparseCategoricalAccuracy (class in babilim.losses)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="babilim.losses.html#babilim.losses.SparseCategoricalAccuracy">SparseCategoricalAccuracy (class in babilim.losses)</a>
-</li>
       <li><a href="babilim.losses.html#babilim.losses.SparseCrossEntropyLossFromLogits">SparseCrossEntropyLossFromLogits (class in babilim.losses)</a>
+</li>
+      <li><a href="babilim.core.html#babilim.core.StatefullObject.state_dict">state_dict() (babilim.core.StatefullObject method)</a>
+</li>
+      <li><a href="babilim.core.html#babilim.core.StatefullObject">StatefullObject (class in babilim.core)</a>
 </li>
       <li><a href="babilim.optimizers.html#babilim.optimizers.StepDecay">StepDecay (class in babilim.optimizers)</a>
 </li>
-      <li><a href="babilim.core.html#babilim.ITensor.stop_gradients">stop_gradients() (babilim.ITensor method)</a>
+      <li><a href="babilim.core.html#babilim.core.ITensor.stop_gradients">stop_gradients() (babilim.core.ITensor method)</a>
 </li>
       <li><a href="babilim.layers.html#babilim.layers.ILayer.submodules">submodules() (babilim.layers.ILayer property)</a>
 </li>
@@ -535,7 +559,9 @@
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="babilim.core.html#babilim.Tensor">Tensor() (in module babilim)</a>
+      <li><a href="babilim.core.html#babilim.core.Tensor">Tensor() (in module babilim.core)</a>
+</li>
+      <li><a href="babilim.data.html#babilim.data.TensorDataset">TensorDataset (class in babilim.data)</a>
 </li>
       <li><a href="babilim.experiment.html#babilim.experiment.ConfigPart.to_dict">to_dict() (babilim.experiment.ConfigPart method)</a>
 </li>
@@ -543,15 +569,23 @@
 </li>
       <li><a href="babilim.data.html#babilim.data.Dataset.to_keras">to_keras() (babilim.data.Dataset method)</a>
 </li>
+      <li><a href="babilim.data.html#babilim.data.Dataset.to_native">to_native() (babilim.data.Dataset method)</a>
+</li>
       <li><a href="babilim.data.html#babilim.data.Dataset.to_pytorch">to_pytorch() (babilim.data.Dataset method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="babilim.data.html#babilim.data.Dataset.to_tfrecord">to_tfrecord() (babilim.data.Dataset method)</a>
 </li>
-      <li><a href="babilim.core.html#babilim.tprint">tprint() (in module babilim)</a>
+      <li><a href="babilim.html#babilim.tprint">tprint() (in module babilim)</a>
 </li>
-      <li><a href="babilim.core.html#babilim.ITensor.trainable">trainable() (babilim.ITensor property)</a>
+      <li><a href="babilim.models.html#babilim.models.IModel.train_epoch">train_epoch() (babilim.models.IModel method)</a>
+</li>
+      <li><a href="babilim.core.html#babilim.core.ITensor.trainable">trainable() (babilim.core.ITensor property)</a>
+</li>
+      <li><a href="babilim.core.html#babilim.core.StatefullObject.trainable_variables">trainable_variables() (babilim.core.StatefullObject property)</a>
+</li>
+      <li><a href="babilim.core.html#babilim.core.StatefullObject.trainable_variables_native">trainable_variables_native() (babilim.core.StatefullObject property)</a>
 </li>
       <li><a href="babilim.data.html#babilim.data.TransformedDataset">TransformedDataset (class in babilim.data)</a>
 </li>
@@ -563,13 +597,19 @@
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="babilim.experiment.logging.html#babilim.experiment.logging.update_progress">update_progress() (in module babilim.experiment.logging)</a>
+      <li><a href="babilim.logger.html#babilim.logger.update_progress">update_progress() (in module babilim.logger)</a>
 </li>
   </ul></td>
 </tr></table>
 
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="babilim.models.html#babilim.models.IModel.validate_epoch">validate_epoch() (babilim.models.IModel method)</a>
+</li>
+      <li><a href="babilim.core.html#babilim.core.StatefullObject.variables">variables() (babilim.core.StatefullObject property)</a>
+</li>
+  </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="babilim.data.html#babilim.data.Dataset.version">version() (babilim.data.Dataset property)</a>
 

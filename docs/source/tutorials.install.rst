@@ -5,7 +5,8 @@ Using *conda or virtualenv is highly recommended* if you do not already use them
 
 **1. Install your backend**
 
-Follow the official instructions `here <https://pytorch.org/get-started/locally/>`_ to install pytorch or `here <https://www.tensorflow.org/install>`_ to install tensorflow 2.
+Follow the official instructions `here (pytorch) <https://pytorch.org/get-started/locally/>`_ or `here (tf2) <https://www.tensorflow.org/install>`_.
+If you don't know which one to choose, roll a dice, it does not matter for this framework.
 
 **2. Install babilim**
 

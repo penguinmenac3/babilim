@@ -67,8 +67,8 @@ Babilim is an attempt to unite the two to talk in a language compatible with bot
    babilim.core
    babilim.data
    babilim.experiment
-   babilim.logger
    babilim.layers
+   babilim.logger
    babilim.losses
    babilim.models
    babilim.optimizers

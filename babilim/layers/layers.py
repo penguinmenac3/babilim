@@ -23,7 +23,7 @@ def Flatten(name:str = "Flatten") -> ILayer:
         raise NotImplementedError("The backend {} is not implemented by this layer.".format(get_backend()))
 
 
-def Linear(out_features: int, name:str ="Linear") -> ILayer:
+def Linear(out_features: int, name:str ="Linear", activation=None) -> ILayer:
     """A simple linear layer.
 
     It computes Wx+b with no activation funciton.
@@ -42,17 +42,17 @@ def Linear(out_features: int, name:str ="Linear") -> ILayer:
     """
     if is_backend(PYTORCH_BACKEND):
         from babilim.layers.pt.linear import Linear as _Linear
-        return _Linear(out_features, name)
+        return _Linear(out_features, name, activation=activation)
     elif is_backend(TF_BACKEND):
         from babilim.layers.tf.linear import Linear as _Linear
-        return _Linear(out_features, name)
+        return _Linear(out_features, name, activation=activation)
     else:
         raise NotImplementedError("The backend {} is not implemented by this layer.".format(get_backend()))
 
 
 def Conv2D(filters: int, kernel_size: Tuple[int, int], name: str = "Conv2D",
            padding: Optional[str] = None, strides: Tuple[int, int] = (1, 1),
-           dilation_rate: Tuple[int, int] = (1, 1), kernel_initializer: Optional[Any] = None) -> ILayer:
+           dilation_rate: Tuple[int, int] = (1, 1), kernel_initializer: Optional[Any] = None, activation=None) -> ILayer:
     """A simple 2d convolution layer.
 
     TODO stride, dilation, etc.
@@ -75,10 +75,10 @@ def Conv2D(filters: int, kernel_size: Tuple[int, int], name: str = "Conv2D",
     """
     if is_backend(PYTORCH_BACKEND):
         from babilim.layers.pt.conv import Conv2D as _Conv2D
-        return _Conv2D(filters, kernel_size, name, padding, strides, dilation_rate, kernel_initializer)
+        return _Conv2D(filters, kernel_size, name, padding, strides, dilation_rate, kernel_initializer, activation=activation)
     elif is_backend(TF_BACKEND):
         from babilim.layers.tf.conv import Conv2D as _Conv2D
-        return _Conv2D(filters, kernel_size, name, padding, strides, dilation_rate, kernel_initializer)
+        return _Conv2D(filters, kernel_size, name, padding, strides, dilation_rate, kernel_initializer, activation=activation)
     else:
         raise NotImplementedError("The backend {} is not implemented by this layer.".format(get_backend()))
 
@@ -187,7 +187,7 @@ def GlobalAveragePooling2D(name:str ="GlobalAveragePooling2D") -> ILayer:
 # *******************************************************
 
 
-def ReLU(name:str ="ReLU") -> ILayer:
+def Activation(activation: str, name: str = None) -> ILayer:
     """TODO
     
     Arguments:
@@ -201,11 +201,13 @@ def ReLU(name:str ="ReLU") -> ILayer:
     Returns:
         ILayer -- A layer object.
     """
+    if name is None:
+        name = activation
     if is_backend(PYTORCH_BACKEND):
-        from babilim.layers.pt.activation import ReLU as _ReLU
-        return _ReLU(name)
+        from babilim.layers.pt.activation import Activation as _Activation
+        return _Activation(activation, name)
     elif is_backend(TF_BACKEND):
-        from babilim.layers.tf.activation import ReLU as _ReLU
-        return _ReLU(name)
+        from babilim.layers.tf.activation import Activation as _Activation
+        return _Activation(activation, name)
     else:
         raise NotImplementedError("The backend {} is not implemented by this layer.".format(get_backend()))

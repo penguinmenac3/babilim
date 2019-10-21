@@ -5,14 +5,20 @@ from babilim.core.tensor_tf import Tensor
 from babilim.core.annotations import RunOnlyOnce
 
 
-class ReLU(ILayer):
-    def __init__(self, name):
-        super().__init__(name=name, layer_type="ReLU")
-        self.activation = _Activation("relu")
+class Activation(ILayer):
+    def __init__(self, activation: str, name: str):
+        super().__init__(name=name, layer_type="Activation")
+        if self.activation is None:
+            self.activation = None
+        else:
+            self.activation = _Activation(activation)
 
     @RunOnlyOnce
     def build(self, features):
         pass
 
     def call(self, features):
-        return Tensor(native=self.activation(features.native))
+        if self.activation is None:
+            return features
+        else:
+            return Tensor(native=self.activation(features.native))

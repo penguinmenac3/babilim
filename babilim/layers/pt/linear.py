@@ -9,12 +9,14 @@ import torch.nn as nn
 from babilim.layers.ilayer import ILayer
 from babilim.core.tensor_pt import Tensor
 from babilim.core.annotations import RunOnlyOnce
+from babilim.layers.pt.activation import Activation
 
 
 class Linear(ILayer):
-    def __init__(self, out_features, name):
+    def __init__(self, out_features, name, activation):
         super().__init__(name=name, layer_type="Linear")
         self.out_features = out_features
+        self.activation = Activation(activation, name + "/activation")
 
     @RunOnlyOnce
     def build(self, features):
@@ -26,7 +28,7 @@ class Linear(ILayer):
             self.linear = self.linear.to(torch.device("cuda"))
 
     def call(self, features):
-        return Tensor(native=self.linear(features.native))
+        return self.activation(Tensor(native=self.linear(features.native)))
 
 
 class PtLinear(nn.Module):

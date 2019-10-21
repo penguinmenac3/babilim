@@ -5,10 +5,11 @@ from torch.nn.init import orthogonal_
 from babilim.layers.ilayer import ILayer
 from babilim.core.tensor_pt import Tensor
 from babilim.core.annotations import RunOnlyOnce
+from babilim.layers.pt.activation import Activation
 
 
 class Conv2D(ILayer):
-    def __init__(self, filters, kernel_size, name, padding=None, stride=None, dilation=None, kernel_initializer=None):
+    def __init__(self, filters, kernel_size, name, padding=None, stride=None, dilation=None, kernel_initializer=None, activation=None):
         super().__init__(name=name, layer_type="Conv2D")
         self.filters = filters
         self.kernel_size = kernel_size
@@ -26,6 +27,7 @@ class Conv2D(ILayer):
         self.dilation = dilation
         self.stride = stride
         self.kernel_initializer = kernel_initializer
+        self.activation = Activation(activation, name + "/activation")
 
     @RunOnlyOnce
     def build(self, features):
@@ -38,4 +40,4 @@ class Conv2D(ILayer):
         self.bias = Tensor(data=None, trainable=True, native=self.conv.bias, name=self.name + "/bias")
 
     def call(self, features):
-        return Tensor(native=self.conv(features.native))
+        return self.activation(Tensor(native=self.conv(features.native)))

@@ -110,6 +110,15 @@ class Tensor(ITensor):
     def argmax(self, axis: Optional[int]=None) -> 'ITensor':
         return Tensor(native=tf.argmax(self.native, axis=axis))
 
+    def sum(self, axis: Optional[int]=None) -> 'ITensor':
+        return Tensor(native=tf.reduce_sum(self.native, axis=axis))
+
+    def is_nan(self) -> 'ITensor':
+        return Tensor(native=tf.math.is_nan(self.native))
+
+    def any(self) -> bool:
+        return tf.reduce_any(self.native)
+
     @property
     def shape(self) -> Tuple:
         return self.native.shape

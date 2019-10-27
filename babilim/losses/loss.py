@@ -22,6 +22,8 @@ class Loss(StatefullObject):
         :param y_true: The desired outputs of the network (labels). Either a NamedTuple pointing at ITensors or a Dict or Tuple of ITensors.
         """
         loss = self.call(y_pred, y_true)
+        if loss.is_nan().any():
+            raise ValueError("Loss '{}' is nan. Loss value: {}".format(self.name, loss))
         return loss
 
     def call(self,

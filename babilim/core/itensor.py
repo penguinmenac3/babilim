@@ -57,6 +57,15 @@ class ITensor(object):
     def argmax(self, axis: Optional[int]=None) -> 'ITensor':
         raise NotImplementedError("Each implementation of a tensor must implement this.")
 
+    def sum(self, axis: Optional[int]=None) -> 'ITensor':
+        raise NotImplementedError("Each implementation of a tensor must implement this.")
+
+    def is_nan(self) -> 'ITensor':
+        raise NotImplementedError("Each implementation of a tensor must implement this.")
+
+    def any(self) -> bool:
+        raise NotImplementedError("Each implementation of a tensor must implement this.")
+
     @property
     def shape(self) -> Tuple:
         raise NotImplementedError("Each implementation of a variable must implement this.")

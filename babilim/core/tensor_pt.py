@@ -126,7 +126,7 @@ class Tensor(ITensor):
         tmp = self.native
         if tmp.requires_grad:
             tmp = tmp.detach()
-        if torch.cuda.is_available():
+        if tmp.is_cuda:
             tmp = tmp.cpu()
         
         return tmp.numpy().T
@@ -142,6 +142,18 @@ class Tensor(ITensor):
             return Tensor(native=self.native.argmax(dim=axis))
         else:
             return Tensor(native=self.native.argmax())
+
+    def sum(self, axis: Optional[int]=None) -> 'ITensor':
+        if axis is not None:
+            return Tensor(native=self.native.sum(dim=axis))
+        else:
+            return Tensor(native=self.native.sum())
+
+    def is_nan(self) -> 'ITensor':
+        return Tensor(native=torch.isnan(self.native))
+
+    def any(self) -> bool:
+        return self.native.any()
 
     @property
     def shape(self) -> Tuple:

@@ -22,7 +22,7 @@ class _PyTorchDataset(__TDataset):
         return feat, label
 
 
-def BatchedPytorchDataset(dataset: Sequence, config: Config, shuffle: bool = True, num_workers: int = 1) -> __DataLoader:
+def BatchedPytorchDataset(dataset: Sequence, config: Config, shuffle: bool = True, num_workers: int = 0) -> __DataLoader:
     """
     Converts a dataset into a pytorch dataloader.
 

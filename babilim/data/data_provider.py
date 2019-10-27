@@ -151,7 +151,7 @@ class Dataset(Sequence):
         from babilim.data.keras import BatchedKerasDataset
         return BatchedKerasDataset(self, self.config)
 
-    def to_pytorch(self, shuffle: bool = True, num_workers: int = 1):
+    def to_pytorch(self):
         """
         Converts the dataset into a batched pytorch dataset.
         
@@ -161,7 +161,7 @@ class Dataset(Sequence):
         :param num_workers: The number of multithreaded workers. Defaults to 1, since more usually does not work.
         """
         from babilim.data.pytorch import BatchedPytorchDataset
-        return BatchedPytorchDataset(self, self.config, shuffle, num_workers)
+        return BatchedPytorchDataset(self, self.config, self.config.problem_shuffle, self.config.problem_num_threads)
 
     def to_native(self) -> TensorDataset:
         """
@@ -200,15 +200,26 @@ class Transformer(object):
         """
         raise NotImplementedError
 
+    @property
+    def version(self):
+        """
+        Defines the version of the transformer. The name can be also something descriptive of the method.
+
+        :return: The version number of the transformer.
+        """
+        raise NotImplementedError
+
 
 class ComposeTransforms(Transformer):
-    def __init__(self, transforms: Iterable[Transformer]) -> None:
+    def __init__(self, transforms: Iterable[Transformer], transform_version_name: str) -> None:
         """
         A transform that applies the transforms provided in transforms in order.
 
         :param transforms: An Iterable of Transformers which is applied on the data.
+        :param transform_version_name: The name of the transformation procedure used for versioning.
         """
         self.transforms = transforms
+        self.transform_version_name = transform_version_name
 
     def __call__(self, *args):
         """
@@ -219,6 +230,10 @@ class ComposeTransforms(Transformer):
         for t in self.transforms:
             args = t(*args)
         return args
+
+    @property
+    def version(self):
+        return self.transform_version_name
 
 
 class TransformedDataset(Dataset):
@@ -246,9 +261,9 @@ class TransformedDataset(Dataset):
 
         :return: The version number of the dataset.
         """
-        return "TransformedDataset_{}".format(self.dataset.version)
+        return "{}_{}".format(self.dataset.version, self.transformer.version)
 
-  
+
 class _CacheDummyDataset(Dataset):
     def __init__(self, config: Config, cache_path: str, version: str) -> None:
         """

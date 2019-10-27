@@ -153,6 +153,8 @@ class Config(ConfigPart):
         # Required for general dataset loading. (Non architecture specific.)
         self.problem_base_dir = None
         self.problem_dataset = None
+        self.problem_shuffle = True
+        self.problem_num_threads = 0
 
         # The following should not be changed, since babilim will change them internally.
         self.train_actual_checkpoint_path = None

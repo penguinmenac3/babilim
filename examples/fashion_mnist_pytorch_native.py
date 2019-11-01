@@ -37,8 +37,8 @@ class FashionMnistConfig(Config):
         self.problem_base_dir = "datasets"
 
         self.train_epochs = 20
-        self.train_l2_weight = 0.01
-        self.train_batch_size = 32
+        self.train_l2_weight = 0.001
+        self.train_batch_size = 64
         self.train_log_steps = 100
         self.train_experiment_name = "FashionMNIST"
         self.train_checkpoint_path = "checkpoints"
@@ -200,7 +200,7 @@ if __name__ == "__main__":
     metrics = NativeMetricsWrapper(FashionMnistMetrics())
 
     # Create optimizer
-    optim = NativePytorchOptimizerWrapper(SGD, model, momentum=0.95, dampening=0.0, weight_decay=0.0, nesterov=True)
+    optim = NativePytorchOptimizerWrapper(SGD, model, momentum=0.95, dampening=0.0, weight_decay=config.train_l2_weight, nesterov=True)
 
     # Fit our model to the data using our loss and report the metrics.
     model.fit(train, val, loss, metrics, config, optim, config.train_learning_rate_shedule, verbose=True)

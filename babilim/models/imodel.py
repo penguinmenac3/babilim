@@ -31,8 +31,24 @@ class IModel(ILayer):
         minutes, seconds = divmod(remainder, 60)
         return '%d:%02d:%02d' % (hours, minutes, seconds)
 
-    def train_epoch(self, config: Config, dataset, optimizer, lr_schedule, loss, metrics, samples_seen: int, summary_writer,
-               verbose: bool = False):
+    def run_epoch(self, config: Config, dataset, optimizer, lr_schedule, loss, metrics, samples_seen: int, summary_writer):
+        """
+        Run an epoch in training or validation.
+
+        (This function is called in fit and it is NOT RECOMMENDED to use this function from outside.)
+
+        Optimizer is "optional" if it is set to None, it is a validation run otherwise it is a training run.
+
+        :param config: The configuration for the run.
+        :param dataset: The native dataset.
+        :param optimizer: The babilim optimizer or None for validation.
+        :param lr_schedule: The learning rate scheduler (also required for validation).
+        :param loss: The loss function.
+        :param metrics: The metric computation function.
+        :param samples_seen: The number of samples the network has seen before running this method.
+        :param summary_writer: The summary writer where to store the summaries.
+        :return: Returns the average loss and metrics.
+        """
         N = len(dataset)
 
         # Setup the training loop
@@ -50,54 +66,36 @@ class IModel(ILayer):
                 loss_results = loss(y_true=y, y_pred=prediction)
                 loss.log("total", loss_results)
                 metrics(y_true=y, y_pred=prediction)
-            # Translate those to something usefull...
+
+            loss_val = loss.avg["total"].numpy()
             gradients = tape.gradient(loss_results)
             for grad in gradients:
                 if grad.is_nan().any():
                     tprint("NaN in gradient for {}: {}".format(grad.name, grad.native))
                     raise ValueError("Gradient of {} got nan.".format(grad.name))
             lr = lr_schedule(samples_seen / config.train_batch_size)
-            optimizer.apply_gradients(gradients, variables, lr)
 
-            # Update global variables and log the variables
-            samples_seen += config.train_batch_size
-            tprint("Training {}/{} - Loss {:.3f} - LR {:.6f}".format(i + 1, N, loss.avg["total"].numpy(), lr), end="")
-            if i % config.train_log_steps == 0:
-                summary_writer.add_scalar('learning_rate', lr, global_step=samples_seen)
-                loss.summary(samples_seen, summary_writer)
-                metrics.summary(samples_seen, summary_writer)
-        print()
+            if optimizer is not None:
+                # Translate those to something usefull...
+                optimizer.apply_gradients(gradients, variables, lr)
 
-    def validate_epoch(self, config, dataset, loss, metrics, samples_seen, summary_writer):
-        N = len(dataset)
-        for i, (x, y) in enumerate(dataset):
-            prediction = self(**x._asdict())
-            loss_results = loss(y_true=y, y_pred=prediction)
-            loss.log("total", loss_results)
-            metrics(y_true=y, y_pred=prediction)
-            tprint("Validating {}/{} - Loss {:.3f}".format(i, N, loss.avg["total"].numpy()), end="")
-        loss.summary(samples_seen, summary_writer)
-        metrics.summary(samples_seen, summary_writer)
+                # Update global variables and log the variables
+                samples_seen += config.train_batch_size
+                tprint("Training {}/{} - Loss {:.3f} - LR {:.6f}".format(i + 1, N, loss_val, lr), end="")
+                if i % config.train_log_steps == 0:
+                    summary_writer.add_scalar('learning_rate', lr, global_step=samples_seen)
+                    loss.summary(samples_seen, summary_writer)
+                    metrics.summary(samples_seen, summary_writer)
+            else:
+                tprint("Validating {}/{} - Loss {:.3f}".format(i + 1, N, loss_val), end="")
+        if optimizer is None:
+            loss.summary(samples_seen, summary_writer)
+            metrics.summary(samples_seen, summary_writer)
         print()
         return loss.avg, metrics.avg
 
-    def fit(self, training_dataset: Dataset, validation_dataset: Dataset, loss, metrics, config: Config, optim: Any,
-            lr_schedule: LearningRateSchedule, verbose: bool = False):
-        config.check_completness()
-        if config.train_actual_checkpoint_path is None:
-            raise RuntimeError(
-                "You must setup logger before calling the fit method. See babilim.experiment.logger.setup")
-        chkpt_path = config.train_actual_checkpoint_path
-
-        # Summary writers
-        train_summary_writer = SummaryWriter(os.path.join(chkpt_path, "train"))
-        val_summary_writer = SummaryWriter(os.path.join(chkpt_path, "val"))
-
-        # Try to retrieve optional arguments from hyperparams if not specified
-        epochs = config.train_epochs
-
-        batched_training_dataset = training_dataset.to_native()
-        batched_validation_dataset = validation_dataset.to_native()
+    def _init_model(self, batched_training_dataset, chkpt_path, config, optim, loss, metrics, lr_schedule, verbose=False):
+        samples_seen = 0
 
         # Actually force model to be build by running one forward step
         tprint("Build model.")
@@ -112,6 +110,7 @@ class IModel(ILayer):
             tprint("Loading checkpoint: {}".format(saved_models[-1]))
             checkpoint = np.load(saved_models[-1], allow_pickle=True)
             epoch = checkpoint["epoch"] + 1
+            samples_seen = len(batched_training_dataset) * config.train_batch_size * epoch
             if "model_state_dict" in checkpoint:
                 self.load_state_dict(checkpoint["model_state_dict"][()])
             else:
@@ -143,21 +142,45 @@ class IModel(ILayer):
                 print("  {}: {}".format(var.name, var.shape))
             print()
 
+        return epoch, samples_seen
+
+    def fit(self, training_dataset: Dataset, validation_dataset: Dataset, loss, metrics, config: Config, optim: Any,
+            lr_schedule: LearningRateSchedule, verbose: bool = False):
+        config.check_completness()
+        if config.train_actual_checkpoint_path is None:
+            raise RuntimeError(
+                "You must setup logger before calling the fit method. See babilim.experiment.logger.setup")
+        chkpt_path = config.train_actual_checkpoint_path
+
+        # Summary writers
+        train_summary_writer = SummaryWriter(os.path.join(chkpt_path, "train"))
+        val_summary_writer = SummaryWriter(os.path.join(chkpt_path, "val"))
+
+        # Create batched datasets.
+        training_dataset = training_dataset.to_native()
+        validation_dataset = validation_dataset.to_native()
+
+        # Try to retrieve optional arguments from hyperparams if not specified
+        epochs = config.train_epochs
+
+        epoch, samples_seen = self._init_model(training_dataset, chkpt_path, config, optim, loss, metrics, lr_schedule, verbose)
+
         tprint("Start training for {} epochs from epoch {}.".format(epochs, epoch))
-        samples_seen = len(batched_training_dataset) * config.train_batch_size * epoch
         start = time.time()
         for i in range(epoch, epochs):
             loss.reset_avg()
             metrics.reset_avg()
-            self.train_epoch(config, batched_training_dataset, optim, lr_schedule, loss, metrics, samples_seen,
-                   train_summary_writer, verbose)
-            samples_seen += len(batched_training_dataset) * config.train_batch_size
+            self.run_epoch(config, training_dataset, optim, lr_schedule, loss, metrics, samples_seen, train_summary_writer)
+            samples_seen += len(training_dataset) * config.train_batch_size
 
             loss.reset_avg()
             metrics.reset_avg()
-            loss_results, metrics_results = self.validate_epoch(config, batched_validation_dataset, loss, metrics,
-                                                      samples_seen, val_summary_writer)
-
+            loss_results, metrics_results = self.run_epoch(config, validation_dataset, None, lr_schedule, loss, metrics, samples_seen, val_summary_writer)
+            elapsed_time = time.time() - start
+            eta = elapsed_time / (i + 1) * (epochs - (i + 1))
+            tprint("Epoch {}/{} - ETA {} - {} - {}".format(i + 1, epochs, self.__format_time(eta),
+                                                           self.__dict_to_str(loss_results),
+                                                           self.__dict_to_str(metrics_results)))
             # save checkpoint
             state_dict = {
                 'epoch': i,
@@ -169,12 +192,6 @@ class IModel(ILayer):
             }
             np.savez_compressed(os.path.join(chkpt_path, "checkpoints", "chkpt_{:09d}.npz".format(i)), **state_dict)
 
-            elapsed_time = time.time() - start
-            eta = elapsed_time / (i + 1) * (epochs - (i + 1))
-            tprint("Epoch {}/{} - ETA {} - {} - {}".format(i + 1, epochs, self.__format_time(eta),
-                                                           self.__dict_to_str(loss_results),
-                                                           self.__dict_to_str(metrics_results)))
-
     def load(self, model_file):
         checkpoint = np.load(model_file, allow_pickle=True)
         if "model_state_dict" in checkpoint:
@@ -184,6 +201,24 @@ class IModel(ILayer):
 
     def save(self, model_file):
         np.savez_compressed(model_file, **{'model_state_dict': self.state_dict()})
+
+    def predict(self, **kwargs):
+        """
+        Pass in single training examples as numpy arrays.
+
+        The array must not have batch dimension.
+
+        :param kwargs: The parameters to feed the network as a single example.
+        :return: The output for a single example.
+        """
+        kwargs = {k: np.array([kwargs[k]]) for k in kwargs.keys() if isinstance(kwargs[k], np.ndarray)}
+        kwargs = {k: Tensor(data=kwargs[k], trainable=False) for k in kwargs.keys()}
+
+        preds = self.__call__(**kwargs)
+        tmp = preds._asdict()
+        tmp = {k: tmp[k].numpy()[0] for k in tmp.keys()}
+        preds = type(preds)(**tmp)
+        return preds
 
 
 class NativeModelWrapper(IModel):

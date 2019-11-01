@@ -92,9 +92,18 @@ class StatefullObject(object):
     def state_dict(self):
         state = {}
         for var in self.variables:
-            state[var.name] = var.numpy()
+            if babilim.is_backend(babilim.TF_BACKEND):
+                state[var.name] = var.numpy()
+            else:
+                state[var.name] = var.numpy().T
         return state
 
     def load_state_dict(self, state_dict):
         for var in self.variables:
-            var.assign(state_dict[var.name])
+            if var.name in state_dict:
+                if babilim.is_backend(babilim.TF_BACKEND):
+                    var.assign(state_dict[var.name])
+                else:
+                    var.assign(state_dict[var.name].T)
+            else:
+                print("Warning: Variable {} not in checkpoint.".format(var.name))

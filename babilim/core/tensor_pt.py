@@ -75,7 +75,7 @@ class TensorWrapper(ITensorWrapper):
 class Tensor(ITensor):
     def __init__(self, data: np.ndarray = None, trainable=False, native: _Tensor=None, name: str="unnamed"):
         if data is not None:
-            data = data.T
+            #data = data.T
             native = torch.from_numpy(data)
             native.requires_grad = trainable
             if torch.cuda.is_available() and not native.is_cuda:
@@ -129,7 +129,7 @@ class Tensor(ITensor):
         if tmp.is_cuda:
             tmp = tmp.cpu()
         
-        return tmp.numpy().T
+        return tmp.numpy()
 
     def mean(self, axis: Optional[int]=None) -> 'Tensor':
         if axis is not None:

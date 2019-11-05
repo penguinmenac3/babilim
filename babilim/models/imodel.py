@@ -70,6 +70,10 @@ class IModel(ILayer):
             loss_val = loss.avg["total"].numpy()
             gradients = tape.gradient(loss_results)
             for grad in gradients:
+                if grad is None:
+                    tprint("WARNING: A trainable variable did not have gradients."
+                           "Did you set trainable or requires grads to false during your forward pass?")
+                    continue
                 if grad.is_nan().any():
                     tprint("NaN in gradient for {}: {}".format(grad.name, grad.native))
                     raise ValueError("Gradient of {} got nan.".format(grad.name))

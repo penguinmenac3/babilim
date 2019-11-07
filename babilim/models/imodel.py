@@ -5,6 +5,7 @@ from babilim.layers.ilayer import ILayer
 from babilim.data import Dataset, TensorDataset
 from babilim.experiment import Config
 from babilim.optimizers.learning_rates import LearningRateSchedule
+import babilim.core.statefull_object as so
 import os
 import time
 import numpy as np
@@ -174,11 +175,13 @@ class IModel(ILayer):
         for i in range(epoch, epochs):
             loss.reset_avg()
             metrics.reset_avg()
+            self.train()
             self.run_epoch(config, training_dataset, optim, lr_schedule, loss, metrics, samples_seen, train_summary_writer)
             samples_seen += len(training_dataset) * config.train_batch_size
 
             loss.reset_avg()
             metrics.reset_avg()
+            self.eval()
             loss_results, metrics_results = self.run_epoch(config, validation_dataset, None, lr_schedule, loss, metrics, samples_seen, val_summary_writer)
             elapsed_time = time.time() - start
             eta = elapsed_time / (i + 1) * (epochs - (i + 1))
@@ -224,6 +227,12 @@ class IModel(ILayer):
         preds = type(preds)(**tmp)
         return preds
 
+    def eval(self):
+        so.TRAINING = False
+
+    def train(self):
+        so.TRAINING = True
+
 
 class NativeModelWrapper(IModel):
     def __init__(self, model, name: str, layer_type: str = "NativeModel"):
@@ -262,3 +271,11 @@ class NativeModelWrapper(IModel):
         # Wrap results
         result_raw = {k: Tensor(data=result_raw[k], trainable=True) for k in result_raw}
         return type(result)(**result_raw)
+
+    def eval(self):
+        so.TRAINING = False
+        self.model.eval()
+
+    def train(self):
+        so.TRAINING = True
+        self.model.train()

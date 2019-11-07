@@ -9,6 +9,9 @@ from babilim.core.tensor import Tensor, TensorWrapper
 _statefull_object_name_table = {}
 
 
+TRAINING = True
+
+
 class StatefullObject(object):
     def __init__(self, name):
         self._wrapper = TensorWrapper()
@@ -19,6 +22,10 @@ class StatefullObject(object):
             numbering = _statefull_object_name_table[name]
             self.__name = "{}_{}".format(name, numbering)
             _statefull_object_name_table[name] += 1
+
+    @property
+    def training(self):
+        return TRAINING
 
     @property
     def name(self):
@@ -101,6 +108,7 @@ class StatefullObject(object):
     def load_state_dict(self, state_dict):
         for var in self.variables:
             if var.name in state_dict:
+                print("Loaded: {}".format(var.name))
                 if babilim.is_backend(babilim.TF_BACKEND):
                     var.assign(state_dict[var.name])
                 else:

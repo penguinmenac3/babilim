@@ -24,8 +24,7 @@ class BatchNormalization(ILayer):
         
         if torch.cuda.is_available():
             self.bn = self.bn.to(torch.device("cuda"))
-            
-
 
     def call(self, features):
+        self.bn.training = self.training
         return Tensor(native=self.bn(features.native))

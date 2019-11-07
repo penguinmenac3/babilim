@@ -22,9 +22,9 @@ class IModel(ILayer):
             if isinstance(data[k], list):
                 for i in data[k]:
                     name = i.__name__
-                    out.append("{}_{}={:.3f}".format(k, name, data[k].numpy()))
+                    out.append("{}_{}={:.3f}".format(k, name, data[k]))
             else:
-                out.append("{}={:.3f}".format(k, data[k].numpy()))
+                out.append("{}={:.3f}".format(k, data[k]))
         return " - ".join(out)
 
     def __format_time(self, t):
@@ -65,10 +65,10 @@ class IModel(ILayer):
                         tprint("NaN NetworkOutput {}: {}".format(p.name, p.native))
                         raise ValueError("NetworkOutput {} got nan.".format(p.name))
                 loss_results = loss(y_true=y, y_pred=prediction)
-                loss.log("total", loss_results)
+                loss.log("loss/total", loss_results)
                 metrics(y_true=y, y_pred=prediction)
 
-            loss_val = loss.avg["total"].numpy()
+            loss_val = loss.avg["loss/total"]
             gradients = tape.gradient(loss_results)
             for grad in gradients:
                 if grad is None:

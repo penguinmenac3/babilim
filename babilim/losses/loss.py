@@ -1,3 +1,4 @@
+from collections import defaultdict
 from typing import Any
 import numpy as np
 import babilim
@@ -7,10 +8,12 @@ from babilim.core.statefull_object import StatefullObject
 
 
 class Loss(StatefullObject):
-    def __init__(self):
+    def __init__(self, log_std=False, log_min=False, log_max=False):
         super().__init__("Loss")
-        self._accumulators = {}
-        self._counters = {}
+        self._accumulators = defaultdict(list)
+        self._log_std = log_std
+        self._log_min = log_min
+        self._log_max = log_max
 
     def __call__(self,
                  y_pred: Any,
@@ -38,39 +41,49 @@ class Loss(StatefullObject):
         raise NotImplementedError("Every loss must implement the call method.")
 
     def log(self, name: str, value: ITensor):
-        if name not in self._accumulators:
-            self._accumulators[name] = value.copy()
-            self._counters[name] = 1
+        val = value.numpy()
+        if len(val.shape) > 0:
+            self._accumulators[name].append(val)
         else:
-            self._accumulators[name] += value.stop_gradients()
-            self._counters[name] += 1
+            self._accumulators[name].append(np.array([val]))
 
     def reset_avg(self):
-        for k in self._accumulators:
-            acc = self._accumulators[k]
-            acc.assign(np.zeros_like(acc.numpy()))
-            self._counters[k] = 0
+        self._accumulators = defaultdict(list)
 
     def summary(self, samples_seen, summary_writer=None):
-        avgs = self.avg
         if summary_writer is not None:
-            for k in avgs:
-                summary_writer.add_scalar("{}".format(k), avgs[k].numpy(), global_step=samples_seen)
+            for k in self._accumulators:
+                combined = np.concatenate(self._accumulators[k], axis=0)
+                summary_writer.add_scalar("{}".format(k), combined.mean(), global_step=samples_seen)
+                if self._log_std:
+                    summary_writer.add_scalar("{}_std".format(k), combined.std(), global_step=samples_seen)
+                if self._log_min:
+                    summary_writer.add_scalar("{}_min".format(k), combined.min(), global_step=samples_seen)
+                if self._log_max:
+                    summary_writer.add_scalar("{}_max".format(k), combined.max(), global_step=samples_seen)
         else:
             import tensorflow as tf
-            for k in avgs:
-                tf.summary.scalar("{}".format(k), avgs[k].numpy(), step=samples_seen)
+            for k in self._accumulators:
+                combined = np.concatenate(self._accumulators[k], axis=0)
+                tf.summary.scalar("{}".format(k), combined.mean(), step=samples_seen)
+                if self._log_std:
+                    tf.summary.scalar("{}_std".format(k), combined.std(), step=samples_seen)
+                if self._log_min:
+                    tf.summary.scalar("{}_min".format(k), combined.min(), step=samples_seen)
+                if self._log_max:
+                    tf.summary.scalar("{}_max".format(k), combined.max(), step=samples_seen)
 
     @property
     def avg(self):
         avgs = {}
         for k in self._accumulators:
-            avgs[k] = self._accumulators[k] / self._counters[k]
+            combined = np.concatenate(self._accumulators[k], axis=0)
+            avgs[k] = combined.mean()
         return avgs
 
 
 class NativeLossWrapper(Loss):
-    def __init__(self, loss):
+    def __init__(self, loss, log_std=False, log_min=False, log_max=False):
         """
         Wrap a native loss as a babilim loss.
 
@@ -82,7 +95,7 @@ class NativeLossWrapper(Loss):
 
         :param loss: The loss that should be wrapped.
         """
-        super().__init__()
+        super().__init__(log_std=log_std, log_min=log_min, log_max=log_max)
         self.loss = loss
 
     def call(self, y_pred: Any, y_true: Any) -> ITensor:

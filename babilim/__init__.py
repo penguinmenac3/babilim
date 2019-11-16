@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-__all__ = ['tprint', 'set_backend', 'get_backend', 'is_backend']
+__all__ = ['status', 'info', 'warn', 'error', 'set_backend', 'get_backend', 'is_backend']
 
 
 import time as __time
@@ -32,13 +32,19 @@ PHASE_VALIDATION = "val"
 PHASE_TRAINVAL = "trainval"
 PHASE_TEST = "test"
 
+DEBUG_VERBOSITY = False
+PRINT_STATUS = True
+PRINT_INFO = True
+PRINT_WARN = True
+PRINT_ERROR = True
+
 PYTORCH_BACKEND = "pytorch"
 TF_BACKEND = "tf2"
 
 _backend = PYTORCH_BACKEND
 
 
-def tprint(msg: str, end: str="\n") -> None:
+def status(msg: str, end: str= "\n") -> None:
     """
     Print something with a timestamp.
     Useful for logging.
@@ -53,8 +59,69 @@ def tprint(msg: str, end: str="\n") -> None:
     :param msg: The message to print.
     :param end: The line ending. Defaults to "\n" but can be set to "" to not have a linebreak.
     """
-    time_stamp = __datetime.datetime.fromtimestamp(__time.time()).strftime('%Y-%m-%d %H:%M:%S')
-    print("\r[{}] {}".format(time_stamp, msg), end=end)
+    if PRINT_STATUS:
+        time_stamp = __datetime.datetime.fromtimestamp(__time.time()).strftime('%Y-%m-%d %H:%M:%S')
+        print("\r[{}] STAT {}".format(time_stamp, msg), end=end)
+
+
+def info(msg: str, end: str= "\n") -> None:
+    """
+    Print something with a timestamp.
+    Useful for logging.
+    Babilim internally uses this for all its log messages.
+
+    .. code-block:: python
+
+        from babilim import tprint
+        tprint("This is a log message.")
+        # [yyyy-mm-dd HH:MM:SS] This is a log message.
+
+    :param msg: The message to print.
+    :param end: The line ending. Defaults to "\n" but can be set to "" to not have a linebreak.
+    """
+    if PRINT_INFO:
+        time_stamp = __datetime.datetime.fromtimestamp(__time.time()).strftime('%Y-%m-%d %H:%M:%S')
+        print("\r[{}] INFO {}".format(time_stamp, msg), end=end)
+
+
+def warn(msg: str, end: str = "\n") -> None:
+    """
+    Print something with a timestamp.
+    Useful for logging.
+    Babilim internally uses this for all its log messages.
+
+    .. code-block:: python
+
+        from babilim import tprint
+        tprint("This is a log message.")
+        # [yyyy-mm-dd HH:MM:SS] This is a log message.
+
+    :param msg: The message to print.
+    :param end: The line ending. Defaults to "\n" but can be set to "" to not have a linebreak.
+    """
+    if PRINT_WARN:
+        time_stamp = __datetime.datetime.fromtimestamp(__time.time()).strftime('%Y-%m-%d %H:%M:%S')
+        print("\r[{}] WARN {}".format(time_stamp, msg), end=end)
+
+
+def error(msg: str, end: str = "\n") -> None:
+    """
+    Print something with a timestamp.
+    Useful for logging.
+    Babilim internally uses this for all its log messages.
+
+    .. code-block:: python
+
+        from babilim import tprint
+        tprint("This is a log message.")
+        # [yyyy-mm-dd HH:MM:SS] This is a log message.
+
+    :param msg: The message to print.
+    :param end: The line ending. Defaults to "\n" but can be set to "" to not have a linebreak.
+    """
+    if PRINT_ERROR:
+        time_stamp = __datetime.datetime.fromtimestamp(__time.time()).strftime('%Y-%m-%d %H:%M:%S')
+        print("\r[{}] ERROR {}".format(time_stamp, msg), end=end)
 
 
 def set_backend(backend: str):
@@ -86,7 +153,7 @@ def set_backend(backend: str):
         import tensorflow as tf
         if tf.test.is_gpu_available():
             device = "gpu"
-    tprint("Using backend: {}-{}".format(backend, device))
+    info("Using backend: {}-{}".format(backend, device))
     _backend = backend
 
 

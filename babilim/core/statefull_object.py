@@ -1,7 +1,7 @@
 from typing import Sequence, Any, Sequence, Callable, Dict, Iterable
 from collections import defaultdict
 import babilim
-from babilim import PYTORCH_BACKEND, TF_BACKEND
+from babilim import PYTORCH_BACKEND, TF_BACKEND, info, warn, DEBUG_VERBOSITY
 from babilim.core.itensor import ITensor
 from babilim.core.tensor import Tensor, TensorWrapper
 
@@ -106,12 +106,11 @@ class StatefullObject(object):
         return state
 
     def load_state_dict(self, state_dict):
-        for var in self.variables:
-            if var.name in state_dict:
-                print("Loaded: {}".format(var.name))
+                if DEBUG_VERBOSITY:
+                    info("  Loaded: {}".format(name))
                 if babilim.is_backend(babilim.TF_BACKEND):
                     var.assign(state_dict[var.name])
                 else:
                     var.assign(state_dict[var.name].T)
             else:
-                print("Warning: Variable {} not in checkpoint.".format(var.name))
+                warn("  Variable {} not in checkpoint.".format(name))

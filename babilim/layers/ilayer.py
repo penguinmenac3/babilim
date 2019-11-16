@@ -2,7 +2,7 @@ from typing import Sequence, Any, Sequence, Callable, Dict, Iterable
 from collections import defaultdict
 import inspect
 import babilim
-from babilim import PYTORCH_BACKEND, TF_BACKEND, tprint
+from babilim import PYTORCH_BACKEND, TF_BACKEND, warn
 from babilim.core import StatefullObject, RunOnlyOnce
 
 
@@ -81,4 +81,4 @@ class ILayer(StatefullObject):
                 for param in self.trainable_variables:
                     module.register_parameter(param.name, param.native)
         else:
-            tprint("Not implemented for tf2 but I think it is not required.")
+            warn("Not implemented for tf2 but I think it is not required.")

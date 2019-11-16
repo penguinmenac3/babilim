@@ -12,7 +12,7 @@ import entangle
 import matplotlib.pyplot as plt
 import scipy.misc
 from babilim.experiment.config import Config
-from babilim import tprint
+from babilim import info, warn, DEBUG_VERBOSITY
 
 __log_file = None
 __checkpoint_path = None
@@ -93,8 +93,8 @@ def _write_log(*, obj: object) -> None:
     global __entanglement
     out_str = json.dumps(obj)
     if __log_file is None:
-        tprint("WARING: You should setup logger before using it. Call ailab.logger.setup(...).")
-        tprint(out_str)
+        warn("You should setup logger before using it. Call ailab.logger.setup(...).")
+        warn(out_str)
     else:
         with open(__log_file, "a") as f:
             f.write(out_str + "\n")
@@ -251,7 +251,7 @@ def log_image(*, name: str, data: np.ndarray = None) -> None:
     """
     global __checkpoint_path
     if __checkpoint_path is None:
-        tprint("WARNING: Cannot log images when logger is not setup. Call logger.setup first")
+        warn("Cannot log images when logger is not setup. Call logger.setup first")
         return
     if data is None:
         plt.savefig(os.path.join(__checkpoint_path, "images", name + ".png"))
@@ -280,11 +280,13 @@ def setup(config: Config, continue_with_specific_checkpointpath: bool = False, c
 
     if continue_with_specific_checkpointpath:
         chkpt_path = config.train_checkpoint_path + "/" + continue_with_specific_checkpointpath
-        tprint("Continue with checkpoint: {}".format(chkpt_path))
+        if DEBUG_VERBOSITY:
+            info("Continue with checkpoint: {}".format(chkpt_path))
     elif continue_training:
         chkpts = sorted([name for name in os.listdir(config.train_checkpoint_path)])
         chkpt_path = config.train_checkpoint_path + "/" + chkpts[-1]
-        tprint("Latest found checkpoint: {}".format(chkpt_path))
+        if DEBUG_VERBOSITY:
+            info("Latest found checkpoint: {}".format(chkpt_path))
 
     if not os.path.exists(os.path.join(chkpt_path, "train")):
         os.makedirs(os.path.join(chkpt_path, "train"))

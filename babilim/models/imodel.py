@@ -1,5 +1,5 @@
 from typing import Any
-from babilim import tprint
+from babilim import status, info, warn, error, DEBUG_VERBOSITY
 from babilim.core import Tensor, RunOnlyOnce, GradientTape
 from babilim.layers.ilayer import ILayer
 from babilim.data import Dataset, TensorDataset
@@ -62,7 +62,7 @@ class IModel(ILayer):
                 prediction = self(**x._asdict())
                 for p in prediction:
                     if p.is_nan().any():
-                        tprint("NaN NetworkOutput {}: {}".format(p.name, p.native))
+                        error("NaN NetworkOutput {}: {}".format(p.name, p.native))
                         raise ValueError("NetworkOutput {} got nan.".format(p.name))
                 loss_results = loss(y_true=y, y_pred=prediction)
                 loss.log("loss/total", loss_results)
@@ -72,11 +72,11 @@ class IModel(ILayer):
             gradients = tape.gradient(loss_results)
             for grad in gradients:
                 if grad is None:
-                    tprint("WARNING: A trainable variable did not have gradients."
+                    warn("A trainable variable did not have gradients."
                            "Did you set trainable or requires grads to false during your forward pass?")
                     continue
                 if grad.is_nan().any():
-                    tprint("NaN in gradient for {}: {}".format(grad.name, grad.native))
+                    error("NaN in gradient for {}: {}".format(grad.name, grad.native))
                     raise ValueError("Gradient of {} got nan.".format(grad.name))
             lr = lr_schedule(samples_seen / config.train_batch_size)
 
@@ -86,13 +86,12 @@ class IModel(ILayer):
 
                 # Update global variables and log the variables
                 samples_seen += config.train_batch_size
-                tprint("Training {}/{} - Loss {:.3f} - LR {:.6f}".format(i + 1, N, loss_val, lr), end="")
-                if i % config.train_log_steps == 0:
+                status("Training {}/{} - Loss {:.3f} - LR {:.6f}".format(i + 1, N, loss_val, lr), end="")
                     summary_writer.add_scalar('learning_rate', lr, global_step=samples_seen)
                     loss.summary(samples_seen, summary_writer)
                     metrics.summary(samples_seen, summary_writer)
             else:
-                tprint("Validating {}/{} - Loss {:.3f}".format(i + 1, N, loss_val), end="")
+                status("Validating {}/{} - Loss {:.3f}".format(i + 1, N, loss_val), end="")
         if optimizer is None:
             loss.summary(samples_seen, summary_writer)
             metrics.summary(samples_seen, summary_writer)
@@ -103,7 +102,8 @@ class IModel(ILayer):
         samples_seen = 0
 
         # Actually force model to be build by running one forward step
-        tprint("Build model.")
+        if DEBUG_VERBOSITY:
+            info("Build model.")
         features, _ = next(iter(batched_training_dataset))
         self(**features._asdict())
 
@@ -112,9 +112,7 @@ class IModel(ILayer):
         saved_models_path = os.path.join(chkpt_path, "checkpoints")
         saved_models = sorted([os.path.join(saved_models_path, f) for f in os.listdir(saved_models_path)])
         if len(saved_models) > 0 and os.path.exists(saved_models[-1]):
-            tprint("Loading checkpoint: {}".format(saved_models[-1]))
-            checkpoint = np.load(saved_models[-1], allow_pickle=True)
-            epoch = checkpoint["epoch"] + 1
+            info("Loading checkpoint: {}".format(saved_models[-1]))
             samples_seen = len(batched_training_dataset) * config.train_batch_size * epoch
             if "model_state_dict" in checkpoint:
                 self.load_state_dict(checkpoint["model_state_dict"][()])
@@ -170,7 +168,7 @@ class IModel(ILayer):
 
         epoch, samples_seen = self._init_model(training_dataset, chkpt_path, config, optim, loss, metrics, lr_schedule, verbose)
 
-        tprint("Start training for {} epochs from epoch {}.".format(epochs, epoch))
+        info("Start training for {} epochs from epoch {}.".format(epochs, epoch))
         start = time.time()
         for i in range(epoch, epochs):
             loss.reset_avg()
@@ -185,7 +183,7 @@ class IModel(ILayer):
             loss_results, metrics_results = self.run_epoch(config, validation_dataset, None, lr_schedule, loss, metrics, samples_seen, val_summary_writer)
             elapsed_time = time.time() - start
             eta = elapsed_time / (i + 1) * (epochs - (i + 1))
-            tprint("Epoch {}/{} - ETA {} - {} - {}".format(i + 1, epochs, self.__format_time(eta),
+            status("Epoch {}/{} - ETA {} - {} - {}".format(i + 1, epochs, self.__format_time(eta),
                                                            self.__dict_to_str(loss_results),
                                                            self.__dict_to_str(metrics_results)))
             # save checkpoint

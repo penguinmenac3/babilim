@@ -26,7 +26,7 @@ import sys
 import pickle
 
 import babilim
-from babilim import tprint
+from babilim import info
 from babilim.experiment.config import Config
 from babilim.core.tensor import TensorWrapper
 
@@ -121,15 +121,13 @@ class Dataset(Sequence):
         """
         dataset = self.as_cached(cache_path)
         if verbose:
-            tprint("Caching dataset...")
-        N = len(dataset)
-        for i, _ in enumerate(dataset):
+            info("Caching dataset...")
             if verbose:
-                tprint("\r{}/{}".format(i, N), end="")
+                info("\r{}/{}".format(i, N), end="")
         
         if verbose:
-            tprint("")
-            tprint("Caching done.")
+            info("")
+            info("Caching done.")
  
     @staticmethod
     def from_disk(config: Config, cache_path: str, version: str) -> '_CachedDataset':

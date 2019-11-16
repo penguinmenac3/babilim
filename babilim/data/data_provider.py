@@ -31,22 +31,21 @@ from babilim.experiment.config import Config
 from babilim.core.tensor import TensorWrapper
 
 
-class TensorDataset(Iterable):
-    def __init__(self, native_dataset):
+class Dataloader(Iterable):
+    def __init__(self, native_dataloader):
         self._tensor_wrapper = TensorWrapper()
-        self.native_dataset = native_dataset
-        self.native_dataset_iter = iter(native_dataset)
+        self.native_dataloader = native_dataloader
 
     def __iter__(self) -> Iterator:
-        class TensorDatasetIterator(Iterator):
-            def __init__(self, native_dataset, tensor_wrapper):
+        class TensorDataloaderIterator(Iterator):
+            def __init__(self, native_dataloader, tensor_wrapper):
                 self._tensor_wrapper = tensor_wrapper
-                self.native_dataset_iter = iter(native_dataset)
+                self.native_dataloader_iter = iter(native_dataloader)
 
             def __next__(self) -> Any:
                 # Print index errors, they probably were an error and not intentional.
                 try:
-                    x, y = next(self.native_dataset_iter)
+                    x, y = next(self.native_dataloader_iter)
                     inp, _ = self._tensor_wrapper.wrap(x._asdict())
                     outp, _ = self._tensor_wrapper.wrap(y._asdict())
                     inp = type(x)(**inp)
@@ -55,10 +54,10 @@ class TensorDataset(Iterable):
                 except IndexError as e:
                     traceback.print_exc(file=sys.stderr)
                     raise e
-        return TensorDatasetIterator(self.native_dataset, self._tensor_wrapper)
+        return TensorDataloaderIterator(self.native_dataloader, self._tensor_wrapper)
 
     def __len__(self) -> int:
-        return len(self.native_dataset)
+        return len(self.native_dataloader)
 
 
 class Dataset(Sequence):
@@ -72,9 +71,37 @@ class Dataset(Sequence):
     The version function returns a number (can be a hash) which changes, whenever the dataset changes.
     This enables subsequent callers to buffer this dataset and update their buffers when the version changes.
     """
-    def __init__(self, config: Config):
+    def __init__(self, config: Config, cache_dir: str = None):
         self.config = config
-    
+        self.transformers = []
+        self.realtime_transformers = []
+        self._caching = False
+        self._cache_dir = cache_dir
+        self._cache_indices = {}
+        self._cached_len = -1
+        if self._cache_dir is not None:
+            self.init_caching(cache_dir)
+            self._cached_len = len(os.listdir(self._cache_dir))
+
+    def init_caching(self, cache_dir):
+        info("Init caching: {}".format(cache_dir))
+        self._caching = True
+        self._cache_dir = cache_dir
+        # If it does not exist create the cache dir.
+        if not os.path.exists(self._cache_dir):
+            os.makedirs(self._cache_dir)
+
+        # Read all files in the folder into a dict that maps indices to filenames (for quicker access)
+        cache_files = os.listdir(self._cache_dir)
+        for cf in cache_files:
+            self._cache_indices[int(cf.replace(".pk", ""))] = os.path.join(self._cache_dir, cf)
+
+    def _cache(self, index: int, value) -> None:
+        fp = os.path.join(self._cache_dir, "{:09d}.pk".format(index))
+        with open(fp, "wb") as f:
+            pickle.dump(value, f)
+        self._cache_indices[index] = fp
+
     def getitem(self, index: int) -> Any:
         raise NotImplementedError
 
@@ -83,14 +110,33 @@ class Dataset(Sequence):
         if index >= len(self):
             raise IndexError()
 
-        # Print index errors, they probably were an error and not intentional.
-        try:
-            return self.getitem(index)
-        except IndexError as e:
-            traceback.print_exc(file=sys.stderr)
-            raise e
+        if self._caching and index in self._cache_indices:
+            with open(self._cache_indices[index], "rb") as f:
+                sample = pickle.load(f)
+        else:
+            # Print index errors, they probably were an error and not intentional.
+            try:
+                sample = self.getitem(index)
+            except IndexError as e:
+                traceback.print_exc(file=sys.stderr)
+                raise e
+
+            # Apply transforms if they are available.
+            for transform in self.transformers:
+                sample = transform(*sample)
+
+            if self._caching:
+                return self._cache(index, sample)
+
+        # Apply real time transformers after caching. Realtime is not cached
+        for transform in self.realtime_transformers:
+            sample = transform(*sample)
+
+        return sample
 
     def __len__(self) -> int:
+        if self._cached_len >= 0:
+            return self._cached_len
         raise NotImplementedError
 
     @property
@@ -100,17 +146,20 @@ class Dataset(Sequence):
 
         :return: The version number of the dataset.
         """
+        version = "{}".format(self._get_version())
+        for transform in self.transformers:
+            version = "{}_{}".format(version, transform.version)
+        for transform in self.realtime_transformers:
+            version = "{}_{}".format(version, transform.version)
+        return version
+
+    def _get_version(self):
+        """
+        Defines the version of the data in the dataset. When the data is static you can return a static string.
+
+        :return: The version number of the dataset.
+        """
         raise NotImplementedError
-
-    def as_cached(self, cache_path: str) -> '_CachedDataset':
-        """
-        Convert a dataset into a cached dataset.
-
-        :param cache_path: The path where the cache should be saved.
-        """
-        if isinstance(self, _CachedDataset):
-            raise RuntimeError("Cannot cache a cached dataset.")
-        return _CachedDataset(dataset=self, cache_path=cache_path, version=self.version)
 
     def to_disk(self, cache_path: str, verbose: bool = True) -> None:
         """
@@ -119,9 +168,11 @@ class Dataset(Sequence):
         :param cache_path: The path where the cache should be written.
         :param verbose: If info on progress should be printed, defaults to True.
         """
-        dataset = self.as_cached(cache_path)
+        self.init_caching(cache_path)
         if verbose:
             info("Caching dataset...")
+        N = len(self)
+        for i, _ in enumerate(self):
             if verbose:
                 info("\r{}/{}".format(i, N), end="")
         
@@ -130,7 +181,7 @@ class Dataset(Sequence):
             info("Caching done.")
  
     @staticmethod
-    def from_disk(config: Config, cache_path: str, version: str) -> '_CachedDataset':
+    def from_disk(config: Config, cache_path: str) -> 'Dataset':
         """
         Create a dataset from a cache on disk.
  
@@ -139,7 +190,7 @@ class Dataset(Sequence):
         :param version: The version of the dataset that should be loaded.
         :return: A CachedDataset object that represents the data that has been passed to "to_disk" when creating the cache.
         """
-        return _CachedDataset(dataset=_CacheDummyDataset(config=config, cache_path=cache_path, version=version), cache_path=cache_path, version=version)
+        return Dataset(config, cache_dir=cache_path)
 
     def to_keras(self):
         """
@@ -155,16 +206,13 @@ class Dataset(Sequence):
         Converts the dataset into a batched pytorch dataset.
         
         The type will be torch.utils.data.DataLoader.
-        
-        :param shuffle: If the data should be shuffeled. Defaults to True.
-        :param num_workers: The number of multithreaded workers. Defaults to 1, since more usually does not work.
         """
         from babilim.data.pytorch import BatchedPytorchDataset
         return BatchedPytorchDataset(self, self.config, self.config.problem_shuffle, self.config.problem_num_threads)
 
-    def to_native(self) -> TensorDataset:
+    def to_dataloader(self) -> Dataloader:
         """
-        TODO
+        Converts the dataset into a babilim.data.Dataloader.
         """
         data = None
         if babilim.is_backend(babilim.PYTORCH_BACKEND):
@@ -173,7 +221,7 @@ class Dataset(Sequence):
             data = self.to_keras()
         else:
             raise NotImplementedError("Other backends than pytorch and tf2 are not implemented.")
-        return TensorDataset(data)
+        return Dataloader(data)
 
     def to_tfrecord(self):
         """
@@ -207,138 +255,3 @@ class Transformer(object):
         :return: The version number of the transformer.
         """
         raise NotImplementedError
-
-
-class ComposeTransforms(Transformer):
-    def __init__(self, transforms: Iterable[Transformer], transform_version_name: str) -> None:
-        """
-        A transform that applies the transforms provided in transforms in order.
-
-        :param transforms: An Iterable of Transformers which is applied on the data.
-        :param transform_version_name: The name of the transformation procedure used for versioning.
-        """
-        self.transforms = transforms
-        self.transform_version_name = transform_version_name
-
-    def __call__(self, *args):
-        """
-        Applies all the transforms in order.
-        :param args: The input data.
-        :return: The transformed data.
-        """
-        for t in self.transforms:
-            args = t(*args)
-        return args
-
-    @property
-    def version(self):
-        return self.transform_version_name
-
-
-class TransformedDataset(Dataset):
-    def __init__(self, dataset: Dataset, transformer: Transformer) -> None:
-        """
-        Create a transfored dataset by applying a transformer.
-
-        :param dataset: The dataset to transform.
-        :param transformer: The transformer that gets applied to the dataset.
-        """
-        super().__init__(dataset.config)
-        self.dataset = dataset
-        self.transformer = transformer
-    
-    def __len__(self) -> int:
-        return len(self.dataset)
-
-    def getitem(self, index: int) -> Any:
-        return self.transformer(*self.dataset[index])
-
-    @property
-    def version(self) -> str:
-        """
-        Defines the version of the data in the dataset. When the data is static you can return a static string.
-
-        :return: The version number of the dataset.
-        """
-        return "{}_{}".format(self.dataset.version, self.transformer.version)
-
-
-class _CacheDummyDataset(Dataset):
-    def __init__(self, config: Config, cache_path: str, version: str) -> None:
-        """
-        A dummy dataset that can be used when a dataset has been fully cached.
- 
-        :param config: The configuration for the dataset.
-        :param version: Version of the cached dataset that should be used.
-        :type version: str
-        """
-        super().__init__(config)
-        self._version = version
-        self.cache_path = os.path.join(cache_path, version)
-        self.size = len(os.listdir(self.cache_path))
- 
-    def getitem(self, index: int) -> Any:
-        raise RuntimeError("This function should never be called on the dummy dataset.")
- 
-    def __len__(self) -> int:
-        return self.size
- 
-    @property
-    def version(self) -> str:
-        """
-        Defines the version of the data in the dataset. When the data is static you can return a static string.
-        :return: The version number of the dataset.
-        """
-        return self._version
- 
- 
-class _CachedDataset(Dataset):
-    def __init__(self, dataset: Dataset, cache_path: str, version: str):
-        """
-        It is not recommended to use this class. Use the static methods to_disk and from_disk instead.
- 
-        A cached dataset stores the data provided by the original dataset on disk in a quick to read manner.
-        When you do computation heavy preprocessing using a cached dataset might be a great idea.
- 
-        :param dataset: The dataset that should be wrapped.
-        """
-        super().__init__(dataset.config)
-        self.dataset = dataset
-        self._version = version
-        self.cache_dir = os.path.join(cache_path, version)
-        self.cache_indices = {}
- 
-        # If it does not exist create the cache dir.
-        if not os.path.exists(self.cache_dir):
-            os.makedirs(self.cache_dir)
- 
-        # Read all files in the folder into a dict that maps indices to filenames (for quicker access)
-        cache_files = os.listdir(self.cache_dir)
-        for cf in cache_files:
-            self.cache_indices[int(cf.replace(".pk", ""))] = os.path.join(self.cache_dir, cf)
- 
-    def _cache(self, index: int) -> None:
-        fp = os.path.join(self.cache_dir, "{:09d}.pk".format(index))
-        value = self.dataset[index]
-        with open(fp, "wb") as f:
-            pickle.dump(value, f)
-        self.cache_indices[index] = fp
-        return value
- 
-    def getitem(self, index: int) -> Any:
-        if index in self.cache_indices:
-            with open(self.cache_indices[index], "rb") as f:
-                return pickle.load(f)
-        else:
-            return self._cache(index)
- 
-    def __len__(self) -> int:
-        return len(self.dataset)
- 
-    @property
-    def version(self) -> str:
-        """
-        Defines the version of the data in the dataset. When the data is static you can return a static string.
-        :return: The version number of the dataset.
-        """
-        return self._version

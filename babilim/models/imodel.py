@@ -2,7 +2,7 @@ from typing import Any
 from babilim import status, info, warn, error, DEBUG_VERBOSITY
 from babilim.core import Tensor, RunOnlyOnce, GradientTape
 from babilim.layers.ilayer import ILayer
-from babilim.data import Dataset, TensorDataset
+from babilim.data import Dataset, Dataloader
 from babilim.experiment import Config
 from babilim.optimizers.learning_rates import LearningRateSchedule
 import babilim.core.statefull_object as so
@@ -162,14 +162,14 @@ class IModel(ILayer):
         train_summary_writer = SummaryWriter(os.path.join(chkpt_path, "train"))
         val_summary_writer = SummaryWriter(os.path.join(chkpt_path, "val"))
 
-        # Create batched datasets.
-        training_dataset = training_dataset.to_native()
-        validation_dataset = validation_dataset.to_native()
+        # Create batched dataloaders.
+        training_dataloader = training_dataset.to_dataloader()
+        validation_dataloader = validation_dataset.to_dataloader()
 
         # Try to retrieve optional arguments from hyperparams if not specified
         epochs = config.train_epochs
 
-        epoch, samples_seen = self._init_model(training_dataset, chkpt_path, config, optim, loss, metrics, lr_schedule, verbose)
+        epoch, samples_seen = self._init_model(training_dataloader, chkpt_path, config, optim, loss, metrics, lr_schedule, train_summary_writer)
 
         info("Start training for {} epochs from epoch {}.".format(epochs, epoch))
         start = time.time()
@@ -177,13 +177,14 @@ class IModel(ILayer):
             loss.reset_avg()
             metrics.reset_avg()
             self.train()
-            self.run_epoch(config, training_dataset, optim, lr_schedule, loss, metrics, samples_seen, train_summary_writer)
-            samples_seen += len(training_dataset) * config.train_batch_size
+            self.run_epoch(config, training_dataloader, optim, lr_schedule, loss, metrics, samples_seen, train_summary_writer)
+            samples_seen += len(training_dataloader) * config.train_batch_size
+
 
             loss.reset_avg()
             metrics.reset_avg()
             self.eval()
-            loss_results, metrics_results = self.run_epoch(config, validation_dataset, None, lr_schedule, loss, metrics, samples_seen, val_summary_writer)
+            loss_results, metrics_results = self.run_epoch(config, validation_dataloader, None, lr_schedule, loss, metrics, samples_seen, val_summary_writer)
             elapsed_time = time.time() - start
             eta = elapsed_time / (i + 1) * (epochs - (i + 1))
             status("Epoch {}/{} - ETA {} - {} - {}".format(i + 1, epochs, self.__format_time(eta),

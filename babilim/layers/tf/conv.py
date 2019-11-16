@@ -8,21 +8,21 @@ from babilim.layers.tf.activation import Activation
 
 
 class Conv2D(ILayer):
-    def __init__(self, filters, kernel_size, name, padding=None, strides=None, dilation_rate=None, kernel_initializer=None, activation=None):
-        super().__init__(name=name, layer_type="Conv2D")
+    def __init__(self, filters, kernel_size, padding=None, strides=None, dilation_rate=None, kernel_initializer=None, activation=None):
+        super().__init__(layer_type="Conv2D")
         if kernel_initializer is None:
             kernel_initializer = Orthogonal()
         if padding is None:
             padding = "same"
         self.conv = _Conv2D(filters=filters, kernel_size=kernel_size, strides=strides, dilation_rate=dilation_rate,
                                   padding=padding, activation="relu", kernel_initializer=kernel_initializer)
-        self.activation = Activation(activation, name + "/activation")
+        self.activation = Activation(activation)
 
     @RunOnlyOnce
     def build(self, features):
         self.conv.build(features.shape)
-        self.weight = Tensor(data=None, trainable=True, native=self.conv.kernel, name=self.name + "/kernel")
-        self.bias = Tensor(data=None, trainable=True, native=self.conv.bias, name=self.name + "/bias")
+        self.weight = Tensor(data=None, trainable=True, native=self.conv.kernel)
+        self.bias = Tensor(data=None, trainable=True, native=self.conv.bias)
 
     def call(self, features):
         return self.activation(Tensor(native=self.conv(features.native)))

@@ -9,8 +9,8 @@ from babilim.core.annotations import RunOnlyOnce
 
 
 class MaxPooling2D(ILayer):
-    def __init__(self, name):
-        super().__init__(name=name, layer_type="MaxPooling2D")
+    def __init__(self):
+        super().__init__(layer_type="MaxPooling2D")
         self.pool = _MaxPooling2D()
 
     @RunOnlyOnce
@@ -20,9 +20,10 @@ class MaxPooling2D(ILayer):
     def call(self, features):
         return Tensor(native=self.pool(features.native))
 
+
 class MaxPooling1D(ILayer):
-    def __init__(self, name):
-        super().__init__(name=name, layer_type="MaxPooling1D")
+    def __init__(self):
+        super().__init__(layer_type="MaxPooling1D")
         self.pool = _MaxPooling1D()
 
     @RunOnlyOnce
@@ -32,9 +33,10 @@ class MaxPooling1D(ILayer):
     def call(self, features):
         return Tensor(native=self.pool(features.native))
 
+
 class GlobalAveragePooling2D(ILayer):
-    def __init__(self, name):
-        super().__init__(name=name, layer_type="GlobalAveragePooling2D")
+    def __init__(self):
+        super().__init__(layer_type="GlobalAveragePooling2D")
         self.pool = _GlobalAveragePooling2D()
 
     @RunOnlyOnce
@@ -44,9 +46,10 @@ class GlobalAveragePooling2D(ILayer):
     def call(self, features):
         return Tensor(native=self.pool(features.native))
 
+
 class GlobalAveragePooling1D(ILayer):
-    def __init__(self, name):
-        super().__init__(name=name, layer_type="GlobalAveragePooling1D")
+    def __init__(self):
+        super().__init__(layer_type="GlobalAveragePooling1D")
         self.pool = _GlobalAveragePooling1D()
 
     @RunOnlyOnce

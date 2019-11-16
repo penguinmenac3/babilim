@@ -4,14 +4,14 @@ from babilim.layers.ilayer import ILayer
 
 
 class Lambda(ILayer):
-    def __init__(self, name: str, native_layer: Callable):
+    def __init__(self, native_layer: Callable):
         """
         Wrap a native function in a layer.
         
         :param name: The name of the function.
         :param native_layer: The native layer or function to wrap. (Must accept *args and or **kwargs and return a single tensor, a list of tensors or a dict of tensors)
         """
-        super().__init__(name=name, layer_type="Lambda")
+        super().__init__(layer_type="Lambda")
         self.native_layer = native_layer
 
     def call(self, *args, **kwargs):

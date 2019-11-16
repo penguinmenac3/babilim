@@ -5,6 +5,7 @@ from babilim.layers.ilayer import ILayer
 from babilim.data import Dataset, Dataloader
 from babilim.experiment import Config
 from babilim.optimizers.learning_rates import LearningRateSchedule
+from babilim.core.checkpoint import Checkpoint
 import babilim.core.statefull_object as so
 import os
 import time
@@ -13,8 +14,9 @@ from tensorboardX import SummaryWriter
 
 
 class IModel(ILayer):
-    def __init__(self, name: str, layer_type: str = "Model"):
-        super().__init__(name, layer_type)
+    def __init__(self, layer_type: str = "Model"):
+        super().__init__(layer_type)
+        self.uninitialized = True
 
     def __dict_to_str(self, data):
         out = []
@@ -101,14 +103,18 @@ class IModel(ILayer):
         print()
         return loss.avg, metrics.avg
 
-    def _init_model(self, batched_training_dataset, chkpt_path, config, optim, loss, metrics, lr_schedule, verbose=False):
+    def _init_model(self, batched_training_dataset, chkpt_path, config, optim, loss, metrics, lr_schedule, train_summary_writer):
         samples_seen = 0
 
         # Actually force model to be build by running one forward step
         if DEBUG_VERBOSITY:
             info("Build model.")
-        features, _ = next(iter(batched_training_dataset))
-        self(**features._asdict())
+        if self.uninitialized:
+            self.uninitialized = False
+            features, _ = next(iter(batched_training_dataset))
+            self(**features._asdict())
+            # TODO implement model graph logging sooner or later.
+            #train_summary_writer.add_graph(self.model, features)
 
         # Load Checkpoint
         epoch = 0
@@ -116,42 +122,59 @@ class IModel(ILayer):
         saved_models = sorted([os.path.join(saved_models_path, f) for f in os.listdir(saved_models_path)])
         if len(saved_models) > 0 and os.path.exists(saved_models[-1]):
             info("Loading checkpoint: {}".format(saved_models[-1]))
+            checkpoint = Checkpoint(saved_models[-1])
+            if DEBUG_VERBOSITY:
+                checkpoint.print()
+            epoch = checkpoint.get_epoch() + 1
             samples_seen = len(batched_training_dataset) * config.train_batch_size * epoch
-            if "model_state_dict" in checkpoint:
-                self.load_state_dict(checkpoint["model_state_dict"][()])
+            model_state = checkpoint.get_state_dict("model")
+            optim_state = checkpoint.get_state_dict("optimizer")
+            loss_state = checkpoint.get_state_dict("loss")
+            metrics_state = checkpoint.get_state_dict("metrics")
+            lr_schedule_state = checkpoint.get_state_dict("lr_schedule")
+            if len(model_state) > 0:
+                if DEBUG_VERBOSITY:
+                    info("Load Model...")
+                self.load_state_dict(model_state)
             else:
-                tprint("WARNING: Could not find model_state_dict in checkpoint.")
-            if "optimizer_state_dict" in checkpoint:
-                optim.load_state_dict(checkpoint['optimizer_state_dict'][()])
+                warn("Could not find model_state in checkpoint.")
+            if len(optim_state) > 0:
+                if DEBUG_VERBOSITY:
+                    info("Load Optimizer...")
+                optim.load_state_dict(optim_state)
             else:
-                tprint("WARNING: Could not find optimizer_state_dict in checkpoint.")
-            if "loss_state_dict" in checkpoint:
-                loss.load_state_dict(checkpoint['loss_state_dict'][()])
+                warn("Could not find optimizer_state in checkpoint.")
+            if len(loss_state) > 0:
+                if DEBUG_VERBOSITY:
+                    info("Load Loss...")
+                loss.load_state_dict(loss_state)
             else:
-                tprint("WARNING: Could not find loss_state_dict in checkpoint.")
-            if "metrics_state_dict" in checkpoint:
-                metrics.load_state_dict(checkpoint['metrics_state_dict'][()])
+                warn("Could not find loss_state in checkpoint.")
+            if len(metrics_state) > 0:
+                if DEBUG_VERBOSITY:
+                    info("Load Metrics...")
+                metrics.load_state_dict(metrics_state)
             else:
-                tprint("WARNING: Could not find metrics_state_dict in checkpoint.")
-            if "lr_schedule_state_dict" in checkpoint:
-                lr_schedule.load_state_dict(checkpoint['lr_schedule_state_dict'][()])
+                warn("Could not find metrics_state in checkpoint.")
+            if len(lr_schedule_state) > 0:
+                if DEBUG_VERBOSITY:
+                    info("Load LR Schedule...")
+                lr_schedule.load_state_dict(lr_schedule_state)
             else:
-                tprint("WARNING: Could not find lr_schedule_state_dict in checkpoint.")
+                warn("Could not find lr_schedule_state in checkpoint.")
 
-        variables = self.trainable_variables
-        if verbose:
-            print()
-            print("*****************************")
-            print("* model.trainable_variables *")
-            print("*****************************")
-            for var in variables:
-                print("  {}: {}".format(var.name, var.shape))
-            print()
+        if DEBUG_VERBOSITY:
+            info("Trainable Variables:")
+            for name, var in self.named_trainable_variables.items():
+                info("  {}: {}".format(name, var.shape))
+            info("Untrainable Variables:")
+            for name, var in self.named_untrainable_variables.items():
+                info("  {}: {}".format(name, var.shape))
 
         return epoch, samples_seen
 
     def fit(self, training_dataset: Dataset, validation_dataset: Dataset, loss, metrics, config: Config, optim: Any,
-            lr_schedule: LearningRateSchedule, verbose: bool = False):
+            lr_schedule: LearningRateSchedule, verbose: bool = True):
         config.check_completness()
         if config.train_actual_checkpoint_path is None:
             raise RuntimeError(
@@ -180,6 +203,15 @@ class IModel(ILayer):
             self.run_epoch(config, training_dataloader, optim, lr_schedule, loss, metrics, samples_seen, train_summary_writer)
             samples_seen += len(training_dataloader) * config.train_batch_size
 
+            # save checkpoint
+            checkpoint = Checkpoint(os.path.join(chkpt_path, "checkpoints", "chkpt_{:09d}.npz".format(i)))
+            checkpoint.set_epoch(i)
+            checkpoint.set_state_dict("model", self.state_dict())
+            checkpoint.set_state_dict("optimizer", optim.state_dict())
+            checkpoint.set_state_dict("loss", loss.state_dict())
+            checkpoint.set_state_dict("metrics", metrics.state_dict())
+            checkpoint.set_state_dict("lr_schedule", lr_schedule.state_dict())
+            checkpoint.save()
 
             loss.reset_avg()
             metrics.reset_avg()
@@ -190,26 +222,26 @@ class IModel(ILayer):
             status("Epoch {}/{} - ETA {} - {} - {}".format(i + 1, epochs, self.__format_time(eta),
                                                            self.__dict_to_str(loss_results),
                                                            self.__dict_to_str(metrics_results)))
-            # save checkpoint
-            state_dict = {
-                'epoch': i,
-                'model_state_dict': self.state_dict(),
-                'optimizer_state_dict': optim.state_dict(),
-                'loss_state_dict': loss.state_dict(),
-                'metrics_state_dict': metrics.state_dict(),
-                'lr_schedule_state_dict': lr_schedule.state_dict(),
-            }
-            np.savez_compressed(os.path.join(chkpt_path, "checkpoints", "chkpt_{:09d}.npz".format(i)), **state_dict)
+
+            # Load checkpoint again.
+            #epoch, samples_seen = self._init_model(training_dataloader, chkpt_path, config, optim, loss, metrics, lr_schedule, verbose)
 
     def load(self, model_file):
-        checkpoint = np.load(model_file, allow_pickle=True)
-        if "model_state_dict" in checkpoint:
-            self.load_state_dict(checkpoint["model_state_dict"][()])
+        checkpoint = Checkpoint(model_file)
+        if DEBUG_VERBOSITY:
+            checkpoint.print()
+        model_state = checkpoint.get_state_dict("model")
+        if len(model_state) > 0:
+            self.load_state_dict(model_state)
         else:
-            tprint("WARNING: Could not find model_state_dict in checkpoint.")
+            error("Could not find model_state_dict in checkpoint.")
 
     def save(self, model_file):
-        np.savez_compressed(model_file, **{'model_state_dict': self.state_dict()})
+        checkpoint = Checkpoint(model_file)
+        checkpoint.set_state_dict("model", self.state_dict())
+        if DEBUG_VERBOSITY:
+            checkpoint.print()
+        checkpoint.save()
 
     def predict(self, **kwargs):
         """
@@ -237,16 +269,16 @@ class IModel(ILayer):
 
 
 class NativeModelWrapper(IModel):
-    def __init__(self, model, name: str, layer_type: str = "NativeModel"):
+    def __init__(self, model, layer_type: str = "NativeModel"):
         """
         Wrap a native model to be trained and used as a babilim model.
 
         The model can have a build function which is then used, but it does not need to.
 
         :param model: The model that should be wrapped.
-        :param name: The name of the model.
         :param layer_type: The layer type. Defaults to NativeModel.
         """
+        super().__init__(layer_type=layer_type)
         self.native_model = model
 
     @RunOnlyOnce

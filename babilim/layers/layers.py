@@ -12,18 +12,18 @@ from babilim.layers.common.wrapper_layer import Lambda
 # *******************************************************
 
 
-def Flatten(name:str = "Flatten") -> ILayer:
+def Flatten() -> ILayer:
     if is_backend(PYTORCH_BACKEND):
         from babilim.layers.pt.flatten import Flatten as _Flatten
-        return _Flatten(name)
+        return _Flatten()
     elif is_backend(TF_BACKEND):
         from babilim.layers.tf.flatten import Flatten as _Flatten
-        return _Flatten(name)
+        return _Flatten()
     else:
         raise NotImplementedError("The backend {} is not implemented by this layer.".format(get_backend()))
 
 
-def Linear(out_features: int, name:str ="Linear", activation=None) -> ILayer:
+def Linear(out_features: int, activation=None) -> ILayer:
     """A simple linear layer.
 
     It computes Wx+b with no activation funciton.
@@ -42,16 +42,15 @@ def Linear(out_features: int, name:str ="Linear", activation=None) -> ILayer:
     """
     if is_backend(PYTORCH_BACKEND):
         from babilim.layers.pt.linear import Linear as _Linear
-        return _Linear(out_features, name, activation=activation)
+        return _Linear(out_features, activation=activation)
     elif is_backend(TF_BACKEND):
         from babilim.layers.tf.linear import Linear as _Linear
-        return _Linear(out_features, name, activation=activation)
+        return _Linear(out_features, activation=activation)
     else:
         raise NotImplementedError("The backend {} is not implemented by this layer.".format(get_backend()))
 
 
-def Conv2D(filters: int, kernel_size: Tuple[int, int], name: str = "Conv2D",
-           padding: Optional[str] = None, strides: Tuple[int, int] = (1, 1),
+def Conv2D(filters: int, kernel_size: Tuple[int, int], padding: Optional[str] = None, strides: Tuple[int, int] = (1, 1),
            dilation_rate: Tuple[int, int] = (1, 1), kernel_initializer: Optional[Any] = None, activation=None) -> ILayer:
     """A simple 2d convolution layer.
 
@@ -75,15 +74,15 @@ def Conv2D(filters: int, kernel_size: Tuple[int, int], name: str = "Conv2D",
     """
     if is_backend(PYTORCH_BACKEND):
         from babilim.layers.pt.conv import Conv2D as _Conv2D
-        return _Conv2D(filters, kernel_size, name, padding, strides, dilation_rate, kernel_initializer, activation=activation)
+        return _Conv2D(filters, kernel_size, padding, strides, dilation_rate, kernel_initializer, activation=activation)
     elif is_backend(TF_BACKEND):
         from babilim.layers.tf.conv import Conv2D as _Conv2D
-        return _Conv2D(filters, kernel_size, name, padding, strides, dilation_rate, kernel_initializer, activation=activation)
+        return _Conv2D(filters, kernel_size, padding, strides, dilation_rate, kernel_initializer, activation=activation)
     else:
         raise NotImplementedError("The backend {} is not implemented by this layer.".format(get_backend()))
 
 
-def BatchNormalization(name:str ="BatchNormalization") -> ILayer:
+def BatchNormalization() -> ILayer:
     """TODO
     
     Arguments:
@@ -99,10 +98,10 @@ def BatchNormalization(name:str ="BatchNormalization") -> ILayer:
     """
     if is_backend(PYTORCH_BACKEND):
         from babilim.layers.pt.batch_normalization import BatchNormalization as _BatchNormalization
-        return _BatchNormalization(name)
+        return _BatchNormalization()
     elif is_backend(TF_BACKEND):
         from babilim.layers.tf.batch_normalization import BatchNormalization as _BatchNormalization
-        return _BatchNormalization(name)
+        return _BatchNormalization()
     else:
         raise NotImplementedError("The backend {} is not implemented by this layer.".format(get_backend()))
 
@@ -111,7 +110,7 @@ def BatchNormalization(name:str ="BatchNormalization") -> ILayer:
 # *******************************************************
 
 
-def MaxPooling2D(name:str ="MaxPooling2D") -> ILayer:
+def MaxPooling2D() -> ILayer:
     """TODO
     
     Arguments:
@@ -127,15 +126,15 @@ def MaxPooling2D(name:str ="MaxPooling2D") -> ILayer:
     """
     if is_backend(PYTORCH_BACKEND):
         from babilim.layers.pt.pooling import MaxPooling2D as _MaxPooling2D
-        return _MaxPooling2D(name)
+        return _MaxPooling2D()
     elif is_backend(TF_BACKEND):
         from babilim.layers.tf.pooling import MaxPooling2D as _MaxPooling2D
-        return _MaxPooling2D(name)
+        return _MaxPooling2D()
     else:
         raise NotImplementedError("The backend {} is not implemented by this layer.".format(get_backend()))
 
 
-def MaxPooling1D(name:str ="MaxPooling1D") -> ILayer:
+def MaxPooling1D() -> ILayer:
     """TODO
     
     Arguments:
@@ -151,15 +150,15 @@ def MaxPooling1D(name:str ="MaxPooling1D") -> ILayer:
     """
     if is_backend(PYTORCH_BACKEND):
         from babilim.layers.pt.pooling import MaxPooling1D as _MaxPooling1D
-        return _MaxPooling1D(name)
+        return _MaxPooling1D()
     elif is_backend(TF_BACKEND):
         from babilim.layers.tf.pooling import MaxPooling1D as _MaxPooling1D
-        return _MaxPooling1D(name)
+        return _MaxPooling1D()
     else:
         raise NotImplementedError("The backend {} is not implemented by this layer.".format(get_backend()))
 
 
-def GlobalAveragePooling2D(name:str ="GlobalAveragePooling2D") -> ILayer:
+def GlobalAveragePooling2D() -> ILayer:
     """TODO
     
     Arguments:
@@ -175,10 +174,10 @@ def GlobalAveragePooling2D(name:str ="GlobalAveragePooling2D") -> ILayer:
     """
     if is_backend(PYTORCH_BACKEND):
         from babilim.layers.pt.pooling import GlobalAveragePooling2D as _GlobalAveragePooling2D
-        return _GlobalAveragePooling2D(name)
+        return _GlobalAveragePooling2D()
     elif is_backend(TF_BACKEND):
         from babilim.layers.tf.pooling import GlobalAveragePooling2D as _GlobalAveragePooling2D
-        return _GlobalAveragePooling2D(name)
+        return _GlobalAveragePooling2D()
     else:
         raise NotImplementedError("The backend {} is not implemented by this layer.".format(get_backend()))
 
@@ -187,7 +186,7 @@ def GlobalAveragePooling2D(name:str ="GlobalAveragePooling2D") -> ILayer:
 # *******************************************************
 
 
-def Activation(activation: str, name: str = None) -> ILayer:
+def Activation(activation: str) -> ILayer:
     """TODO
     
     Arguments:
@@ -205,9 +204,9 @@ def Activation(activation: str, name: str = None) -> ILayer:
         name = activation
     if is_backend(PYTORCH_BACKEND):
         from babilim.layers.pt.activation import Activation as _Activation
-        return _Activation(activation, name)
+        return _Activation(activation)
     elif is_backend(TF_BACKEND):
         from babilim.layers.tf.activation import Activation as _Activation
-        return _Activation(activation, name)
+        return _Activation(activation)
     else:
         raise NotImplementedError("The backend {} is not implemented by this layer.".format(get_backend()))

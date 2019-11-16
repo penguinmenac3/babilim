@@ -52,28 +52,37 @@ class TensorWrapper(ITensorWrapper):
         return isinstance(obj, _Tensor)
 
     def wrap_variable(self, obj: Any, name: str) -> 'ITensor':
+        # TODO remove name from API
         if obj not in _variable_wrappers:
-            tmp = Tensor(native=obj, trainable=obj.requires_grad, name=name)
+            tmp = Tensor(native=obj, trainable=obj.requires_grad)
             if not tmp.native.is_cuda and torch.cuda.is_available():
                 tmp.native = tmp.native.to(torch.device("cuda"))
             _variable_wrappers[obj] = tmp
         return _variable_wrappers[obj]
 
-    def vars_from_object(self, v: Any, namespace: str, defaultname: str = "unnamed") -> Sequence['ITensor']:
+    def vars_from_object(self, v: Any, namespace: str) -> Sequence[Tuple[str, 'ITensor']]:
         extra_vars = []
-        if getattr(v, '_parameters', False):
-            for x in getattr(v, '_parameters'):
-                if self.is_variable(v._parameters[x]):
-                    extra_vars.append(self.wrap_variable(v._parameters[x], name=namespace + "/" + x))
-        elif getattr(v, 'parameters', False):
-            for x in getattr(v, 'parameters')():
+        if getattr(v, 'state_dict', False) and getattr(v, 'named_parameters', False):
+            named_params = v.named_parameters()
+            params = []
+            for key, x in named_params:
+                key = key.replace(".", "/")
                 if self.is_variable(x):
-                    extra_vars.append(self.wrap_variable(x, name=namespace + "/" + defaultname))
+                    params.append(key)
+                    name = namespace + "/" + key
+                    extra_vars.append((name, self.wrap_variable(x, name=name)))
+            state = v.state_dict()
+            for key, x in state.items():
+                key = key.replace(".", "/")
+                if key not in params:
+                    if self.is_variable(x):
+                        name = namespace + "/" + key
+                        extra_vars.append((name, self.wrap_variable(x, name=name)))
         return extra_vars
 
 
 class Tensor(ITensor):
-    def __init__(self, data: np.ndarray = None, trainable=False, native: _Tensor=None, name: str="unnamed"):
+    def __init__(self, data: np.ndarray = None, trainable=False, native: _Tensor=None):
         if data is not None:
             #data = data.T
             native = torch.from_numpy(data)
@@ -84,7 +93,7 @@ class Tensor(ITensor):
             native = native
         else:
             raise RuntimeError("You must specify the data or a native value from the correct framework.")
-        super().__init__(native, name)
+        super().__init__(native)
 
     def copy(self) -> 'Tensor':
         return Tensor(data=self.numpy(), trainable=self.trainable)

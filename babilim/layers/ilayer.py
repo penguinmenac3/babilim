@@ -7,8 +7,8 @@ from babilim.core import StatefullObject, RunOnlyOnce
 
 
 class ILayer(StatefullObject):
-    def __init__(self, name: str, layer_type: str):
-        super().__init__(name)
+    def __init__(self, layer_type: str):
+        super().__init__()
         self.__layer_type = layer_type
 
     def __call__(self, *args, **kwargs) -> Any:
@@ -78,7 +78,16 @@ class ILayer(StatefullObject):
         if babilim.is_backend(PYTORCH_BACKEND):
             from torch.nn import Module
             if isinstance(module, Module):
-                for param in self.trainable_variables:
-                    module.register_parameter(param.name, param.native)
+                myname = "_error_"
+                for var in module.__dict__:
+                    if module.__dict__[var] == self:
+                        myname = var
+                    if isinstance(module.__dict__[var], list) and self in module.__dict__[var]:
+                        myname = "{}/{}".format(var, module.__dict__[var].index(self))
+                for name, param in self.named_variables.items():
+                    if param.trainable:
+                        module.register_parameter(myname + name, param.native)
+                    else:
+                        module.register_buffer(myname + name, param.native)
         else:
             warn("Not implemented for tf2 but I think it is not required.")

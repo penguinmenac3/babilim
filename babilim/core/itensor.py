@@ -3,6 +3,7 @@ import numpy as np
 
 tensor_name_table = {}
 
+
 class ITensorWrapper(object):
     def wrap(self, obj: Any) -> Any:
         raise NotImplementedError()
@@ -16,25 +17,13 @@ class ITensorWrapper(object):
     def wrap_variable(self, obj: Any, name: str) -> 'ITensor':
         raise NotImplementedError()
 
-    def vars_from_object(self, obj: Any, namespace: str, defaultname: str = "unnamed") -> Sequence['ITensor']:
+    def vars_from_object(self, obj: Any, namespace: str) -> Sequence[Tuple[str, 'ITensor']]:
         raise NotImplementedError()
 
 
 class ITensor(object):
-    def __init__(self, native, name: str = "unnamed"):
+    def __init__(self, native):
         self.native = native
-        if name not in tensor_name_table:
-            tensor_name_table[name] = 1
-            self.__name = name
-        else:
-            numbering = tensor_name_table[name]
-            self.__name = "{}_{}".format(name, numbering)
-            tensor_name_table[name] += 1
-        tensor_name_table[name] += 1
-
-    @property
-    def name(self):
-        return self.__name
 
     def copy(self) -> 'ITensor':
         raise NotImplementedError("Each implementation of a tensor must implement this.")

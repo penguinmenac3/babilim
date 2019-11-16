@@ -6,8 +6,8 @@ from babilim.core.annotations import RunOnlyOnce
 
 
 class BatchNormalization(ILayer):
-    def __init__(self, name):
-        super().__init__(name=name, layer_type="BatchNormalization")
+    def __init__(self):
+        super().__init__(layer_type="BatchNormalization")
         self.bn = _BN()
 
     @RunOnlyOnce

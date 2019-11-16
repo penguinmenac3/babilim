@@ -10,8 +10,8 @@ from babilim.layers.pt.flatten import Flatten
 
 
 class MaxPooling2D(ILayer):
-    def __init__(self, name):
-        super().__init__(name=name, layer_type="MaxPooling2D")
+    def __init__(self):
+        super().__init__(layer_type="MaxPooling2D")
 
     @RunOnlyOnce
     def build(self, features):
@@ -20,9 +20,10 @@ class MaxPooling2D(ILayer):
     def call(self, features):
         return Tensor(native=_MaxPooling2D(features.native, (2, 2)))
 
+
 class MaxPooling1D(ILayer):
-    def __init__(self, name):
-        super().__init__(name=name, layer_type="MaxPooling1D")
+    def __init__(self):
+        super().__init__(layer_type="MaxPooling1D")
 
     @RunOnlyOnce
     def build(self, features):
@@ -31,10 +32,11 @@ class MaxPooling1D(ILayer):
     def call(self, features):
         return Tensor(native=_MaxPooling1D(features.native, 2))
 
+
 class GlobalAveragePooling2D(ILayer):
-    def __init__(self, name):
-        super().__init__(name=name, layer_type="GlobalAveragePooling2D")
-        self.flatten = Flatten(name=name + "/Flatten")
+    def __init__(self):
+        super().__init__(layer_type="GlobalAveragePooling2D")
+        self.flatten = Flatten()
 
     @RunOnlyOnce
     def build(self, features):
@@ -43,10 +45,11 @@ class GlobalAveragePooling2D(ILayer):
     def call(self, features):
         return self.flatten(Tensor(native=_AveragePooling2D(features.native, features.native.size()[2:])))
 
+
 class GlobalAveragePooling1D(ILayer):
-    def __init__(self, name):
-        super().__init__(name=name, layer_type="GlobalAveragePooling1D")
-        self.flatten = Flatten(name=name + "/Flatten")
+    def __init__(self):
+        super().__init__(layer_type="GlobalAveragePooling1D")
+        self.flatten = Flatten()
 
     @RunOnlyOnce
     def build(self, features):

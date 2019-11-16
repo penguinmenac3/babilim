@@ -6,8 +6,8 @@ from babilim.core.annotations import RunOnlyOnce
 
 
 class Flatten(ILayer):
-    def __init__(self, name):
-        super().__init__(name=name, layer_type="Flatten")
+    def __init__(self):
+        super().__init__(layer_type="Flatten")
         self.flatten = _Flatten()
 
     @RunOnlyOnce

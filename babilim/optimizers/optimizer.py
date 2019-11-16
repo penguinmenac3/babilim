@@ -6,7 +6,7 @@ from babilim.core import RunOnlyOnce
 
 class Optimizer(StatefullObject):
     def __init__(self):
-        super().__init__("Optimizer")
+        super().__init__()
 
     def apply_gradients(self, gradients: Iterable[ITensor], variables: Iterable[ITensor], learning_rate: float) -> None:
         """

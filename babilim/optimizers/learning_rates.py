@@ -4,7 +4,7 @@ from babilim.core.statefull_object import StatefullObject
 
 class LearningRateSchedule(StatefullObject):
     def __init__(self):
-        super().__init__(name="LearningRateSchedule")
+        super().__init__()
     """
     An interface to a learning rate schedule.
     It should implement a call method which converts a global_step into the current lr.

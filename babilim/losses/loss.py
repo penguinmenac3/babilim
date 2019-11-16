@@ -9,7 +9,7 @@ from babilim.core.statefull_object import StatefullObject
 
 class Loss(StatefullObject):
     def __init__(self, log_std=False, log_min=False, log_max=False):
-        super().__init__("Loss")
+        super().__init__()
         self._accumulators = defaultdict(list)
         self._log_std = log_std
         self._log_min = log_min

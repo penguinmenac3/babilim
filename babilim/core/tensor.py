@@ -5,7 +5,8 @@ import babilim
 from babilim import PYTORCH_BACKEND, TF_BACKEND
 from babilim.core.itensor import ITensor, ITensorWrapper
 
-def Tensor(*, data: Union[np.ndarray, Any], trainable: bool, name: str="unnamed") -> ITensor:
+
+def Tensor(*, data: Union[np.ndarray, Any], trainable: bool) -> ITensor:
     """
     Create a babilim tensor from a native tensor or numpy array.
 
@@ -29,7 +30,7 @@ def Tensor(*, data: Union[np.ndarray, Any], trainable: bool, name: str="unnamed"
         if isinstance(data, _PtTensor):
             native = data
             data = None
-        return _Tensor(data, trainable, native, name)
+        return _Tensor(data, trainable, native)
     elif babilim.get_backend() == TF_BACKEND:
         from babilim.core.tensor_tf import Tensor as _Tensor
         from tensorflow import Tensor as _TfTensor
@@ -37,9 +38,10 @@ def Tensor(*, data: Union[np.ndarray, Any], trainable: bool, name: str="unnamed"
         if isinstance(data, _TfTensor):
             native = data
             data = None
-        return _Tensor(data, trainable, native, name)
+        return _Tensor(data, trainable, native)
     else:
         raise RuntimeError("No variable implementation for this backend was found. (backend={})".format(babilim.get_backend()))
+
 
 def TensorWrapper() -> ITensorWrapper:
     if babilim.get_backend() == PYTORCH_BACKEND:

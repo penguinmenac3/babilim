@@ -13,17 +13,17 @@ from babilim.layers.pt.activation import Activation
 
 
 class Linear(ILayer):
-    def __init__(self, out_features, name, activation):
-        super().__init__(name=name, layer_type="Linear")
+    def __init__(self, out_features, activation):
+        super().__init__(layer_type="Linear")
         self.out_features = out_features
-        self.activation = Activation(activation, name + "/activation")
+        self.activation = Activation(activation)
 
     @RunOnlyOnce
     def build(self, features):
         in_features = features.shape[-1]
         self.linear = PtLinear(in_features, self.out_features)
-        self.weight = Tensor(data=None, trainable=True, native=self.linear.weight, name=self.name + "/kernel")
-        self.bias = Tensor(data=None, trainable=True, native=self.linear.bias, name=self.name + "/bias")
+        self.weight = Tensor(data=None, trainable=True, native=self.linear.weight)
+        self.bias = Tensor(data=None, trainable=True, native=self.linear.bias)
         if torch.cuda.is_available():
             self.linear = self.linear.to(torch.device("cuda"))
 

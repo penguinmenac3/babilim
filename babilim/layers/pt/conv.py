@@ -9,8 +9,8 @@ from babilim.layers.pt.activation import Activation
 
 
 class Conv2D(ILayer):
-    def __init__(self, filters, kernel_size, name, padding=None, stride=None, dilation=None, kernel_initializer=None, activation=None):
-        super().__init__(name=name, layer_type="Conv2D")
+    def __init__(self, filters, kernel_size, padding=None, stride=None, dilation=None, kernel_initializer=None, activation=None):
+        super().__init__(layer_type="Conv2D")
         self.filters = filters
         self.kernel_size = kernel_size
         if kernel_initializer is None:
@@ -27,7 +27,7 @@ class Conv2D(ILayer):
         self.dilation = dilation
         self.stride = stride
         self.kernel_initializer = kernel_initializer
-        self.activation = Activation(activation, name + "/activation")
+        self.activation = Activation(activation)
 
     @RunOnlyOnce
     def build(self, features):
@@ -36,8 +36,8 @@ class Conv2D(ILayer):
         self.conv.weight.data = self.kernel_initializer(self.conv.weight.data)
         if torch.cuda.is_available():
             self.conv = self.conv.to(torch.device("cuda"))
-        self.weight = Tensor(data=None, trainable=True, native=self.conv.weight, name=self.name + "/kernel")
-        self.bias = Tensor(data=None, trainable=True, native=self.conv.bias, name=self.name + "/bias")
+        self.weight = Tensor(data=None, trainable=True, native=self.conv.weight)
+        self.bias = Tensor(data=None, trainable=True, native=self.conv.bias)
 
     def call(self, features):
         return self.activation(Tensor(native=self.conv(features.native)))

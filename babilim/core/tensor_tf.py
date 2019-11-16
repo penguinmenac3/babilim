@@ -59,29 +59,31 @@ class TensorWrapper(ITensorWrapper):
             _variable_wrappers[obj] = Tensor(native=obj, trainable=obj.trainable, name=name)
         return _variable_wrappers[obj]
 
-    def vars_from_object(self, v: Any, namespace: str, defaultname: str = "unnamed") -> Sequence['ITensor']:
+    def vars_from_object(self, v: Any, namespace: str) -> Sequence[Tuple[str, 'ITensor']]:
         extra_vars = []
         # TODO is there something special to tensorflow or keras modules?
         if getattr(v, '_parameters', False):
             for x in getattr(v, '_parameters'):
                 if self.is_variable(v._parameters[x]):
-                    extra_vars.append(self.wrap_variable(v._parameters[x], name=namespace + "/" + x))
+                    name = namespace + "/" + x
+                    extra_vars.append((name, self.wrap_variable(v._parameters[x], name=name)))
         elif getattr(v, 'parameters', False):
             for x in getattr(v, 'parameters')():
                 if self.is_variable(x):
-                    extra_vars.append(self.wrap_variable(x, name=namespace + "/" + defaultname))
+                    name = namespace + "/unnamed"  # FIXME
+                    extra_vars.append((name, self.wrap_variable(x, name=name)))
         return extra_vars
 
 
 class Tensor(ITensor):
-    def __init__(self, data: np.ndarray = None, trainable: bool = False, native=None, name:str = "unnamed"):
+    def __init__(self, data: np.ndarray = None, trainable: bool = False, native=None):
         if data is not None:
             native = tf.Variable(data, trainable=trainable)
         elif native is not None:
             native = native
         else:
             raise RuntimeError("You must specify the data or a native value from the correct framework.")
-        super().__init__(native, name)
+        super().__init__(native)
 
     def copy(self) -> 'Tensor':
         return Tensor(data=self.numpy(), trainable=self.trainable)

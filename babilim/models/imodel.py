@@ -87,9 +87,12 @@ class IModel(ILayer):
                 # Update global variables and log the variables
                 samples_seen += config.train_batch_size
                 status("Training {}/{} - Loss {:.3f} - LR {:.6f}".format(i + 1, N, loss_val, lr), end="")
+                if i % config.train_log_steps == config.train_log_steps - 1:
                     summary_writer.add_scalar('learning_rate', lr, global_step=samples_seen)
                     loss.summary(samples_seen, summary_writer)
                     metrics.summary(samples_seen, summary_writer)
+                    loss.reset_avg()
+                    metrics.reset_avg()
             else:
                 status("Validating {}/{} - Loss {:.3f}".format(i + 1, N, loss_val), end="")
         if optimizer is None:

@@ -62,10 +62,10 @@ class IModel(ILayer):
             # Forward pass, computing gradients and applying them
             with GradientTape(variables) as tape:
                 prediction = self(**x._asdict())
-                for p in prediction:
+                for name, p in prediction._asdict().items():
                     if p.is_nan().any():
-                        error("NaN NetworkOutput {}: {}".format(p.name, p.native))
-                        raise ValueError("NetworkOutput {} got nan.".format(p.name))
+                        error("NaN NetworkOutput {}: {}".format(name, p.native))
+                        raise ValueError("NetworkOutput {} got nan.".format(name))
                 loss_results = loss(y_true=y, y_pred=prediction)
                 loss.log("loss/total", loss_results)
                 metrics(y_true=y, y_pred=prediction)

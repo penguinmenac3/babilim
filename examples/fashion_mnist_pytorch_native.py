@@ -193,7 +193,7 @@ if __name__ == "__main__":
     val = FashionMnistDataset(config, PHASE_VALIDATION)
 
     # Create a model.
-    model = NativeModelWrapper(FashionMnistModel(config), name="FashionMnistModel")
+    model = NativeModelWrapper(FashionMnistModel(config))
 
     # Create a loss and some metrics (if your loss has hyper parameters use config for that)
     loss = NativeLossWrapper(FashionMnistLoss())

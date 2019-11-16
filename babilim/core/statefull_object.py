@@ -36,8 +36,9 @@ class StatefullObject(object):
             if isinstance(v, str):
                 pass
             elif isinstance(v, Dict):
-                for k in v:
-                    x = v[k]
+                for i, (k, x) in enumerate(v.items()):
+                    if not isinstance(k, str):
+                        k = "{}".format(i)
                     name = namespace + "/" + member_name + "/" + k
                     if isinstance(x, StatefullObject):
                         all_vars.extend(x.__variables_with_namespace(name))

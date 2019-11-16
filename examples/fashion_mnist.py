@@ -10,7 +10,7 @@ from babilim import PYTORCH_BACKEND, TF_BACKEND, PHASE_TRAIN, PHASE_VALIDATION
 from babilim.core import ITensor, RunOnlyOnce
 from babilim.data import Dataset, image_grid_wrap
 from babilim.experiment import Config
-from babilim.layers import BatchNormalization, Conv2D, MaxPooling2D, GlobalAveragePooling2D, Linear, ReLU, Flatten
+from babilim.layers import BatchNormalization, Conv2D, MaxPooling2D, GlobalAveragePooling2D, Linear, Activation, Flatten
 from babilim.losses import Loss, Metrics, SparseCrossEntropyLossFromLogits, SparseCategoricalAccuracy
 from babilim.models import IModel
 from babilim.optimizers import SGD
@@ -84,8 +84,8 @@ class FashionMnistDataset(Dataset):
 
 
 class FashionMnistModel(IModel):
-    def __init__(self, config: FashionMnistConfig, name: str = "FashionMnistModel"):
-        super().__init__(name, layer_type="FashionMnistModel")
+    def __init__(self, config: FashionMnistConfig):
+        super().__init__(layer_type="FashionMnistModel")
         self.config = config
         self.linear = []
 
@@ -95,28 +95,28 @@ class FashionMnistModel(IModel):
 
         self.linear.append(BatchNormalization())
         self.linear.append(Conv2D(filters=12, kernel_size=(3, 3)))
-        self.linear.append(ReLU())
+        self.linear.append(Activation("relu"))
         self.linear.append(MaxPooling2D())
 
         self.linear.append(BatchNormalization())
         self.linear.append(Conv2D(filters=18, kernel_size=(3, 3)))
-        self.linear.append(ReLU())
+        self.linear.append(Activation("relu"))
         self.linear.append(MaxPooling2D())
 
         self.linear.append(BatchNormalization())
         self.linear.append(Conv2D(filters=18, kernel_size=(3, 3)))
-        self.linear.append(ReLU())
+        self.linear.append(Activation("relu"))
         self.linear.append(MaxPooling2D())
 
         self.linear.append(BatchNormalization())
         self.linear.append(Conv2D(filters=18, kernel_size=(3, 3)))
-        self.linear.append(ReLU())
+        self.linear.append(Activation("relu"))
         self.linear.append(GlobalAveragePooling2D())
 
         self.linear.append(BatchNormalization())
         self.linear.append(Flatten())
         self.linear.append(Linear(out_features=18))
-        self.linear.append(ReLU())
+        self.linear.append(Activation("relu"))
         self.linear.append(Linear(out_features=out_features))
 
     def call(self, features: ITensor) -> NetworkOutput:

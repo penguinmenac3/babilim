@@ -200,8 +200,6 @@ def Activation(activation: str) -> ILayer:
     Returns:
         ILayer -- A layer object.
     """
-    if name is None:
-        name = activation
     if is_backend(PYTORCH_BACKEND):
         from babilim.layers.pt.activation import Activation as _Activation
         return _Activation(activation)

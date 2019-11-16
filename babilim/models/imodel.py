@@ -247,12 +247,11 @@ class NativeModelWrapper(IModel):
         :param name: The name of the model.
         :param layer_type: The layer type. Defaults to NativeModel.
         """
-        super().__init__(name=name, layer_type=layer_type)
-        self.model = model
+        self.native_model = model
 
     @RunOnlyOnce
     def build(self, *args, **kwargs) -> None:
-        build = getattr(self.model, "build", None)
+        build = getattr(self.native_model, "build", None)
         if callable(build):
             # Unwrap arguments
             args = [feature.native for feature in args]
@@ -267,7 +266,7 @@ class NativeModelWrapper(IModel):
         kwargs = {k: kwargs[k].native for k in kwargs}
 
         # call function
-        result = self.model(*args, **kwargs)
+        result = self.native_model(*args, **kwargs)
         result_raw = result._asdict()
 
         # Wrap results
@@ -276,8 +275,8 @@ class NativeModelWrapper(IModel):
 
     def eval(self):
         so.TRAINING = False
-        self.model.eval()
+        self.native_model.eval()
 
     def train(self):
         so.TRAINING = True
-        self.model.train()
+        self.native_model.train()

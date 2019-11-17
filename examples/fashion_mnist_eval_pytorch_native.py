@@ -2,11 +2,10 @@ import sys
 import os
 import numpy as np
 import babilim
-babilim.DEBUG_VERBOSITY = True
 import babilim.logger as logger
 from babilim.models import NativeModelWrapper
 from babilim.experiment import import_checkpoint_config
-from babilim import PYTORCH_BACKEND, TF_BACKEND, PHASE_VALIDATION, info, error, warn
+from babilim import PYTORCH_BACKEND, TF_BACKEND, PHASE_VALIDATION, info, error, warn, status
 
 from examples.fashion_mnist_pytorch_native import FashionMnistDataset
 from examples.fashion_mnist_pytorch_native import FashionMnistConfig
@@ -35,17 +34,17 @@ def evaluate_checkpoint(config: FashionMnistConfig, checkpoint_folder: str, vali
     # Evaluate
     correct = 0
     wrong = 0
+    info("Evaluating {} examples.".format(len(validation_dataset)))
     for feat, label in validation_dataset:
         preds = model.predict(**feat._asdict())
         pred_digit = np.argmax(preds.class_id)
         true_digit = label.class_id
-        print("\r{} == {}, ".format(true_digit, pred_digit, preds.class_id), end="")
         if pred_digit == true_digit:
             correct += 1
         else:
             wrong += 1
-        print("Accuracy: {:.1f}%  ({} vs {})".format(correct/(correct+wrong) * 100, correct, wrong), end="")
-    print("\nAccuracy: {:.1f}%  ({} vs {})".format(correct/(correct+wrong) * 100, correct, wrong), end="")
+        status("Accuracy: {:.1f}%  ({} vs {}), {} == {}".format(correct/(correct+wrong) * 100, correct, wrong, true_digit, pred_digit), end="")
+    status("Accuracy: {:.1f}%  ({} vs {})".format(correct/(correct+wrong) * 100, correct, wrong))
 
 
 if __name__ == "__main__":

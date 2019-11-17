@@ -139,11 +139,11 @@ class StatefullObject(object):
     def load_state_dict(self, state_dict):
         for name, var in self.named_variables.items():
             if name in state_dict:
-                if DEBUG_VERBOSITY:
-                    info("  Loaded: {}".format(name))
                 if babilim.is_backend(babilim.TF_BACKEND):
                     var.assign(state_dict[name])
                 else:
                     var.assign(state_dict[name].T)
+                if DEBUG_VERBOSITY:
+                    info("  Loaded: {}".format(name))
             else:
                 warn("  Variable {} not in checkpoint.".format(name))

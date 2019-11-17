@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import os
+import sys
 from typing import Dict, Any
 import json
 from importlib import import_module
@@ -194,7 +195,7 @@ class Config(ConfigPart):
         return True
 
 
-def import_config(config_file: str) -> Config:
+def import_config(config_file: str) -> Any:
     """
     Only libraries should use this method. Human users should directly import their configs.
     Automatically imports the most specific config from a given file.
@@ -223,4 +224,20 @@ def import_config(config_file: str) -> Config:
     if n is None:
         raise RuntimeError("There must be at least one class in {} derived from Config.".format(config_file))
     config = module.__dict__[n]()
+    return config
+
+def import_checkpoint_config(config_file: str) -> Any:
+    """
+    Adds the folder in which the config_file is to the pythonpath, imports it and removes the folder from the python path again.
+
+    :param config_file: The configuration file which should be loaded.
+    :return: The configuration object.
+    """
+    config_file = config_file.replace("\\", "/")
+    config_folder = "/".join(config_file.split("/")[:-1])
+    config_file_name = config_file.split("/")[-1]
+
+    sys.path.append(config_folder)
+    config = import_config(config_file_name)
+    sys.path.remove(config_folder)
     return config

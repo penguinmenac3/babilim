@@ -95,6 +95,8 @@ class FashionMnistModel(Module):
 
     def make_bn(self, features):
         self.layers.append(self.register(BatchNorm2d(features.shape[1])))
+        if not self.training:
+            self.layers[-1].eval()
         return self.layers[-1](features)
 
     def make_conv2d(self, features, filters, kernel_size):

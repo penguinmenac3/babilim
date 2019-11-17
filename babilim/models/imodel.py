@@ -246,12 +246,14 @@ class IModel(ILayer):
     def predict(self, **kwargs):
         """
         Pass in single training examples as numpy arrays.
+        Also sets model to eval mode.
 
         The array must not have batch dimension.
 
         :param kwargs: The parameters to feed the network as a single example.
         :return: The output for a single example.
         """
+        self.eval()
         kwargs = {k: np.array([kwargs[k]]) for k in kwargs.keys() if isinstance(kwargs[k], np.ndarray)}
         kwargs = {k: Tensor(data=kwargs[k], trainable=False) for k in kwargs.keys()}
 

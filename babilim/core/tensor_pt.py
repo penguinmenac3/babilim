@@ -62,7 +62,7 @@ class TensorWrapper(ITensorWrapper):
 
     def vars_from_object(self, v: Any, namespace: str) -> Sequence[Tuple[str, 'ITensor']]:
         extra_vars = []
-        if getattr(v, 'state_dict', False) and getattr(v, 'named_parameters', False):
+        if getattr(v, 'named_buffers', False) and getattr(v, 'named_parameters', False):
             named_params = v.named_parameters()
             params = []
             for key, x in named_params:
@@ -71,8 +71,8 @@ class TensorWrapper(ITensorWrapper):
                     params.append(key)
                     name = namespace + "/" + key
                     extra_vars.append((name, self.wrap_variable(x, name=name)))
-            state = v.state_dict()
-            for key, x in state.items():
+            buffers = v.named_buffers()
+            for key, x in buffers:
                 key = key.replace(".", "/")
                 if key not in params:
                     if self.is_variable(x):

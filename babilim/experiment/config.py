@@ -23,7 +23,7 @@ import os
 import sys
 from typing import Dict, Any
 import json
-from importlib import import_module
+import importlib
 import inspect
 
 _sentinel = object()
@@ -53,7 +53,10 @@ class ConfigPart(object):
         return "ConfigPart(" + self.__str__() + ")"
 
     def __str__(self) -> str:
-        return json.dumps(self.to_dict(), indent=4, sort_keys=True)
+        out = ""
+        for k, v in sorted(self.to_dict().items(), key=lambda x: x[0]):
+            out += "{}: {}\n".format(k, v)
+        return out
 
     def get(self, key: str, default: Any = _sentinel) -> Any:
         """
@@ -204,7 +207,8 @@ def import_config(config_file: str) -> Any:
     :return: The configuration object.
     """
     module_name = config_file.replace("\\", ".").replace("/", ".").replace(".py", "")
-    module = import_module(module_name)
+    module = importlib.import_module(module_name)
+    module = importlib.reload(module)
     symbols = list(module.__dict__.keys())
     symbols = [x for x in symbols if not x.startswith("__")]
     n = None
@@ -234,8 +238,8 @@ def import_checkpoint_config(config_file: str) -> Any:
     :return: The configuration object.
     """
     config_file = config_file.replace("\\", "/")
-    config_folder = "/".join(config_file.split("/")[:-1])
-    config_file_name = config_file.split("/")[-1]
+    config_folder = "/".join(config_file.split("/")[:-2])
+    config_file_name="/".join(config_file.split("/")[-2:])
 
     sys.path.append(config_folder)
     config = import_config(config_file_name)

@@ -111,6 +111,8 @@ class ITensor(object):
     def __invert__(self) -> 'ITensor':
         raise NotImplementedError("Each implementation of a variable must implement this.")
 
+    def __getitem__(self, item) -> 'ITensor':
+        raise NotImplementedError("Each implementation of a variable must implement this.")
 
     # Assignment Operators
     def __isub__(self, other: Union[float, 'ITensor']) -> 'ITensor':

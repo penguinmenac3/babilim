@@ -200,3 +200,10 @@ class Tensor(ITensor):
 
     def __invert__(self) -> 'Tensor':
         return Tensor(native=~self.native)
+
+    def __getitem__(self, item) -> 'Tensor':
+        if isinstance(item, Tensor):
+            result = self.native[item.native]
+        else:
+            result = self.native[item]
+        return Tensor(native=result)

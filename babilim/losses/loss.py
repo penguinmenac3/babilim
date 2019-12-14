@@ -26,7 +26,7 @@ class Loss(StatefullObject):
         """
         loss = self.call(y_pred, y_true)
         if loss.is_nan().any():
-            raise ValueError("Loss '{}' is nan. Loss value: {}".format(self.name, loss))
+            raise ValueError("Loss is nan. Loss value: {}".format(loss))
         return loss
 
     def call(self,
@@ -53,6 +53,8 @@ class Loss(StatefullObject):
     def summary(self, samples_seen, summary_writer=None):
         if summary_writer is not None:
             for k in self._accumulators:
+                if not self._accumulators[k]:
+                    continue
                 combined = np.concatenate(self._accumulators[k], axis=0)
                 summary_writer.add_scalar("{}".format(k), combined.mean(), global_step=samples_seen)
                 if self._log_std:
@@ -64,6 +66,8 @@ class Loss(StatefullObject):
         else:
             import tensorflow as tf
             for k in self._accumulators:
+                if not self._accumulators[k]:
+                    continue
                 combined = np.concatenate(self._accumulators[k], axis=0)
                 tf.summary.scalar("{}".format(k), combined.mean(), step=samples_seen)
                 if self._log_std:
@@ -77,6 +81,8 @@ class Loss(StatefullObject):
     def avg(self):
         avgs = {}
         for k in self._accumulators:
+            if not self._accumulators[k]:
+                continue
             combined = np.concatenate(self._accumulators[k], axis=0)
             avgs[k] = combined.mean()
         return avgs

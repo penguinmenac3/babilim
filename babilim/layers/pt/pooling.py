@@ -32,6 +32,30 @@ class MaxPooling1D(ILayer):
     def call(self, features):
         return Tensor(native=_MaxPooling1D(features.native, 2))
 
+class GlobalMaxPooling2D(ILayer):
+    def __init__(self):
+        super().__init__(layer_type="GlobalMaxPooling2D")
+
+    @RunOnlyOnce
+    def build(self, features):
+        pass
+
+    def call(self, features: Tensor):
+        shape = features.shape[1:2]
+        print(shape)
+        return Tensor(native=_MaxPooling2D(features.native, shape))
+
+class GlobalMaxPooling1D(ILayer):
+    def __init__(self):
+        super().__init__(layer_type="GlobalMaxPooling2D")
+
+    @RunOnlyOnce
+    def build(self, features):
+        pass
+
+    def call(self, features: Tensor):
+        shape = features.shape[1]
+        return Tensor(native=_MaxPooling1D(features.native, shape))
 
 class GlobalAveragePooling2D(ILayer):
     def __init__(self):

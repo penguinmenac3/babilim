@@ -50,6 +50,19 @@ def Linear(out_features: int, activation=None) -> ILayer:
         raise NotImplementedError("The backend {} is not implemented by this layer.".format(get_backend()))
 
 
+def Conv1D(filters: int, kernel_size: int, padding: Optional[str] = None, strides: int = 1,
+           dilation_rate: int = 1, kernel_initializer: Optional[Any] = None, activation=None) -> ILayer:
+    if is_backend(PYTORCH_BACKEND):
+        from babilim.layers.pt.conv import Conv1D as _Conv1D
+        return _Conv1D(filters, kernel_size, padding, strides, dilation_rate, kernel_initializer, activation=activation)
+    elif is_backend(TF_BACKEND):
+        from babilim.layers.tf.conv import Conv1D as _Conv1D
+        return _Conv1D(filters, kernel_size, padding, strides, dilation_rate, kernel_initializer, activation=activation)
+    else:
+        raise NotImplementedError("The backend {} is not implemented by this layer.".format(get_backend()))
+
+
+
 def Conv2D(filters: int, kernel_size: Tuple[int, int], padding: Optional[str] = None, strides: Tuple[int, int] = (1, 1),
            dilation_rate: Tuple[int, int] = (1, 1), kernel_initializer: Optional[Any] = None, activation=None) -> ILayer:
     """A simple 2d convolution layer.
@@ -108,6 +121,28 @@ def BatchNormalization() -> ILayer:
 # *******************************************************
 # Pooling
 # *******************************************************
+
+
+def GlobalMaxPooling2D() -> ILayer:
+    if is_backend(PYTORCH_BACKEND):
+        from babilim.layers.pt.pooling import GlobalMaxPooling2D as _GlobalMaxPooling2D
+        return _GlobalMaxPooling2D()
+    elif is_backend(TF_BACKEND):
+        from babilim.layers.tf.pooling import GlobalMaxPooling2D as _GlobalMaxPooling2D
+        return _GlobalMaxPooling2D()
+    else:
+        raise NotImplementedError("The backend {} is not implemented by this layer.".format(get_backend()))
+
+
+def GlobalMaxPooling1D() -> ILayer:
+    if is_backend(PYTORCH_BACKEND):
+        from babilim.layers.pt.pooling import GlobalMaxPooling1D as _GlobalMaxPooling1D
+        return _GlobalMaxPooling1D()
+    elif is_backend(TF_BACKEND):
+        from babilim.layers.tf.pooling import GlobalMaxPooling1D as _GlobalMaxPooling1D
+        return _GlobalMaxPooling1D()
+    else:
+        raise NotImplementedError("The backend {} is not implemented by this layer.".format(get_backend()))
 
 
 def MaxPooling2D() -> ILayer:

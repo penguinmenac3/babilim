@@ -1,3 +1,4 @@
+__version__ = "0.0.1"
 # MIT License
 #
 # Copyright (c) 2019 Michael Fuerst

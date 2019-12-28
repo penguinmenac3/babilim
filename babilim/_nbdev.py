@@ -2,9 +2,10 @@
 
 __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
-index = {}
+index = {"ClassDecorator": "core_annotations.ipynb",
+         "RunOnlyOnce": "core_annotations.ipynb"}
 
-modules = []
+modules = ["core/annotations.py"]
 
 git_url = "https://github.com/penguinmenac3/babilim/tree/master/"
 

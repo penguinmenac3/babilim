@@ -9,6 +9,12 @@ entries:
     - output: web,pdf
       title: Overview
       url: /
+    - output: web,pdf
+      title: Title
+      url: /build
+    - output: web,pdf
+      title: babilim.core.annotations
+      url: /core_annotations
     output: web
     title: babilim
   output: web

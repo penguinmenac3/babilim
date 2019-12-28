@@ -1,16 +1,15 @@
 from typing import Tuple, Iterable
 
 import babilim
-import babilim.logger as logger
-import babilim.optimizers.learning_rates as lr
+import babilim.training.optimizers.learning_rates as lr
 
 from babilim import PYTORCH_BACKEND, PHASE_TRAIN, PHASE_VALIDATION
-from babilim.core import RunOnlyOnce
+from babilim.core import RunOnlyOnce, Config, logger
 from babilim.data import Dataset, image_grid_wrap
-from babilim.experiment import Config
-from babilim.losses import NativeMetricsWrapper, NativeLossWrapper
-from babilim.models import NativeModelWrapper
-from babilim.optimizers import NativePytorchOptimizerWrapper
+from babilim.model.modules import Lambda, BatchNormalization
+from babilim.training import supervised
+from babilim.training.losses import NativeMetricsWrapper, NativeLossWrapper
+from babilim.training.optimizers import NativePytorchOptimizerWrapper
 
 import torch
 from torch import Tensor
@@ -143,6 +142,8 @@ class FashionMnistModel(Module):
         net = self.make_conv2d(net, 18, (3, 3))
         net = self.make_relu(net)
         net = self.make_global_avg_pool_2d(net)
+        self.layers.append(BatchNormalization())
+        net = self.layers[-1](net)
         net = self.make_bn(net)
         net = self.make_flatten(net)
         net = self.make_linear(net, 18)
@@ -182,6 +183,7 @@ class FashionMnistMetrics(Module):
 
 
 if __name__ == "__main__":
+    babilim.DEBUG_VERBOSITY = True
     babilim.set_backend(PYTORCH_BACKEND)
 
     # Create our configuration (containing all hyper parameters)
@@ -193,7 +195,7 @@ if __name__ == "__main__":
     val = FashionMnistDataset(config, PHASE_VALIDATION)
 
     # Create a model.
-    model = NativeModelWrapper(FashionMnistModel(config))
+    model = Lambda(FashionMnistModel(config))
 
     # Create a loss and some metrics (if your loss has hyper parameters use config for that)
     loss = NativeLossWrapper(FashionMnistLoss())
@@ -203,4 +205,4 @@ if __name__ == "__main__":
     optim = NativePytorchOptimizerWrapper(SGD, model, momentum=0.95, dampening=0.0, weight_decay=config.train_l2_weight, nesterov=True)
 
     # Fit our model to the data using our loss and report the metrics.
-    model.fit(train, val, loss, metrics, config, optim, config.train_learning_rate_shedule, verbose=True)
+    supervised.fit(model, train, val, loss, metrics, config, optim, config.train_learning_rate_shedule, verbose=True)

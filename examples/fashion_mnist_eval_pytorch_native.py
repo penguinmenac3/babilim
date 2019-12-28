@@ -2,9 +2,8 @@ import sys
 import os
 import numpy as np
 import babilim
-import babilim.logger as logger
-from babilim.models import NativeModelWrapper
-from babilim.experiment import import_checkpoint_config
+from babilim.model.modules import Lambda
+from babilim.core import import_checkpoint_config
 from babilim import PYTORCH_BACKEND, TF_BACKEND, PHASE_VALIDATION, info, error, warn, status
 
 from examples.fashion_mnist_pytorch_native import FashionMnistDataset
@@ -18,7 +17,7 @@ def evaluate_checkpoint(config: FashionMnistConfig, checkpoint_folder: str, vali
     info("Importing model from: {}".format(model_path))
     sys.path.append(model_path)
     from fashion_mnist_pytorch_native import FashionMnistModel
-    model = NativeModelWrapper(FashionMnistModel(config))
+    model = Lambda(FashionMnistModel(config))
     sys.path.remove(model_path)
 
     # Init model on gpu

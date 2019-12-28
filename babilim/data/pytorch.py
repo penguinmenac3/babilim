@@ -1,6 +1,6 @@
 from torch.utils.data import DataLoader as __DataLoader
 from typing import Sequence
-from babilim.experiment import Config
+from babilim.core import Config
 
 
 def BatchedPytorchDataset(dataset: Sequence, config: Config, shuffle: bool = True, num_workers: int = 0) -> __DataLoader:

@@ -3,17 +3,13 @@ import numpy as np
 from collections import namedtuple
 
 import babilim
-import babilim.logger as logger
-import babilim.optimizers.learning_rates as lr
-
 from babilim import PYTORCH_BACKEND, TF_BACKEND, PHASE_TRAIN, PHASE_VALIDATION
-from babilim.core import ITensor, RunOnlyOnce
+from babilim.core import ITensor, RunOnlyOnce, Config, logger
 from babilim.data import Dataset, image_grid_wrap
-from babilim.experiment import Config
-from babilim.layers import BatchNormalization, Conv2D, MaxPooling2D, GlobalAveragePooling2D, Linear, Activation, Flatten
-from babilim.losses import Loss, Metrics, SparseCrossEntropyLossFromLogits, SparseCategoricalAccuracy
-from babilim.models import IModel
-from babilim.optimizers import SGD
+from babilim.model.modules import BatchNormalization, Conv2D, MaxPooling2D, GlobalAveragePooling2D, Linear, Activation, Flatten, Module
+from babilim.training import supervised
+from babilim.training.losses import Loss, Metrics, SparseCrossEntropyLossFromLogits, SparseCategoricalAccuracy
+from babilim.training.optimizers import SGD, learning_rates
 
 
 # Create some named tuple for our inputs and outputs so we do not confuse them.
@@ -36,7 +32,7 @@ class FashionMnistConfig(Config):
         self.train_experiment_name = "FashionMNIST"
         self.train_checkpoint_path = "checkpoints"
         samples_per_epoch = self.problem_samples / self.train_batch_size
-        self.train_learning_rate_shedule = lr.Exponential(initial_lr=0.001, k=0.1 / samples_per_epoch)
+        self.train_learning_rate_shedule = learning_rates.Exponential(initial_lr=0.001, k=0.1 / samples_per_epoch)
 
 
 class FashionMnistDataset(Dataset):
@@ -83,7 +79,7 @@ class FashionMnistDataset(Dataset):
         return "FashionMnistDataset"
 
 
-class FashionMnistModel(IModel):
+class FashionMnistModel(Module):
     def __init__(self, config: FashionMnistConfig):
         super().__init__(layer_type="FashionMnistModel")
         self.config = config
@@ -147,6 +143,7 @@ class FashionMnistMetrics(Metrics):
 
 
 if __name__ == "__main__":
+    babilim.DEBUG_VERBOSITY = True
     babilim.set_backend(PYTORCH_BACKEND)
 
     # Create our configuration (containing all hyperparameters)
@@ -168,4 +165,4 @@ if __name__ == "__main__":
     optim = SGD()
 
     # Fit our model to the data using our loss and report the metrics.
-    model.fit(train, val, loss, metrics, config, optim, config.train_learning_rate_shedule, verbose=True)
+    supervised.fit(model, train, val, loss, metrics, config, optim, config.train_learning_rate_shedule, verbose=True)

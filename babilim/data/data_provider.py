@@ -27,7 +27,7 @@ import pickle
 
 import babilim
 from babilim import info
-from babilim.experiment.config import Config
+from babilim.core.config import Config
 from babilim.core.tensor import TensorWrapper
 
 

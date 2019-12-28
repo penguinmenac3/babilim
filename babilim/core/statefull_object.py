@@ -2,6 +2,7 @@ from typing import Sequence, Any, Sequence, Callable, Dict, Iterable
 from collections import defaultdict
 import babilim
 from babilim import PYTORCH_BACKEND, TF_BACKEND, info, warn, DEBUG_VERBOSITY
+from babilim.core.checkpoint import Checkpoint
 from babilim.core.itensor import ITensor
 from babilim.core.tensor import Tensor, TensorWrapper
 
@@ -9,16 +10,14 @@ from babilim.core.tensor import Tensor, TensorWrapper
 _statefull_object_name_table = {}
 
 
-TRAINING = True
-
-
 class StatefullObject(object):
     def __init__(self):
         self._wrapper = TensorWrapper()
+        self._training = True
 
     @property
     def training(self):
-        return TRAINING
+        return self._training
 
     @property
     def variables(self):
@@ -147,3 +146,31 @@ class StatefullObject(object):
                     info("  Loaded: {}".format(name))
             else:
                 warn("  Variable {} not in checkpoint.".format(name))
+
+    def eval(self):
+        self.train(False)
+
+    def train(self, mode=True):
+        self._training = mode
+        for member_name in self.__dict__:
+            obj = self.__dict__[member_name]
+            train_fn = getattr(obj, "train", None)
+            if callable(train_fn):
+                train_fn(mode)
+
+    def load(self, checkpoint_file_path):
+        checkpoint = Checkpoint(checkpoint_file_path)
+        if DEBUG_VERBOSITY:
+            checkpoint.print()
+        model_state = checkpoint.get_state_dict("model")
+        if len(model_state) > 0:
+            self.load_state_dict(model_state)
+        else:
+            babilim.error("Could not find state in checkpoint.")
+
+    def save(self, checkpoint_file_path):
+        checkpoint = Checkpoint(checkpoint_file_path)
+        checkpoint.set_state_dict("model", self.state_dict())
+        if DEBUG_VERBOSITY:
+            checkpoint.print()
+        checkpoint.save()

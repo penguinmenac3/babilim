@@ -30,7 +30,7 @@ import tensorflow as tf
 from tensorflow.keras.utils import Sequence
 
 from babilim import PHASE_TRAINVAL, PHASE_TEST, PHASE_TRAIN, PHASE_VALIDATION
-from babilim.logger.logger import _log_code, _is_code_log_up_to_date
+from babilim.core.logger import _log_code, _is_code_log_up_to_date
 
 def _bytes_feature(value):
     return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))

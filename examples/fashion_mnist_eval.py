@@ -2,8 +2,7 @@ import sys
 import os
 import numpy as np
 import babilim
-import babilim.logger as logger
-from babilim.experiment import import_checkpoint_config
+from babilim.core import import_checkpoint_config
 from babilim import PYTORCH_BACKEND, TF_BACKEND, PHASE_VALIDATION, info, error, warn, status
 
 from examples.fashion_mnist import FashionMnistDataset

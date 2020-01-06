@@ -32,7 +32,12 @@ from abc import ABC, abstractmethod
 # Cell
 class ClassDecorator(ABC):
     def __get__(self, obj, objtype):
-        """Support instance methods."""
+        """
+        A class decorator is a base class that is used for all annotations that should be usable with python classes.
+        Regular annotations will not work with classes.
+
+        This is a helper class that can be used when writing annotations.
+        """
         import functools
         return functools.partial(self.__call__, obj)
 

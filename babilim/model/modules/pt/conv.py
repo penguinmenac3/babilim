@@ -3,7 +3,7 @@ from torch.nn import Conv2d as _Conv2d
 from torch.nn import Conv1d as _Conv1d
 from torch.nn.init import orthogonal_
 
-from babilim.model.modules import Module
+from babilim.model.module import Module
 from babilim.core.tensor_pt import Tensor
 from babilim.core.annotations import RunOnlyOnce
 from babilim.model.modules.pt.activation import Activation

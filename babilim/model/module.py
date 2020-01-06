@@ -7,11 +7,13 @@ import numpy as np
 import babilim
 from babilim import PYTORCH_BACKEND, TF_BACKEND, warn
 from babilim.core import StatefullObject, RunOnlyOnce, Tensor
+from babilim.data import Dataset
 
 
 class Module(StatefullObject):
     def __init__(self, layer_type: str):
         super().__init__()
+        self.initialized_module = False
         self.__layer_type = layer_type
 
     def __call__(self, *args, **kwargs) -> Any:
@@ -28,6 +30,15 @@ class Module(StatefullObject):
             return self._wrapper.unwrap(result)
         else:
             return result
+
+    def initialize(self, dataset: Dataset):
+        if not self.initialized_module:
+            if babilim.DEBUG_VERBOSITY:
+                babilim.info("Build Model")
+            self.initialized_module = True
+            dataloader = dataset.to_dataloader()
+            features, _ = next(iter(dataloader))
+            self(**features._asdict())
 
     def predict(self, **kwargs):
         """

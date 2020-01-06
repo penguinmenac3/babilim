@@ -154,9 +154,15 @@ class StatefullObject(object):
         self._training = mode
         for member_name in self.__dict__:
             obj = self.__dict__[member_name]
-            train_fn = getattr(obj, "train", None)
-            if callable(train_fn):
-                train_fn(mode)
+            if isinstance(obj, Sequence):
+                for x in obj:
+                    train_fn = getattr(x, "train", None)
+                    if callable(train_fn):
+                        train_fn(mode)
+            else:
+                train_fn = getattr(obj, "train", None)
+                if callable(train_fn):
+                    train_fn(mode)
 
     def load(self, checkpoint_file_path):
         checkpoint = Checkpoint(checkpoint_file_path)

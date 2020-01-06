@@ -105,10 +105,10 @@ def _init_model(model: Module, batched_training_dataset, chkpt_path, config, opt
     samples_seen = 0
 
     # Actually force model to be build by running one forward step
-    if not getattr(model, "ready_for_training", False):
+    if not getattr(model, "initialized_model", False):
         if babilim.DEBUG_VERBOSITY:
             info("Build Model")
-        model.ready_for_training = True
+        model.initialized_model = True
         features, _ = next(iter(batched_training_dataset))
         model(**features._asdict())
         # TODO implement model graph logging sooner or later.

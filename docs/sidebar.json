@@ -1,7 +1,7 @@
 {
   "babilim": {
     "Overview": "/",
-    "Title": "/build",
+    "Build Instruction": "/build",
     "babilim.core.annotations": "/core_annotations"
   }
 }

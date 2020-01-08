@@ -3,3 +3,5 @@ entangle-python
 matplotlib
 scipy
 tensorboardX
+packaging
+git+https://github.com/penguinmenac3/nbdev.git

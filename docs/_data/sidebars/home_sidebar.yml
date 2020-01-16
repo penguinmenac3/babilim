@@ -10,11 +10,17 @@ entries:
       title: Overview
       url: /
     - output: web,pdf
-      title: Title
+      title: Build Instruction
       url: /build
     - output: web,pdf
       title: babilim.core.annotations
       url: /core_annotations
+    - output: web,pdf
+      title: babilim.core.config
+      url: /core_config
+    - output: web,pdf
+      title: babilim.model.module
+      url: /model_module
     output: web
     title: babilim
   output: web

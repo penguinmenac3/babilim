@@ -2,6 +2,8 @@
   "babilim": {
     "Overview": "/",
     "Build Instruction": "/build",
-    "babilim.core.annotations": "/core_annotations"
+    "babilim.core.annotations": "/core_annotations",
+    "babilim.core.config": "/core_config",
+    "babilim.model.module": "/model_module"
   }
 }

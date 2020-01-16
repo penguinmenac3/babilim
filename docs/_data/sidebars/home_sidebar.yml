@@ -19,6 +19,15 @@ entries:
       title: babilim.core.config
       url: /core_config
     - output: web,pdf
+      title: babilim.core.gradient_tape
+      url: /core_gradient_tape
+    - output: web,pdf
+      title: babilim.core.itensor
+      url: /core_itensor
+    - output: web,pdf
+      title: babilim.core.logger
+      url: /core_logger
+    - output: web,pdf
       title: babilim.model.module
       url: /model_module
     output: web

@@ -259,4 +259,3 @@ def import_checkpoint_config(config_file: str) -> Any:
     config = import_config(config_file_name)
     sys.path.remove(config_folder)
     return config
-

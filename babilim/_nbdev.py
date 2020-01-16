@@ -8,11 +8,32 @@ index = {"ClassDecorator": "core_annotations.ipynb",
          "Config": "core_config.ipynb",
          "import_config": "core_config.ipynb",
          "import_checkpoint_config": "core_config.ipynb",
+         "GradientTape": "core_gradient_tape.ipynb",
+         "tensor_name_table": "core_itensor.ipynb",
+         "ITensorWrapper": "core_itensor.ipynb",
+         "ITensor": "core_itensor.ipynb",
+         "__log_file": "core_logger.ipynb",
+         "__checkpoint_path": "core_logger.ipynb",
+         "__last_progress": "core_logger.ipynb",
+         "__last_update": "core_logger.ipynb",
+         "__entanglement": "core_logger.ipynb",
+         "PYTHON_IGNORE_LIST": "core_logger.ipynb",
+         "__get_all_files": "core_logger.ipynb",
+         "log_value": "core_logger.ipynb",
+         "update_progress": "core_logger.ipynb",
+         "log_image": "core_logger.ipynb",
+         "setup": "core_logger.ipynb",
+         "connect_ailab": "core_logger.ipynb",
+         "LogResult": "core_logger.ipynb",
+         "LogCall": "core_logger.ipynb",
          "Module": "model_module.ipynb"}
 
-modules = ["corennotations.py",
-           "core\config.py",
-           "model\module.py"]
+modules = ["core/annotations.py",
+           "core/config.py",
+           "core/gradient_tape.py",
+           "core/itensor.py",
+           "core/logger.py",
+           "model/module.py"]
 
 git_url = "https://github.com/penguinmenac3/babilim/tree/master/"
 

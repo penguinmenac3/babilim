@@ -1,5 +1,5 @@
 from typing import Sequence, Any, Sequence, Callable, Dict, Iterable
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 import babilim
 from babilim import PYTORCH_BACKEND, TF_BACKEND, info, warn, DEBUG_VERBOSITY
 from babilim.core.checkpoint import Checkpoint
@@ -125,6 +125,18 @@ class StatefullObject(object):
         for v in all_vars:
             train_vars.append(v.native)
         return train_vars
+
+    @property
+    def _parameters(self) -> OrderedDict:
+        params = OrderedDict()
+        params.update(self.named_trainable_variables)
+        return params
+
+    @property
+    def _buffers(self) -> OrderedDict:
+        params = OrderedDict()
+        params.update(self.named_untrainable_variables)
+        return params
 
     def state_dict(self):
         state = {}

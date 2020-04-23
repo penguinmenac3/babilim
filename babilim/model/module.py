@@ -180,9 +180,9 @@ class Module(StatefullObject):
         for k in self.__dict__:
             v = self.__dict__[k]
             if isinstance(v, Module):
-                modules[prefix + "/" + k] = v
-                modules.update(**v.named_modules(memo, prefix))
-        return modules
+                modules[prefix + "." + k] = v
+                modules.update(**dict(v.named_modules(memo, prefix)))
+        return list(modules.items())
 
     @RunOnlyOnce
     def _register_params(self, module):

@@ -161,4 +161,3 @@ class ITensor(object):
 
     def __ipow__(self, other: Union[float, 'ITensor']) -> 'ITensor':
         return self.assign(self ** other)
-

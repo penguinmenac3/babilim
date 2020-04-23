@@ -4,7 +4,7 @@ import numpy as np
 from typing import Sequence
 from collections import namedtuple
 
-from babilim.experiment import Config
+from babilim.core import Config
 
 
 def isnamedtupleinstance(x):

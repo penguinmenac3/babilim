@@ -171,6 +171,9 @@ class Config(ConfigPart):
         self.problem_shuffle = True
         self.problem_num_threads = 0
 
+        # Optional Parameters
+        self.arch_chkpt_native_format = False
+
         # The following should not be changed, since babilim will change them internally.
         self.train_actual_checkpoint_path = None
 

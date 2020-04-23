@@ -1,33 +1,37 @@
 import os
 import numpy as np
-from babilim import warn, info
+from babilim import warn, info, is_backend, TF_BACKEND, PYTORCH_BACKEND
 
 
 class Checkpoint(object):
-    def __init__(self, checkpoint_path):
+    def __init__(self, checkpoint_path, native_format=False):
         self.checkoint_path = checkpoint_path
+        self.native_format = native_format
         self.data = {}
         if os.path.exists(checkpoint_path):
-            self.data = np.load(checkpoint_path, allow_pickle=False)
-            try:
-                if "model_state_dict" in self.data:
-                    raise ValueError
-            except ValueError:
-                warn("Checkpoint format deprecated. Save this checkpoint to update the format.")
-                self.data = {}
-                checkpoint = np.load(checkpoint_path, allow_pickle=True)
-                if "epoch" in checkpoint:
-                    self.set_epoch(checkpoint["epoch"][()])
-                if "model_state_dict" in checkpoint:
-                    self.set_state_dict("model", checkpoint["model_state_dict"][()])
-                if "optimizer_state_dict" in checkpoint:
-                    self.set_state_dict("optimizer", checkpoint["optimizer_state_dict"][()])
-                if "loss_state_dict" in checkpoint:
-                    self.set_state_dict("loss", checkpoint["loss_state_dict"][()])
-                if "metrics_state_dict" in checkpoint:
-                    self.set_state_dict("metrics", checkpoint["metrics_state_dict"][()])
-                if "lr_schedule_state_dict" in checkpoint:
-                    self.set_state_dict("lr_schedule", checkpoint["lr_schedule_state_dict"][()])
+            if self.native_format:
+                raise NotImplementedError()
+            else:
+                self.data = np.load(checkpoint_path, allow_pickle=False)
+                try:
+                    if "model_state_dict" in self.data:
+                        raise ValueError
+                except ValueError:
+                    warn("Checkpoint format deprecated. Save this checkpoint to update the format.")
+                    self.data = {}
+                    checkpoint = np.load(checkpoint_path, allow_pickle=True)
+                    if "epoch" in checkpoint:
+                        self.set_epoch(checkpoint["epoch"][()])
+                    if "model_state_dict" in checkpoint:
+                        self.set_state_dict("model", checkpoint["model_state_dict"][()])
+                    if "optimizer_state_dict" in checkpoint:
+                        self.set_state_dict("optimizer", checkpoint["optimizer_state_dict"][()])
+                    if "loss_state_dict" in checkpoint:
+                        self.set_state_dict("loss", checkpoint["loss_state_dict"][()])
+                    if "metrics_state_dict" in checkpoint:
+                        self.set_state_dict("metrics", checkpoint["metrics_state_dict"][()])
+                    if "lr_schedule_state_dict" in checkpoint:
+                        self.set_state_dict("lr_schedule", checkpoint["lr_schedule_state_dict"][()])
 
     def print(self):
         info("Checkpoint: {}".format(self.checkoint_path))
@@ -40,7 +44,10 @@ class Checkpoint(object):
     def save(self, checkpoint_path=None):
         if checkpoint_path is None:
             checkpoint_path = self.checkoint_path
-        np.savez_compressed(checkpoint_path, **self.data)
+        if self.native_format:
+            raise NotImplementedError()
+        else:
+            np.savez_compressed(checkpoint_path, **self.data)
 
     def set_epoch(self, epoch):
         self.data["epoch"] = epoch

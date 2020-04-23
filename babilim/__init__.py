@@ -23,7 +23,7 @@ __version__ = "0.0.1"
 
 __all__ = ['status', 'info', 'warn', 'error', 'set_backend', 'get_backend', 'is_backend']
 
-
+import os
 import time as __time
 import datetime as __datetime
 
@@ -125,7 +125,7 @@ def error(msg: str, end: str = "\n") -> None:
         print("\r[{}] ERROR {}".format(time_stamp, msg), end=end)
 
 
-def set_backend(backend: str):
+def set_backend(backend: str, gpu: int = None):
     """
     Set the backend which babilim uses.
 
@@ -139,10 +139,12 @@ def set_backend(backend: str):
         babilim.set_backend(babilim.TF_BACKEND)
     
     :param backend: The backend which should be used.
-    :type backend: str
+    :param gpu: (Optional) Set the gpu that should be used (cuda visible devices).
     :raises RuntimeError: When the backend is invalid or unknown.
     """
     global _backend
+    if gpu is not None:
+        os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu)
     if backend not in [PYTORCH_BACKEND, TF_BACKEND]:
         raise RuntimeError("Unknown backend selected: {}".format(backend))
     device = "cpu"

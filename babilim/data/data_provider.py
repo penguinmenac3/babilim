@@ -26,7 +26,7 @@ import sys
 import pickle
 
 import babilim
-from babilim import info
+from babilim import info, status
 from babilim.core.config import Config
 from babilim.core.tensor import TensorWrapper
 
@@ -81,7 +81,7 @@ class Dataset(Sequence):
         self._cached_len = -1
         if self._cache_dir is not None:
             self.init_caching(cache_dir)
-            self._cached_len = len(os.listdir(self._cache_dir))
+            self._cached_len = len(self._cache_indices)
 
     def init_caching(self, cache_dir):
         info("Init caching: {}".format(cache_dir))
@@ -94,7 +94,8 @@ class Dataset(Sequence):
         # Read all files in the folder into a dict that maps indices to filenames (for quicker access)
         cache_files = os.listdir(self._cache_dir)
         for cf in cache_files:
-            self._cache_indices[int(cf.replace(".pk", ""))] = os.path.join(self._cache_dir, cf)
+            if cf.endswith(".pk"):
+                self._cache_indices[int(cf.replace(".pk", ""))] = os.path.join(self._cache_dir, cf)
 
     def _cache(self, index: int, value) -> None:
         fp = os.path.join(self._cache_dir, "{:09d}.pk".format(index))
@@ -103,7 +104,10 @@ class Dataset(Sequence):
         self._cache_indices[index] = fp
 
     def getitem(self, index: int) -> Any:
-        raise NotImplementedError
+        if self._caching:
+            raise KeyError("The cache for index '{}' is missing.".format(index))
+        else:
+            raise NotImplementedError
 
     def __getitem__(self, index: int) -> Any:
         # Check if len is exceeded.
@@ -170,11 +174,11 @@ class Dataset(Sequence):
         """
         self.init_caching(cache_path)
         if verbose:
-            info("Caching dataset...")
+            info("Caching dataset to {}".format(cache_path))
         N = len(self)
         for i, _ in enumerate(self):
             if verbose:
-                info("\r{}/{}".format(i, N), end="")
+                status("{}/{}".format(i, N), end="")
         
         if verbose:
             info("")
@@ -184,7 +188,7 @@ class Dataset(Sequence):
     def from_disk(config: Config, cache_path: str) -> 'Dataset':
         """
         Create a dataset from a cache on disk.
- 
+
         :param config: The configuration for the dataset.
         :param cache_path: The path to the cache.
         :param version: The version of the dataset that should be loaded.

@@ -5,10 +5,12 @@ from babilim.core.statefull_object import StatefullObject
 class LearningRateSchedule(StatefullObject):
     def __init__(self):
         super().__init__()
+
     """
     An interface to a learning rate schedule.
     It should implement a call method which converts a global_step into the current lr.
     """
+
     def __call__(self, global_step: int) -> float:
         raise NotImplementedError("Must be implemented by subclass.")
 
@@ -25,6 +27,12 @@ class Const(LearningRateSchedule):
 
     def __call__(self, global_step: int) -> float:
         return self.lr
+
+    def __repr__(self):
+        return "lr.Const(lr={})".format(self.lr)
+
+    def __str__(self):
+        return "lr.Const(lr={})".format(self.lr)
 
 
 class Exponential(LearningRateSchedule):
@@ -44,6 +52,12 @@ class Exponential(LearningRateSchedule):
     def __call__(self, global_step: int) -> float:
         return self.initial_lr * math.exp(-self.k * global_step)
 
+    def __repr__(self):
+        return "lr.Exponential(initial_lr={}, k={})".format(self.initial_lr, self.k)
+
+    def __str__(self):
+        return "lr.Exponential(initial_lr={}, k={})".format(self.initial_lr, self.k)
+
 
 class StepDecay(LearningRateSchedule):
     def __init__(self, initial_lr: float, drop: float, steps_per_drop: int):
@@ -61,5 +75,12 @@ class StepDecay(LearningRateSchedule):
         self.steps_per_drop = steps_per_drop
 
     def __call__(self, global_step: int) -> float:
-        return self.initial_lr * math.pow(self.drop, math.floor((1+global_step)/self.steps_per_drop))
+        return self.initial_lr * math.pow(self.drop, math.floor((1 + global_step) / self.steps_per_drop))
 
+    def __repr__(self):
+        return "lr.StepDecay(initial_lr={}, drop={}, steps_per_drop={})".format(self.initial_lr, self.drop,
+                                                                                self.steps_per_drop)
+
+    def __str__(self):
+        return "lr.StepDecay(initial_lr={}, drop={}, steps_per_drop={})".format(self.initial_lr, self.drop,
+                                                                                self.steps_per_drop)

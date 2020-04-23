@@ -66,7 +66,7 @@ class MultiZipReader(object):
     def __find_file(self, filename: str) -> Tuple[int, object]:
         """
         Find a file in all zips.
-        :param filename: The filename to search.
+        :param filename: The sample_token to search.
         :return: In which zip it is findable with what fileinfo.
         """
         zipid = -1
@@ -75,13 +75,13 @@ class MultiZipReader(object):
                 zipid = i
                 break
         if zipid < 0:
-            raise RuntimeError("Cannot find file: ".format(filename))
+            raise RuntimeError("Cannot find file: {}".format(filename))
         return zipid, self.__infos[zipid][filename]
 
     def read(self, filename: str) -> str:
         """
         Read a files content as a string.
-        :param filename: The filename of the file.
+        :param filename: The sample_token of the file.
         :return: The content of the file as a string.
         """
         zipid, fileinfo = self.__find_file(filename)
@@ -91,7 +91,7 @@ class MultiZipReader(object):
     def read_image(self, filename: str) -> np.ndarray:
         """
         Read an image from the zips.
-        :param filename: The filename of the file.
+        :param filename: The sample_token of the file.
         :return: The image as a numpy array.
         """
         zipid, fileinfo = self.__find_file(filename)

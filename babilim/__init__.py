@@ -43,6 +43,17 @@ PYTORCH_BACKEND = "pytorch"
 TF_BACKEND = "tf2"
 
 _backend = PYTORCH_BACKEND
+_logfile = None
+
+
+def get_logfile(path="", time_suffix=True):
+    global _logfile
+    if _logfile is None:
+        _logfile = path
+        if time_suffix:
+            _logfile += __datetime.datetime.fromtimestamp(__time.time()).strftime('%Y-%m-%d_%H.%M.%S')
+        _logfile += ".txt"
+    return _logfile
 
 
 def status(msg: str, end: str= "\n") -> None:
@@ -82,7 +93,10 @@ def info(msg: str, end: str= "\n") -> None:
     """
     if PRINT_INFO:
         time_stamp = __datetime.datetime.fromtimestamp(__time.time()).strftime('%Y-%m-%d %H:%M:%S')
-        print("\r[{}] INFO {}".format(time_stamp, msg), end=end)
+        data = "[{}] INFO {}".format(time_stamp, msg)
+        print("\r{}".format(data), end=end)
+        with open(get_logfile(), "a") as f:
+            f.write(data + "\n")
 
 
 def warn(msg: str, end: str = "\n") -> None:
@@ -102,7 +116,10 @@ def warn(msg: str, end: str = "\n") -> None:
     """
     if PRINT_WARN:
         time_stamp = __datetime.datetime.fromtimestamp(__time.time()).strftime('%Y-%m-%d %H:%M:%S')
-        print("\r[{}] WARN {}".format(time_stamp, msg), end=end)
+        data = "[{}] WARN {}".format(time_stamp, msg)
+        print("\r{}".format(data), end=end)
+        with open(get_logfile(), "a") as f:
+            f.write(data + "\n")
 
 
 def error(msg: str, end: str = "\n") -> None:
@@ -122,7 +139,10 @@ def error(msg: str, end: str = "\n") -> None:
     """
     if PRINT_ERROR:
         time_stamp = __datetime.datetime.fromtimestamp(__time.time()).strftime('%Y-%m-%d %H:%M:%S')
-        print("\r[{}] ERROR {}".format(time_stamp, msg), end=end)
+        data = "[{}] ERROR {}".format(time_stamp, msg)
+        print("\r{}".format(data), end=end)
+        with open(get_logfile(), "a") as f:
+            f.write(data + "\n")
 
 
 def set_backend(backend: str, gpu: int = None):

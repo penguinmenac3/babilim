@@ -8,7 +8,7 @@ from babilim.core.annotations import RunOnlyOnce
 class Activation(Module):
     def __init__(self, activation: str):
         super().__init__(layer_type="Activation")
-        if self.activation is None:
+        if activation is None:
             self.activation = None
         else:
             self.activation = _Activation(activation)

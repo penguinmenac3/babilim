@@ -55,9 +55,9 @@ class TensorWrapper(ITensorWrapper):
         return isinstance(obj, tf.Variable)
 
     def wrap_variable(self, obj: Any, name: str) -> 'ITensor':
-        if obj not in _variable_wrappers:
-            _variable_wrappers[obj] = Tensor(native=obj, trainable=obj.trainable, name=name)
-        return _variable_wrappers[obj]
+        if obj.ref() not in _variable_wrappers:
+            _variable_wrappers[obj.ref()] = Tensor(native=obj, trainable=obj.trainable)
+        return _variable_wrappers[obj.ref()]
 
     def vars_from_object(self, v: Any, namespace: str) -> Sequence[Tuple[str, 'ITensor']]:
         extra_vars = []
@@ -85,6 +85,9 @@ class Tensor(ITensor):
             raise RuntimeError("You must specify the data or a native value from the correct framework.")
         super().__init__(native)
 
+    def ref(self) -> 'ITensor':
+        return self.native.ref()
+        
     def copy(self) -> 'Tensor':
         return Tensor(data=self.numpy(), trainable=self.trainable)
         

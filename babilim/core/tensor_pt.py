@@ -95,6 +95,9 @@ class Tensor(ITensor):
             raise RuntimeError("You must specify the data or a native value from the correct framework.")
         super().__init__(native)
 
+    def ref(self) -> 'ITensor':
+        return self.native
+        
     def copy(self) -> 'Tensor':
         return Tensor(data=self.numpy(), trainable=self.trainable)
         

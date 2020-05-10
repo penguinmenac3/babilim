@@ -27,6 +27,7 @@ index = {"ClassDecorator": "core_annotations.ipynb",
          "setup": "core_logger.ipynb",
          "LogResult": "core_logger.ipynb",
          "LogCall": "core_logger.ipynb",
+         "warn_once": "model_module.ipynb",
          "Module": "model_module.ipynb"}
 
 modules = ["core/annotations.py",

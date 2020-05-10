@@ -41,12 +41,13 @@ PRINT_ERROR = True
 
 PYTORCH_BACKEND = "pytorch"
 TF_BACKEND = "tf2"
+TF2_BACKEND = "tf2"
 
 _backend = PYTORCH_BACKEND
 _logfile = None
 
 
-def get_logfile(path="", time_suffix=True):
+def get_logfile(path="log_", time_suffix=True):
     global _logfile
     if _logfile is None:
         _logfile = path

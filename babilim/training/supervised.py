@@ -3,6 +3,7 @@ import babilim
 from babilim import status, info, warn, error
 from babilim.core import Tensor, RunOnlyOnce, GradientTape
 from babilim.core.logger import log_progress
+from babilim.core.annotations import RunOnlyOnce
 from babilim.model.module import Module
 from babilim.data import Dataset, Dataloader
 from babilim.core import Config
@@ -14,6 +15,10 @@ import time
 import numpy as np
 from tensorboardX import SummaryWriter
 
+
+@RunOnlyOnce
+def warn_once(msg):
+    warn(msg)
 
 def _dict_to_str(data):
     out = []
@@ -82,8 +87,8 @@ def run_epoch(model, config: Config, dataset, optimizer, lr_schedule, loss, metr
         gradients = tape.gradient(loss_results)
         for grad in gradients:
             if grad is None:
-                warn("A trainable variable did not have gradients."
-                       "Did you set trainable or requires grads to false during your forward pass?")
+                warn_once("A trainable variable did not have gradients."
+                           "Did you set trainable or requires grads to false during your forward pass?")
                 continue
             if grad.is_nan().any():
                 error("NaN in gradient for {}: {}".format(grad.name, grad.native))

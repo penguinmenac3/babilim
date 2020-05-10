@@ -54,6 +54,9 @@ class ITensor(object):
     def __init__(self, native):
         self.native = native
 
+    def ref(self) -> 'ITensor':
+        raise NotImplementedError("Each implementation of a tensor must implement this.")
+
     def copy(self) -> 'ITensor':
         raise NotImplementedError("Each implementation of a tensor must implement this.")
 

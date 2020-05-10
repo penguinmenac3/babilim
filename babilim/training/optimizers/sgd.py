@@ -20,10 +20,10 @@ class SGD(Optimizer):
             if self.weight_decay != 0:
                 d_p += var * self.weight_decay
             if self.momentum != 0:
-                if var.native not in self.state:
-                    buf = self.state[var.native] = d_p.copy()
+                if var.ref() not in self.state:
+                    buf = self.state[var.ref()] = d_p.copy()
                 else:
-                    buf = self.state[var.native]
+                    buf = self.state[var.ref()]
                     buf *= self.momentum
                     buf += d_p * (1 - self.dampening)
                 if self.nesterov:

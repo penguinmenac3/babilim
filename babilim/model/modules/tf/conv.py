@@ -4,7 +4,7 @@ from tensorflow.keras.initializers import Orthogonal
 from babilim.model.module import Module
 from babilim.core.tensor_tf import Tensor
 from babilim.core.annotations import RunOnlyOnce
-from babilim.model.modules.tf import Activation
+from babilim.model.modules.tf.activation import Activation
 
 
 class Conv2D(Module):

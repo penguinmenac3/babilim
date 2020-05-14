@@ -45,16 +45,19 @@ TF2_BACKEND = "tf2"
 
 _backend = PYTORCH_BACKEND
 _logfile = None
+_log_buffer = []
 
 
-def get_logfile(path="log_", time_suffix=True):
+def set_logfile(path="log_", time_suffix=True):
     global _logfile
-    if _logfile is None:
-        _logfile = path
-        if time_suffix:
-            _logfile += __datetime.datetime.fromtimestamp(__time.time()).strftime('%Y-%m-%d_%H.%M.%S')
-        _logfile += ".txt"
-    return _logfile
+    _logfile = path
+    if time_suffix:
+        _logfile += __datetime.datetime.fromtimestamp(__time.time()).strftime('%Y-%m-%d_%H.%M.%S')
+    _logfile += ".txt"
+
+    with open(_logfile, "a") as f:
+        for data in _log_buffer:
+            f.write(data + "\n")
 
 
 def status(msg: str, end: str= "\n") -> None:
@@ -96,8 +99,11 @@ def info(msg: str, end: str= "\n") -> None:
         time_stamp = __datetime.datetime.fromtimestamp(__time.time()).strftime('%Y-%m-%d %H:%M:%S')
         data = "[{}] INFO {}".format(time_stamp, msg)
         print("\r{}".format(data), end=end)
-        with open(get_logfile(), "a") as f:
-            f.write(data + "\n")
+        if _logfile is not None:
+            with open(_logfile, "a") as f:
+                f.write(data + "\n")
+        else:
+            _log_buffer.append(data)
 
 
 def warn(msg: str, end: str = "\n") -> None:
@@ -119,8 +125,11 @@ def warn(msg: str, end: str = "\n") -> None:
         time_stamp = __datetime.datetime.fromtimestamp(__time.time()).strftime('%Y-%m-%d %H:%M:%S')
         data = "[{}] WARN {}".format(time_stamp, msg)
         print("\r{}".format(data), end=end)
-        with open(get_logfile(), "a") as f:
-            f.write(data + "\n")
+        if _logfile is not None:
+            with open(_logfile, "a") as f:
+                f.write(data + "\n")
+        else:
+            _log_buffer.append(data)
 
 
 def error(msg: str, end: str = "\n") -> None:
@@ -142,8 +151,11 @@ def error(msg: str, end: str = "\n") -> None:
         time_stamp = __datetime.datetime.fromtimestamp(__time.time()).strftime('%Y-%m-%d %H:%M:%S')
         data = "[{}] ERROR {}".format(time_stamp, msg)
         print("\r{}".format(data), end=end)
-        with open(get_logfile(), "a") as f:
-            f.write(data + "\n")
+        if _logfile is not None:
+            with open(_logfile, "a") as f:
+                f.write(data + "\n")
+        else:
+            _log_buffer.append(data)
 
 
 def set_backend(backend: str, gpu: int = None):

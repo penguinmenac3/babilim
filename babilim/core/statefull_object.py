@@ -2,7 +2,7 @@ from typing import Sequence, Any, Sequence, Callable, Dict, Iterable
 from collections import defaultdict, OrderedDict
 import babilim
 from babilim import PYTORCH_BACKEND, TF_BACKEND, info, warn, DEBUG_VERBOSITY
-from babilim.core.checkpoint import Checkpoint
+from babilim.core.checkpoint import load_state, save_state
 from babilim.core.itensor import ITensor
 from babilim.core.tensor import Tensor, TensorWrapper
 
@@ -177,18 +177,11 @@ class StatefullObject(object):
                     train_fn(mode)
 
     def load(self, checkpoint_file_path):
-        checkpoint = Checkpoint(checkpoint_file_path)
-        if DEBUG_VERBOSITY:
-            checkpoint.print()
-        model_state = checkpoint.get_state_dict("model")
-        if len(model_state) > 0:
-            self.load_state_dict(model_state)
+        checkpoint = load_state(checkpoint_file_path)
+        if "model" in checkpoint:
+            self.load_state_dict(checkpoint["model"])
         else:
             babilim.error("Could not find state in checkpoint.")
 
     def save(self, checkpoint_file_path):
-        checkpoint = Checkpoint(checkpoint_file_path)
-        checkpoint.set_state_dict("model", self.state_dict())
-        if DEBUG_VERBOSITY:
-            checkpoint.print()
-        checkpoint.save()
+        save_state({"model": self.state_dict()}, checkpoint_file_path)

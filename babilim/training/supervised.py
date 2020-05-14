@@ -9,7 +9,7 @@ from babilim.data import Dataset, Dataloader
 from babilim.core import Config
 from babilim.model.modules import Lambda
 from babilim.training.optimizers.learning_rates import LearningRateSchedule
-from babilim.core.checkpoint import Checkpoint
+from babilim.core.checkpoint import load_state, save_state
 import os
 import time
 import numpy as np
@@ -150,44 +150,39 @@ def _init_model(model: Module, batched_training_dataset, chkpt_path, config, opt
     saved_models = sorted([os.path.join(saved_models_path, f) for f in os.listdir(saved_models_path)])
     if len(saved_models) > 0 and os.path.exists(saved_models[-1]):
         info("Loading checkpoint: {}".format(saved_models[-1]))
-        checkpoint = Checkpoint(saved_models[-1], chkpt_native_format)
+        checkpoint = load_state(saved_models[-1], native_format=chkpt_native_format)
         if babilim.DEBUG_VERBOSITY:
             checkpoint.print()
-        epoch = checkpoint.get_epoch() + 1
+        epoch = checkpoint["epoch"] + 1
         samples_seen = len(batched_training_dataset) * config.train_batch_size * epoch
-        model_state = checkpoint.get_state_dict("model")
-        optim_state = checkpoint.get_state_dict("optimizer")
-        loss_state = checkpoint.get_state_dict("loss")
-        metrics_state = checkpoint.get_state_dict("metrics")
-        lr_schedule_state = checkpoint.get_state_dict("lr_schedule")
-        if len(model_state) > 0:
+        if "model" in checkpoint:
             if babilim.DEBUG_VERBOSITY:
                 info("Load Model...")
-            model.load_state_dict(model_state)
+            model.load_state_dict(checkpoint["model"])
         else:
             warn("Could not find model_state in checkpoint.")
-        if len(optim_state) > 0:
+        if "optimizer" in checkpoint:
             if babilim.DEBUG_VERBOSITY:
                 info("Load Optimizer...")
-            optim.load_state_dict(optim_state)
+            optim.load_state_dict(checkpoint["optimizer"])
         else:
             warn("Could not find optimizer_state in checkpoint.")
-        if len(loss_state) > 0:
+        if "loss" in checkpoint:
             if babilim.DEBUG_VERBOSITY:
                 info("Load Loss...")
-            loss.load_state_dict(loss_state)
+            loss.load_state_dict(checkpoint["loss"])
         else:
             warn("Could not find loss_state in checkpoint.")
-        if len(metrics_state) > 0:
+        if "metrics" in checkpoint:
             if babilim.DEBUG_VERBOSITY:
                 info("Load Metrics...")
-            metrics.load_state_dict(metrics_state)
+            metrics.load_state_dict(checkpoint["metrics"])
         else:
             warn("Could not find metrics_state in checkpoint.")
-        if len(lr_schedule_state) > 0:
+        if "lr_schedule" in  checkpoint:
             if babilim.DEBUG_VERBOSITY:
                 info("Load LR Schedule...")
-            lr_schedule.load_state_dict(lr_schedule_state)
+            lr_schedule.load_state_dict(checkpoint["lr_schedule"])
         else:
             warn("Could not find lr_schedule_state in checkpoint.")
 
@@ -241,14 +236,14 @@ def fit(model, training_dataset: Dataset, validation_dataset: Dataset, loss, met
             samples_seen += len(training_dataloader) * config.train_batch_size
 
             # save checkpoint
-            checkpoint = Checkpoint(os.path.join(chkpt_path, "checkpoints", "chkpt_{:09d}.npz".format(i)), native_format=chkpt_native_format)
-            checkpoint.set_epoch(i)
-            checkpoint.set_state_dict("model", model.state_dict())
-            checkpoint.set_state_dict("optimizer", optim.state_dict())
-            checkpoint.set_state_dict("loss", loss.state_dict())
-            checkpoint.set_state_dict("metrics", metrics.state_dict())
-            checkpoint.set_state_dict("lr_schedule", lr_schedule.state_dict())
-            checkpoint.save()
+            save_state({
+                "epoch": i,
+                "model": model.state_dict(),
+                "optimizer": optim.state_dict(),
+                "loss": loss.state_dict(),
+                "metrics": metrics.state_dict(),
+                "lr_schedule": lr_schedule.state_dict()
+            }, os.path.join(chkpt_path, "checkpoints", "chkpt_{:09d}.npz".format(i)), native_format=chkpt_native_format)
 
             loss.reset_avg()
             metrics.reset_avg()

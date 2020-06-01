@@ -291,6 +291,7 @@ def setup_minimal(log_folder: str) -> None:
         _log_code(chkpt_path=log_folder)
     __log_file = os.path.join(log_folder, "log.txt")
     log_progress(goal="waiting", progress=0, score=0)
+    set_logfile(os.path.join(log_folder, "print_log"), time_suffix=False)
 
 
 # Cell

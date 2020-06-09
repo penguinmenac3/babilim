@@ -1,7 +1,8 @@
 import os
 import numpy as np
 
-from babilim import warn, info, is_backend, TF_BACKEND, PYTORCH_BACKEND
+from babilim import is_backend, TF_BACKEND, PYTORCH_BACKEND
+from babilim.core.logging import info, warn
 
 
 def load_state(checkpoint_path, native_format=False):

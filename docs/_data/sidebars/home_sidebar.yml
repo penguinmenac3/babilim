@@ -25,7 +25,7 @@ entries:
       title: babilim.core.itensor
       url: /core_itensor
     - output: web,pdf
-      title: babilim.core.logger
+      title: babilim.core.logging
       url: /core_logger
     - output: web,pdf
       title: babilim.model.module

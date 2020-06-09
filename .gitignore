@@ -1,6 +1,7 @@
 .idea
 .vscode
 checkpoints
+logs
 datasets
 
 *.code-workspace

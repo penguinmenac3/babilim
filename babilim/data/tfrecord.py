@@ -29,8 +29,8 @@ from multiprocessing import Pool
 import tensorflow as tf
 from tensorflow.keras.utils import Sequence
 
-from babilim import PHASE_TRAINVAL, PHASE_TEST, PHASE_TRAIN, PHASE_VALIDATION
-from babilim.core.logger import _log_code, _is_code_log_up_to_date
+from babilim import SPLIT_TRAIN, SPLIT_DEV, SPLIT_TEST
+from babilim.core.logging import _log_code, _is_code_log_up_to_date
 
 def _bytes_feature(value):
     return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
@@ -184,7 +184,7 @@ def create_input_fn(config, phase, augmentation_fn=None, repeat=True, subset=Non
     :param subset: A list of indices of the record files to use, can be used for cross validation. If none is provided all tfrecord files are used.
     :return: An input function for a tf estimator.
     """
-    assert phase in [PHASE_TRAINVAL, PHASE_TEST, PHASE_TRAIN, PHASE_VALIDATION]
+    assert phase in [SPLIT_TRAIN, SPLIT_DEV, SPLIT_TEST, SPLIT_TRAIN + SPLIT_DEV]
 
     prefix = os.path.join(config.problem.tf_records_path, phase)
     prefix = prefix.replace("\\", "/")
@@ -287,9 +287,9 @@ def auto_setup_data(config, training_data=None, validation_data=None):
         # If data is not up to date or records should not be used load dataprovider
         if config.problem.get("tf_records_path", None) is None or needs_update:
             prepare = config.arch.prepare
-            training_data = prepare(config, PHASE_TRAIN, augmentation_fn=augment_train)
+            training_data = prepare(config, SPLIT_TRAIN, augmentation_fn=augment_train)
             training_samples = len(training_data) * config.train.batch_size
-            validation_data = prepare(config, PHASE_VALIDATION, augmentation_fn=augment_train)
+            validation_data = prepare(config, SPLIT_DEV, augmentation_fn=augment_train)
             validation_samples = len(validation_data) * config.train.batch_size
 
         # Load the record dataset and update it if required.
@@ -299,15 +299,15 @@ def auto_setup_data(config, training_data=None, validation_data=None):
 
             # When the training data is written, also update the validation data.
             if needs_update:
-                write_data(config, PHASE_TRAIN, training_data)
-                write_data(config, PHASE_VALIDATION, validation_data)
+                write_data(config, SPLIT_TRAIN, training_data)
+                write_data(config, SPLIT_DEV, validation_data)
             config.train.batch_size = tmp
 
             training_data, training_samples = create_input_fn(
-                config, PHASE_TRAIN, augmentation_fn=augment_train, repeat=False)
+                config, SPLIT_TRAIN, augmentation_fn=augment_train, repeat=False)
             training_data = training_data()
             validation_data, validation_samples = create_input_fn(
-                config, PHASE_VALIDATION, augmentation_fn=augment_test, repeat=False)
+                config, SPLIT_DEV, augmentation_fn=augment_test, repeat=False)
             validation_data = validation_data()
 
     return training_data, training_samples, validation_data, validation_samples

@@ -19,45 +19,16 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-from typing import Iterable, List, Any, Sequence, Iterator
+from typing import Any, Sequence
 import traceback
 import os
 import sys
 import pickle
 
 import babilim
-from babilim import info, status
+from babilim.core.logging import info, status
 from babilim.core.config import Config
-from babilim.core.tensor import TensorWrapper
-
-
-class Dataloader(Iterable):
-    def __init__(self, native_dataloader):
-        self._tensor_wrapper = TensorWrapper()
-        self.native_dataloader = native_dataloader
-
-    def __iter__(self) -> Iterator:
-        class TensorDataloaderIterator(Iterator):
-            def __init__(self, native_dataloader, tensor_wrapper):
-                self._tensor_wrapper = tensor_wrapper
-                self.native_dataloader_iter = iter(native_dataloader)
-
-            def __next__(self) -> Any:
-                # Print index errors, they probably were an error and not intentional.
-                try:
-                    x, y = next(self.native_dataloader_iter)
-                    inp, _ = self._tensor_wrapper.wrap(x._asdict())
-                    outp, _ = self._tensor_wrapper.wrap(y._asdict())
-                    inp = type(x)(**inp)
-                    outp = type(y)(**outp)
-                    return inp, outp
-                except IndexError as e:
-                    traceback.print_exc(file=sys.stderr)
-                    raise e
-        return TensorDataloaderIterator(self.native_dataloader, self._tensor_wrapper)
-
-    def __len__(self) -> int:
-        return len(self.native_dataloader)
+from babilim.data.dataloader import Dataloader
 
 
 class Dataset(Sequence):
@@ -225,7 +196,7 @@ class Dataset(Sequence):
             data = self.to_keras()
         else:
             raise NotImplementedError("Other backends than pytorch and tf2 are not implemented.")
-        return Dataloader(data)
+        return Dataloader(data, self)
 
     def to_tfrecord(self):
         """
@@ -237,25 +208,3 @@ class Dataset(Sequence):
 
         """
         raise NotImplementedError("This is not implemented yet. Use dataset.as_cached(...).to_keras() instead.")
-
-
-class Transformer(object):
-    """
-    A transformer should implement ``__call__``.
-    """
-    def __call__(self, *args):
-        """
-        This function gets the data from the previous transformer or dataset as input and should output the data again.
-        :param args: The input data.
-        :return: The output data.
-        """
-        raise NotImplementedError
-
-    @property
-    def version(self):
-        """
-        Defines the version of the transformer. The name can be also something descriptive of the method.
-
-        :return: The version number of the transformer.
-        """
-        raise NotImplementedError

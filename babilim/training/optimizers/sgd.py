@@ -4,15 +4,15 @@ from babilim.training.optimizers.optimizer import Optimizer
 
 
 class SGD(Optimizer):
-    def __init__(self, momentum: float=0.95, dampening: float=0.0, weight_decay: float=0, nesterov: bool=True):
-        super().__init__()
+    def __init__(self, initial_lr: float, momentum: float=0.95, dampening: float=0.0, weight_decay: float=0, nesterov: bool=True):
+        super().__init__(initial_lr)
         self.momentum = momentum
         self.weight_decay = weight_decay
         self.nesterov = nesterov
         self.dampening = dampening
         self.state = {}
 
-    def apply_gradients(self, gradients: Iterable[ITensor], variables: Iterable[ITensor], learning_rate: float) -> None:
+    def apply_gradients(self, gradients: Iterable[ITensor], variables: Iterable[ITensor]) -> None:
         for grad, var in zip(gradients, variables):
             if grad is None:
                 continue
@@ -31,4 +31,4 @@ class SGD(Optimizer):
                 else:
                     d_p = buf
 
-            var -= d_p * learning_rate
+            var -= d_p * self.lr

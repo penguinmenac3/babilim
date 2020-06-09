@@ -6,7 +6,7 @@
     "babilim.core.config": "/core_config",
     "babilim.core.gradient_tape": "/core_gradient_tape",
     "babilim.core.itensor": "/core_itensor",
-    "babilim.core.logger": "/core_logger",
+    "babilim.core.logging": "/core_logger",
     "babilim.model.module": "/model_module"
   }
 }

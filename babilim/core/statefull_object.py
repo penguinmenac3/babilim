@@ -1,10 +1,11 @@
 from typing import Sequence, Any, Sequence, Callable, Dict, Iterable
 from collections import defaultdict, OrderedDict
 import babilim
-from babilim import PYTORCH_BACKEND, TF_BACKEND, info, warn, DEBUG_VERBOSITY
+from babilim import PYTORCH_BACKEND, TF_BACKEND
 from babilim.core.checkpoint import load_state, save_state
 from babilim.core.itensor import ITensor
 from babilim.core.tensor import Tensor, TensorWrapper
+from babilim.core.logging import info, warn, DEBUG_VERBOSITY
 
 
 _statefull_object_name_table = {}

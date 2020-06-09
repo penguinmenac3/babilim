@@ -5,10 +5,11 @@ from babilim.core import RunOnlyOnce
 
 
 class Optimizer(StatefullObject):
-    def __init__(self):
+    def __init__(self, initial_lr: float):
         super().__init__()
+        self.lr = initial_lr
 
-    def apply_gradients(self, gradients: Iterable[ITensor], variables: Iterable[ITensor], learning_rate: float) -> None:
+    def apply_gradients(self, gradients: Iterable[ITensor], variables: Iterable[ITensor]) -> None:
         """
         This method applies the gradients to variables.
 
@@ -20,7 +21,7 @@ class Optimizer(StatefullObject):
 
 
 class NativePytorchOptimizerWrapper(Optimizer):
-    def __init__(self, optimizer_class, model, **kwargs):
+    def __init__(self, optimizer_class, initial_lr, model, **kwargs):
         """
         Wrap a native pytorch optimizer as a babilim optimizer.
 
@@ -29,7 +30,7 @@ class NativePytorchOptimizerWrapper(Optimizer):
         :param model: The model that is used (instance of type IModel).
         :param kwargs: The arguments for the optimizer on initialization.
         """
-        super().__init__()
+        super().__init__(initial_lr)
         self.optimizer_class = optimizer_class
         self.kwargs = kwargs
         self.model = model
@@ -39,8 +40,8 @@ class NativePytorchOptimizerWrapper(Optimizer):
     def build(self, lr):
         self.optim = self.optimizer_class(self.model.trainable_variables_native, lr=lr, **self.kwargs)
 
-    def apply_gradients(self, gradients: Iterable[ITensor], variables: Iterable[ITensor], learning_rate: float) -> None:
-        self.build(learning_rate)
+    def apply_gradients(self, gradients: Iterable[ITensor], variables: Iterable[ITensor]) -> None:
+        self.build(self.lr)
         for param_group in self.optim.param_groups:
-            param_group['lr'] = learning_rate
+            param_group['lr'] = self.lr
         self.optim.step()

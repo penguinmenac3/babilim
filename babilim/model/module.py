@@ -35,7 +35,8 @@ import inspect
 import numpy as np
 
 import babilim
-from babilim import PYTORCH_BACKEND, TF_BACKEND, warn
+from babilim import PYTORCH_BACKEND, TF_BACKEND
+from ..core.logging import warn, info
 from ..core import StatefullObject, RunOnlyOnce, Tensor
 from ..data import Dataset
 
@@ -94,8 +95,8 @@ class Module(StatefullObject):
         :param dataset: The dataset you want to use for initialization. (Must be of type babilim.data.Dataset)
         """
         if not self.initialized_module:
-            if babilim.DEBUG_VERBOSITY:
-                babilim.info("Build Model")
+            if babilim.core.logging.DEBUG_VERBOSITY:
+                info("Build Model")
             self.initialized_module = True
             dataloader = dataset.to_dataloader()
             features, _ = next(iter(dataloader))
@@ -239,5 +240,5 @@ class Module(StatefullObject):
                     else:
                         module.register_buffer(myname + name, param.native)
         else:
-            if babilim.DEBUG_VERBOSITY:
+            if babilim.core.logging.DEBUG_VERBOSITY:
                 warn_once("Not implemented for tf2 but I think it is not required.")

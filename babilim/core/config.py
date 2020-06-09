@@ -154,29 +154,17 @@ class Config(ConfigPart):
         """
         # Training parameters.
         self.train_batch_size = 1
-        self.train_experiment_name = None
-        self.train_checkpoint_path = "checkpoints"
-        self.train_epochs = 50
-        self.train_log_steps = 100
+        self.train_epochs = 1
+        self.train_log_steps = 100000
 
-        # Architectural parameters (like preparing the data, the model, the loss and then some metrics)
-        self.arch_prepare = None
-        self.arch_model = None
-        self.arch_loss = None
-        self.arch_metrics = None
+        # Specifies if a native checkpoint format is prefered.
+        self.arch_chkpt_native_format = False
 
         # Required for general dataset loading. (Non architecture specific.)
         self.problem_base_dir = None
         self.problem_dataset = None
         self.problem_shuffle = True
         self.problem_num_threads = 0
-
-        # Optional Parameters
-        self.arch_chkpt_native_format = False
-
-        # The following should not be changed, since babilim will change them internally.
-        self.train_actual_checkpoint_path = None
-
         super().__init__()
 
     def __repr__(self) -> str:
@@ -202,8 +190,6 @@ class Config(ConfigPart):
         :return: True if no exception occurs.
         """
         # Check for training parameters
-        assert Config.__has_attribute(self, "train_experiment_name")
-        assert Config.__has_attribute(self, "train_checkpoint_path")
         assert Config.__has_attribute(self, "train_batch_size")
         assert Config.__has_attribute(self, "train_epochs")
         assert Config.__has_attribute(self, "train_log_steps")

@@ -1,266 +1,121 @@
-from typing import Any
-import babilim
-from babilim import status, info, warn, error
-from babilim.core import Tensor, RunOnlyOnce, GradientTape
-from babilim.core.logger import log_progress
-from babilim.core.annotations import RunOnlyOnce
+from typing import Iterable, Union
+
+from babilim.training.trainer import Trainer
+
+from babilim.data import Dataloader
+from babilim.core import GradientTape
+from babilim.core.logging import error
 from babilim.model.module import Module
-from babilim.data import Dataset, Dataloader
-from babilim.core import Config
-from babilim.model.modules import Lambda
-from babilim.training.optimizers.learning_rates import LearningRateSchedule
-from babilim.core.checkpoint import load_state, save_state
-import os
-import time
-import numpy as np
-from tensorboardX import SummaryWriter
+from babilim.training.callbacks.checkpoint_callback import CheckpointCallback
+from babilim.training.callbacks.log_callback import LogCallback
+from babilim.training.callbacks.tensorboard_callback import TensorboardCallback
+from babilim.training.losses import Loss
+from babilim.training.optimizers import Optimizer
+from babilim.training.callbacks.base_callback import BaseCallback
+
+DEFAULT_CALLBACKS = [
+    LogCallback(),
+    CheckpointCallback(),
+    TensorboardCallback()
+]
 
 
-@RunOnlyOnce
-def warn_once(msg):
-    warn(msg)
+class SupervisedTrainer(Trainer):
+    def __init__(self, model: Module, loss: Loss, optimizer: Optimizer, callbacks: Iterable[BaseCallback] = DEFAULT_CALLBACKS):
+        """
+        Create a trainer for supervised training scenarios.
 
-def _dict_to_str(data):
-    out = []
-    for k in data:
-        if isinstance(data[k], list):
-            for i in data[k]:
-                name = i.__name__
-                out.append("{}_{}={:.3f}".format(k, name, data[k]))
-        else:
-            out.append("{}={:.3f}".format(k, data[k]))
-    return " - ".join(out)
+        The fit function is very basic and can be vastly extended by using callbacks.
+        The default behaviour can be changed by changing not passing the DEFAULT_CALLBACKS but a modified set of callbacks (only do this if you know what you are doing).
+        A normal use case would be to simply add some callbacks:
+            SupervisedTrainer(callbacks=DEFAULT_CALLBACKS + [my_callback])
 
+        :param model: The model that should be fit.
+        :param loss: The loss defines a what should optimization.
+        :param optimizer: The optimizer defines how the optimization is done.
+        :param callbacks: Any callbacks that you want to add. You should always write callbacks=DEFAULT_CALLBACKS+[MyCallback], otherwise the default callbacks will not be called.
+        Callbacks will be called in the order as specified in this list. So make sure your callbacks are in the correct order (and when in doubt DEFAULT_CALLBACKS first, yours later).
+        """
+        self.callbacks = callbacks
+        self.model = model
+        self.loss = loss
+        self.optimizer = optimizer
 
-def _format_time(t):
-    hours, remainder = divmod(t, 3600)
-    minutes, seconds = divmod(remainder, 60)
-    return '%d:%02d:%02d' % (hours, minutes, seconds)
+    def run_epoch(self, dataloader: Dataloader, phase: str, epoch: int):
+        """
+        Run an epoch in training or validation.
 
+        (This function is called in fit and it is NOT RECOMMENDED to use this function from outside.)
 
-def run_epoch(model, config: Config, dataset, optimizer, lr_schedule, loss, metrics, samples_seen: int, summary_writer, goal=None):
-    """
-    Run an epoch in training or validation.
+        Optimizer is "optional" if it is set to None, it is a validation run otherwise it is a training run.
 
-    (This function is called in fit and it is NOT RECOMMENDED to use this function from outside.)
+        :param dataloader: The dataloader created from a dataset.
+        :param phase: The phase (train/dev/test) which is used for running.
+        :param epoch: The epoch number.
+        :return: Returns the average loss.
+        """
+        if self.model is None:
+            raise RuntimeError("You must compile the trainer first!")
+        self.loss.reset_avg()
+        for callback in self.callbacks:
+            callback.on_epoch_begin(dataloader, phase, epoch)
 
-    Optimizer is "optional" if it is set to None, it is a validation run otherwise it is a training run.
+        # Setup the training loop
+        variables = self.model.trainable_variables
 
-    :param config: The configuration for the run.
-    :param dataset: The native dataset_class.
-    :param optimizer: The babilim optimizer or None for validation.
-    :param lr_schedule: The learning rate scheduler (also required for validation).
-    :param loss: The loss function.
-    :param metrics: The metric computation function.
-    :param samples_seen: The number of detection the network has seen before running this method.
-    :param summary_writer: The summary writer where to store the summaries.
-    :return: Returns the average loss and metrics.
-    """
-    # wrap module if it was native
-    if not isinstance(model, Module):
-        model = Lambda(model)
+        # Loop over the dataset_class and update weights.
+        for iter, (x, y) in enumerate(dataloader):
+            for callback in self.callbacks:
+                callback.on_iter_begin(iter, x, y)
 
-    N = len(dataset)
+            # Forward pass, computing gradients and applying them
+            with GradientTape(variables) as tape:
+                predictions = self.model(**x._asdict())
+                for name, p in predictions._asdict().items():
+                    if p.is_nan().any():
+                        error("NaN NetworkOutput {}: {}".format(name, p.native))
+                        raise ValueError("NetworkOutput {} got nan.".format(name))
+                loss_result = self.loss(y_true=y, y_pred=predictions)
+                self.loss.log("loss/total", loss_result)
+                if loss_result.is_nan().any():
+                    error("NaN Loss")
+                    raise ValueError("Loss got nan.")
+            gradients = tape.gradient(loss_result)
 
-    # Setup the training loop
-    variables = model.trainable_variables
+            if phase == "train":
+                self.optimizer.apply_gradients(gradients, variables)
 
-    # Set progress to zero.
-    if goal is not None:
-        log_progress(goal=goal, progress=0, score=0)
-    loss_val = None
+            for callback in self.callbacks:
+                callback.on_iter_end(predictions, loss_result)
 
-    # Loop over the dataset_class and update weights.
-    for i, (x, y) in enumerate(dataset):
-        # Forward pass, computing gradients and applying them
-        with GradientTape(variables) as tape:
-            prediction = model(**x._asdict())
-            for name, p in prediction._asdict().items():
-                if p.is_nan().any():
-                    error("NaN NetworkOutput {}: {}".format(name, p.native))
-                    raise ValueError("NetworkOutput {} got nan.".format(name))
-            loss_results = loss(y_true=y, y_pred=prediction)
-            loss.log("loss/total", loss_results)
-            metrics(y_true=y, y_pred=prediction)
+        for callback in self.callbacks:
+            callback.on_epoch_end()
 
-        loss_val = loss.avg["loss/total"]
-        gradients = tape.gradient(loss_results)
-        for grad in gradients:
-            if grad is None:
-                warn_once("A trainable variable did not have gradients."
-                           "Did you set trainable or requires grads to false during your forward pass?")
-                continue
-            if grad.is_nan().any():
-                error("NaN in gradient for {}: {}".format(grad.name, grad.native))
-                raise ValueError("Gradient of {} got nan.".format(grad.name))
-        lr = lr_schedule(samples_seen / config.train_batch_size)
+    def fit(self, train_dataloader: Dataloader, dev_dataloader: Dataloader, epochs: int):
+        """
+        Fit the model managed by this trainer to the data.
 
-        if optimizer is not None:
-            # Translate those to something usefull...
-            optimizer.apply_gradients(gradients, variables, lr)
+        :param train_dataloader: The dataloader for training your neural network (train split).
+        :param dev_dataloader: The dataloader for validation during your development (dev split). NOT TEST SPLIT!
+        :param epochs: The number of epochs describes how often the fit will iterate over the dataloaders.
+        """
+        try:
+            start_epoch = 0
+            for callback in self.callbacks:
+                start_epoch = callback.on_fit_start(self.model, train_dataloader, dev_dataloader, self.loss, self.optimizer, start_epoch, epochs)
 
-            # Update global variables and log the variables
-            samples_seen += config.train_batch_size
-            status("Training {}/{} - Loss {:.3f} - LR {:.6f}".format(i + 1, N, loss_val, lr), end="")
-            if i % config.train_log_steps == config.train_log_steps - 1:
-                summary_writer.add_scalar('learning_rate', lr, global_step=samples_seen)
-                if goal is not None:
-                    log_progress(goal=goal, progress=((i + 1) / N), score=loss_val)
-                loss.summary(samples_seen, summary_writer)
-                metrics.summary(samples_seen, summary_writer)
-                loss.reset_avg()
-                metrics.reset_avg()
-        else:
-            status("Validating {}/{} - Loss {:.3f}".format(i + 1, N, loss_val), end="")
-            if i % config.train_log_steps == config.train_log_steps - 1:
-                if goal is not None:
-                    log_progress(goal=goal, progress=((i + 1) / N), score=loss_val)
+            for epoch in range(start_epoch, epochs):
+                self.model.train()
+                self.run_epoch(train_dataloader, "train", epoch)
+                self.model.eval()
+                self.run_epoch(dev_dataloader, "dev", epoch)
+        except KeyboardInterrupt as e:
+            for callback in self.callbacks:
+                callback.on_fit_interruted(e)
+        except Exception as e:
+            for callback in self.callbacks:
+                callback.on_fit_failed(e)
+            raise e
 
-    if optimizer is None:
-        loss.summary(samples_seen, summary_writer)
-        metrics.summary(samples_seen, summary_writer)
-    if goal is not None and loss_val is not None:
-        log_progress(goal=goal, progress=1.0, score=loss_val)
-    print()
-    return loss.avg, metrics.avg
-
-
-def _init_model(model: Module, batched_training_dataset, chkpt_path, config, optim, loss, metrics, lr_schedule, train_summary_writer, chkpt_native_format=False):
-    samples_seen = 0
-
-    # Actually force model to be build by running one forward step
-    if not getattr(model, "initialized_model", False):
-        if babilim.DEBUG_VERBOSITY:
-            info("Build Model")
-        model.initialized_model = True
-        features, _ = next(iter(batched_training_dataset))
-        model(**features._asdict())
-        if isinstance(model, Lambda):
-            # FIXME this does not work, pytorch needs dict support or my models need ordered parameters
-            #print("Writing Graph to Tensorboard.")
-            #train_summary_writer.add_graph(model.native_module, features)
-            pass
-        else:
-            # TODO implement model graph logging sooner or later.
-            pass
-
-    # Load Checkpoint
-    epoch = 0
-    saved_models_path = os.path.join(chkpt_path, "checkpoints")
-    saved_models = sorted([os.path.join(saved_models_path, f) for f in os.listdir(saved_models_path)])
-    if len(saved_models) > 0 and os.path.exists(saved_models[-1]):
-        info("Loading checkpoint: {}".format(saved_models[-1]))
-        checkpoint = load_state(saved_models[-1], native_format=chkpt_native_format)
-        if babilim.DEBUG_VERBOSITY:
-            checkpoint.print()
-        epoch = checkpoint["epoch"] + 1
-        samples_seen = len(batched_training_dataset) * config.train_batch_size * epoch
-        if "model" in checkpoint:
-            if babilim.DEBUG_VERBOSITY:
-                info("Load Model...")
-            model.load_state_dict(checkpoint["model"])
-        else:
-            warn("Could not find model_state in checkpoint.")
-        if "optimizer" in checkpoint:
-            if babilim.DEBUG_VERBOSITY:
-                info("Load Optimizer...")
-            optim.load_state_dict(checkpoint["optimizer"])
-        else:
-            warn("Could not find optimizer_state in checkpoint.")
-        if "loss" in checkpoint:
-            if babilim.DEBUG_VERBOSITY:
-                info("Load Loss...")
-            loss.load_state_dict(checkpoint["loss"])
-        else:
-            warn("Could not find loss_state in checkpoint.")
-        if "metrics" in checkpoint:
-            if babilim.DEBUG_VERBOSITY:
-                info("Load Metrics...")
-            metrics.load_state_dict(checkpoint["metrics"])
-        else:
-            warn("Could not find metrics_state in checkpoint.")
-        if "lr_schedule" in  checkpoint:
-            if babilim.DEBUG_VERBOSITY:
-                info("Load LR Schedule...")
-            lr_schedule.load_state_dict(checkpoint["lr_schedule"])
-        else:
-            warn("Could not find lr_schedule_state in checkpoint.")
-
-    if babilim.DEBUG_VERBOSITY:
-        info("Trainable Variables:")
-        for name, var in model.named_trainable_variables.items():
-            info("  {}: {}".format(name, var.shape))
-        info("Untrainable Variables:")
-        for name, var in model.named_untrainable_variables.items():
-            info("  {}: {}".format(name, var.shape))
-
-    return epoch, samples_seen
-
-
-def fit(model, training_dataset: Dataset, validation_dataset: Dataset, loss, metrics, config: Config, optim: Any,
-        lr_schedule: LearningRateSchedule, verbose: bool = True):
-    try:
-        # Wrap module if it is a native module.
-        if not isinstance(model, Module):
-            model = Lambda(model)
-
-        config.check_completness()
-        if config.train_actual_checkpoint_path is None:
-            raise RuntimeError("You must setup logger before calling the fit method. See babilim.experiment.logger.setup")
-        log_progress(goal="warmup", progress=0, score=0)
-        chkpt_path = config.train_actual_checkpoint_path
-
-        # Summary writers
-        train_summary_writer = SummaryWriter(os.path.join(chkpt_path, "train"))
-        val_summary_writer = SummaryWriter(os.path.join(chkpt_path, "val"))
-
-        # Create batched dataloaders.
-        training_dataloader = training_dataset.to_dataloader()
-        validation_dataloader = validation_dataset.to_dataloader()
-
-        # Try to retrieve optional arguments from hyperparams if not specified
-        epochs = config.train_epochs
-
-        chkpt_native_format = config.arch_chkpt_native_format
-
-        epoch, samples_seen = _init_model(model, training_dataloader, chkpt_path, config, optim, loss, metrics, lr_schedule, train_summary_writer, chkpt_native_format)
-
-        info("Start training for {} epochs from epoch {}.".format(epochs, epoch))
-        start = time.time()
-        log_progress(goal="train {}/{}".format(epoch + 1, epochs), progress=0, score=0)
-        for i in range(epoch, epochs):
-            loss.reset_avg()
-            metrics.reset_avg()
-            model.train()
-            run_epoch(model, config, training_dataloader, optim, lr_schedule, loss, metrics, samples_seen, train_summary_writer, goal="train {}/{}".format(i + 1, epochs))
-            samples_seen += len(training_dataloader) * config.train_batch_size
-
-            # save checkpoint
-            save_state({
-                "epoch": i,
-                "model": model.state_dict(),
-                "optimizer": optim.state_dict(),
-                "loss": loss.state_dict(),
-                "metrics": metrics.state_dict(),
-                "lr_schedule": lr_schedule.state_dict()
-            }, os.path.join(chkpt_path, "checkpoints", "chkpt_{:09d}.npz".format(i)), native_format=chkpt_native_format)
-
-            loss.reset_avg()
-            metrics.reset_avg()
-            model.eval()
-            loss_results, metrics_results = run_epoch(model, config, validation_dataloader, None, lr_schedule, loss, metrics, samples_seen, val_summary_writer, goal="val {}/{}".format(i + 1, epochs))
-            elapsed_time = time.time() - start
-            eta = elapsed_time / (i + 1) * (epochs - (i + 1))
-            status("Epoch {}/{} - ETA {} - {} - {}".format(i + 1, epochs, _format_time(eta),
-                                                        _dict_to_str(loss_results),
-                                                        _dict_to_str(metrics_results)))
-        log_progress(goal="done", progress=1, score=loss.avg["loss/total"])
-        if verbose:
-            print("Training done.")
-    except KeyboardInterrupt as e:
-        log_progress(goal="paused", progress=1, score=loss.avg["loss/total"])
-        print()
-        print("Training stopped by user!")
-    except Exception as e:
-        log_progress(goal="failed", progress=1, score=loss.avg["loss/total"])
-        raise e
+        for callback in self.callbacks:
+            callback.on_fit_end()

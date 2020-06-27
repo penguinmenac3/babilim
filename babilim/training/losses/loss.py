@@ -3,6 +3,7 @@ from typing import Any
 import numpy as np
 import babilim
 from babilim.core.itensor import ITensor
+from babilim.core.logging import info
 from babilim.core.tensor import Tensor
 from babilim.core.statefull_object import StatefullObject
 
@@ -89,7 +90,7 @@ class Loss(StatefullObject):
 
 
 class NativeLossWrapper(Loss):
-    def __init__(self, loss, log_std=False, log_min=False, log_max=False):
+    def __init__(self, loss, log_std=False, log_min=False, log_max=False, to_gpu=True):
         """
         Wrap a native loss as a babilim loss.
 
@@ -102,6 +103,11 @@ class NativeLossWrapper(Loss):
         :param loss: The loss that should be wrapped.
         """
         super().__init__(log_std=log_std, log_min=log_min, log_max=log_max)
+        if to_gpu and babilim.is_backend(babilim.PYTORCH_BACKEND) and not loss.native.is_cuda:
+            import torch
+            if torch.cuda.is_available():
+                loss = loss.to(torch.device("cuda"))
+                info("Automatically moved Loss to GPU. Use to_gpu=False to avoid this.")
         self.loss = loss
 
     def call(self, y_pred: Any, y_true: Any) -> ITensor:

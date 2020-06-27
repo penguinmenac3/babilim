@@ -10,32 +10,37 @@ _variable_wrappers = {}
 
 
 class TensorWrapper(ITensorWrapper):
+    def __init__(self):
+        pass
+
     def wrap(self, obj: Any) -> Any:
-        wrapped = False
+        def _wrap_indexable(obj, indices):
+            obj = obj.copy()
+            for i in indices:
+                if obj[i] is None: continue
+                obj[i] = self.wrap(obj[i])
+                if obj[i] is None: return None
+            return obj
+
         if isinstance(obj, Tuple):
             obj = list(obj)
-            for i in range(len(obj)):
-                obj[i], q = self.wrap(obj[i])
-                wrapped = wrapped or q
-            obj = tuple(obj)
+            obj = _wrap_indexable(obj, range(len(obj)))
+            if obj is not None:
+                obj = tuple(obj)
         elif isinstance(obj, Sequence):
-            for i in range(len(obj)):
-                obj[i], q = self.wrap(obj[i])
-                wrapped = wrapped or q
+            obj = _wrap_indexable(obj, range(len(obj)))
         elif isinstance(obj, Dict):
-            for k in obj:
-                obj[k], q = self.wrap(obj[k])
-                wrapped = wrapped or q
+            obj = _wrap_indexable(obj, obj)
         elif isinstance(obj, _Tensor):
             obj = Tensor(native=obj, trainable=obj.requires_grad)
             # FIXME is this required? obj should already be cuda
             if not obj.native.is_cuda and torch.cuda.is_available():
                 obj.native = obj.native.to(torch.device("cuda"))
-            wrapped = True
         elif isinstance(obj, np.ndarray):
             obj = Tensor(data=obj, trainable=False)
-            wrapped = True
-        return obj, wrapped
+        else:
+            obj = None
+        return obj
     
     def unwrap(self, obj: Any) -> Any:
         if isinstance(obj, Sequence):

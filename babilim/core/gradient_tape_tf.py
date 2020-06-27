@@ -19,5 +19,5 @@ class GradientTapeTF(object):
     def gradient(self, loss):
         raw_vars = _tensor_wrapper.unwrap(self.variables)
         gradients = self.tape_context.gradient(loss.native, raw_vars)
-        wrapped_grads, _ = _tensor_wrapper.wrap(gradients)
+        wrapped_grads = _tensor_wrapper.wrap(gradients)
         return wrapped_grads

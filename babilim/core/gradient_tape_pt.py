@@ -20,5 +20,5 @@ class GradientTapePT(object):
     def gradient(self, loss):
         loss.native.backward()
         gradients = [var.native.grad for var in self.variables]
-        wrapped_grads, _ = _tensor_wrapper.wrap(gradients)
+        wrapped_grads = _tensor_wrapper.wrap(gradients)
         return wrapped_grads

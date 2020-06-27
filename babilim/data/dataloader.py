@@ -21,8 +21,10 @@ class Dataloader(Iterable):
                 # Print index errors, they probably were an error and not intentional.
                 try:
                     x, y = next(self.native_dataloader_iter)
-                    inp, _ = self._tensor_wrapper.wrap(x._asdict())
-                    outp, _ = self._tensor_wrapper.wrap(y._asdict())
+                    inp = dict(x._asdict())
+                    outp = dict(y._asdict())
+                    inp = self._tensor_wrapper.wrap(inp)
+                    outp = self._tensor_wrapper.wrap(outp)
                     inp = type(x)(**inp)
                     outp = type(y)(**outp)
                     return inp, outp

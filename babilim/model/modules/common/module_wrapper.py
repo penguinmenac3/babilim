@@ -1,5 +1,7 @@
 from typing import Any
 
+import babilim
+from babilim.core.logging import info
 from babilim.core import Tensor, RunOnlyOnce
 from babilim.model.module import Module
 
@@ -14,13 +16,18 @@ def _isnamedtupleinstance(x):
 
 
 class Lambda(Module):
-    def __init__(self, native_module):
+    def __init__(self, native_module, to_gpu=True):
         """
         Wrap a native module in a module.
 
         :param native_module: The native modules, module or function to wrap. (Must accept *args and or **kwargs and return a single tensor, a list of tensors or a dict of tensors or a named tuple)
         """
         super().__init__(layer_type="LambdaModule")
+        if to_gpu and babilim.is_backend(babilim.PYTORCH_BACKEND) and not native_module.native.is_cuda:
+            import torch
+            if torch.cuda.is_available():
+                native_module = native_module.to(torch.device("cuda"))
+                info("Automatically moved LambdaModule to GPU. Use to_gpu=False to avoid this.")
         self.native_module = native_module
 
     @RunOnlyOnce

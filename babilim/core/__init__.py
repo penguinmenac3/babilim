@@ -4,6 +4,6 @@ from babilim.core.annotations import RunOnlyOnce
 
 from babilim.core.gradient_tape import GradientTape
 from babilim.core.statefull_object import StatefullObject
-from babilim.core.config import Config, ConfigPart, import_config, import_checkpoint_config
+from babilim.core.config import Config, import_config, import_checkpoint_config
 
-__all__ = ['Config', 'ConfigPart', 'import_config', 'import_checkpoint_config', "Tensor", "ITensor", "RunOnlyOnce", "GradientTape", "StatefullObject"]
+__all__ = ['Config', 'import_config', 'import_checkpoint_config', "Tensor", "ITensor", "RunOnlyOnce", "GradientTape", "StatefullObject"]

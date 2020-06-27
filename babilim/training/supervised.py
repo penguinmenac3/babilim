@@ -61,7 +61,7 @@ class SupervisedTrainer(Trainer):
             callback.on_epoch_begin(dataloader, phase, epoch)
 
         # Setup the training loop
-        variables = self.model.trainable_variables
+        variables = self.model.trainable_variables + self.loss.trainable_variables
 
         # Loop over the dataset_class and update weights.
         for iter, (x, y) in enumerate(dataloader):

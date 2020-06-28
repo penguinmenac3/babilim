@@ -32,8 +32,9 @@ SPLIT_TEST = "test"
 PYTORCH_BACKEND = "pytorch"
 TF_BACKEND = "tf2"
 TF2_BACKEND = "tf2"
+AUTO_BACKEND = "auto"
 
-_backend = PYTORCH_BACKEND
+_backend = AUTO_BACKEND
 
 
 def set_backend(backend: str, gpu: int = None):
@@ -54,6 +55,9 @@ def set_backend(backend: str, gpu: int = None):
     :raises RuntimeError: When the backend is invalid or unknown.
     """
     global _backend
+    _backend = backend
+    
+    backend = get_backend()
     if gpu is not None:
         os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu)
     if backend not in [PYTORCH_BACKEND, TF_BACKEND]:
@@ -69,7 +73,6 @@ def set_backend(backend: str, gpu: int = None):
             device = "gpu"
     from babilim.core.logging import info as __info
     __info("Using backend: {}-{}".format(backend, device))
-    _backend = backend
 
 
 def get_backend() -> str:
@@ -84,6 +87,16 @@ def get_backend() -> str:
     :return: The backend string.
     :rtype: str
     """
+    def _select_backend():
+        global _backend
+        try:
+            import torch
+            _backend = PYTORCH_BACKEND
+        except:
+            _backend = TF2_BACKEND
+
+    if _backend == AUTO_BACKEND:
+        _select_backend()
     return _backend
 
 
@@ -104,4 +117,4 @@ def is_backend(backend: str) -> bool:
     :return: True if the set backend is equal to the provided backend.
     :rtype: bool
     """
-    return _backend == backend
+    return get_backend() == backend

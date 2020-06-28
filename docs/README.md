@@ -21,6 +21,14 @@
 ](babilim/core/statefull_object.md)
 * [babilim.core.tensor
 ](babilim/core/tensor.md)
+* [babilim.data.dataloader
+](babilim/data/dataloader.md)
+* [babilim.data.dataset
+](babilim/data/dataset.md)
+* [babilim.data.image_grid
+](babilim/data/image_grid.md)
+* [babilim.data.transformer
+](babilim/data/transformer.md)
 * [babilim.model.module
 ](babilim/model/module.md)
 

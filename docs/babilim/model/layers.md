@@ -1,4 +1,4 @@
-# babilim.model.modules.layers
+# babilim.model.layers
 
 > Here you can find all layers implemented in babilim.
 

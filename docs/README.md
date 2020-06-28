@@ -25,9 +25,9 @@
 ](babilim/data/image_grid.md)
 * [babilim.data.transformer
 ](babilim/data/transformer.md)
+* [babilim.model.layers
+](babilim/model/layers.md)
 * [babilim.model.module
 ](babilim/model/module.md)
-* [babilim.model.modules.layers
-](babilim/model/layers.md)
 
 

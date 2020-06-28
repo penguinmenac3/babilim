@@ -29,5 +29,19 @@
 ](babilim/model/layers.md)
 * [babilim.model.module
 ](babilim/model/module.md)
+* [babilim.training.callbacks.base_callback
+](babilim/training/callbacks/base_callback.md)
+* [babilim.training.losses
+](babilim/training/losses.md)
+* [babilim.training.optimizers.learning_rates
+](babilim/training/optimizers/learning_rates.md)
+* [babilim.training.optimizers.optimizer
+](babilim/training/optimizers/optimizer.md)
+* [babilim.training.optimizers.sgd
+](babilim/training/optimizers/sgd.md)
+* [babilim.training.supervised
+](babilim/training/supervised.md)
+* [babilim.training.trainer
+](babilim/training/trainer.md)
 
 

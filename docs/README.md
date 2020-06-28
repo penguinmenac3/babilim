@@ -1,10 +1,6 @@
 
 # Package List
 
-* [Example: MNIST with Babilim
-](examples/fashion_mnist.md)
-* [Example: MNIST with Babilim
-](examples/fashion_mnist_pytorch.md)
 * [babilim.core.annotations
 ](babilim/core/annotations.md)
 * [babilim.core.checkpoint
@@ -31,5 +27,7 @@
 ](babilim/data/transformer.md)
 * [babilim.model.module
 ](babilim/model/module.md)
+* [babilim.model.modules.layers
+](babilim/model/layers.md)
 
 

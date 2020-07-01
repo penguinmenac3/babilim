@@ -6,7 +6,7 @@ from torch.nn import init
 import torch
 import torch.nn as nn
 
-from babilim.model.module import Module
+from babilim.core.module import Module
 from babilim.core.tensor_pt import Tensor
 from babilim.core.annotations import RunOnlyOnce
 from babilim.model.modules.pt.activation import Activation
@@ -14,7 +14,7 @@ from babilim.model.modules.pt.activation import Activation
 
 class Linear(Module):
     def __init__(self, out_features, activation):
-        super().__init__(layer_type="Linear")
+        super().__init__()
         self.out_features = out_features
         self.activation = Activation(activation)
 

@@ -157,12 +157,11 @@ Check if an object is a variable in the framework.
 * returns: True if the object is a tensorflow/pytorch variable.
 
 
-### *def* **wrap_variable**(*self*, obj: Any, name: str) -> 'ITensor'
+### *def* **wrap_variable**(*self*, obj: Any) -> 'ITensor'
 
 Wrap a variable as an ITensor.
 
 * obj: The object that should be wrapped.
-* name: The name of the variable.
 * returns: An ITensor object containing the variable.
 
 

@@ -2,11 +2,16 @@
 
 > The optimizer interface.
 
-# *class* **Optimizer**(StatefullObject)
+# *class* **Optimizer**(Module)
 
 An optimizer base class.
 
 * initial_lr: The initial learning rate for the optimizer. Learning rates are updated in the optimizer via callbacks.
+
+
+### *def* **call**(*self*, gradients: Iterable[ITensor], variables: Iterable[ITensor]) -> None
+
+Maps to `apply_gradients`.
 
 
 ### *def* **apply_gradients**(*self*, gradients: Iterable[ITensor], variables: Iterable[ITensor]) -> None

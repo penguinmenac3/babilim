@@ -1,11 +1,11 @@
-from babilim.model.module import Module
+from babilim.core.module import Module
 from babilim.core.tensor_pt import Tensor
 from babilim.core.annotations import RunOnlyOnce
 
 
 class Flatten(Module):
     def __init__(self):
-        super().__init__(layer_type="Flatten")
+        super().__init__()
 
     @RunOnlyOnce
     def build(self, features):

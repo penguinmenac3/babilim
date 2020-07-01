@@ -3,7 +3,7 @@
 # Cell: 0
 from babilim.core import ITensor
 from babilim.data import Dataloader
-from babilim.model.module import Module
+from babilim.core.module import Module
 from babilim.training.losses import Loss
 from babilim.training.optimizers import Optimizer
 

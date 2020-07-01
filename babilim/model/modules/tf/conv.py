@@ -1,7 +1,7 @@
 from tensorflow.keras.layers import Conv2D as _Conv2D
 from tensorflow.keras.initializers import Orthogonal
 
-from babilim.model.module import Module
+from babilim.core.module import Module
 from babilim.core.tensor_tf import Tensor
 from babilim.core.annotations import RunOnlyOnce
 from babilim.model.modules.tf.activation import Activation
@@ -9,7 +9,7 @@ from babilim.model.modules.tf.activation import Activation
 
 class Conv2D(Module):
     def __init__(self, filters, kernel_size, padding=None, strides=None, dilation_rate=None, kernel_initializer=None, activation=None):
-        super().__init__(layer_type="Conv2D")
+        super().__init__()
         if kernel_initializer is None:
             kernel_initializer = Orthogonal()
         if padding is None:

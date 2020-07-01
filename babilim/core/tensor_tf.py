@@ -12,15 +12,16 @@ _variable_wrappers = {}
 class TensorWrapper(ITensorWrapper):
     def __init__(self):
         pass
-    
+
     def wrap(self, obj: Any) -> Any:
         def _wrap_indexable(obj, indices):
             obj = obj.copy()
+            ret = obj
             for i in indices:
                 if obj[i] is None: continue
                 obj[i] = self.wrap(obj[i])
-                if obj[i] is None: return None
-            return obj
+                if obj[i] is None: ret = None
+            return ret
 
         if isinstance(obj, Tuple):
             obj = list(obj)
@@ -58,7 +59,7 @@ class TensorWrapper(ITensorWrapper):
     def is_variable(self, obj: Any) -> bool:
         return isinstance(obj, tf.Variable)
 
-    def wrap_variable(self, obj: Any, name: str) -> 'ITensor':
+    def wrap_variable(self, obj: Any) -> 'ITensor':
         if obj.ref() not in _variable_wrappers:
             _variable_wrappers[obj.ref()] = Tensor(native=obj, trainable=obj.trainable)
         return _variable_wrappers[obj.ref()]

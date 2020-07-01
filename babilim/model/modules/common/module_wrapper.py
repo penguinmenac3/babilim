@@ -3,7 +3,7 @@ from typing import Any
 import babilim
 from babilim.core.logging import info
 from babilim.core import Tensor, RunOnlyOnce
-from babilim.model.module import Module
+from babilim.core.module import Module
 
 
 def _isnamedtupleinstance(x):
@@ -16,22 +16,25 @@ def _isnamedtupleinstance(x):
 
 
 class Lambda(Module):
-    def __init__(self, native_module, to_gpu=True):
+    def __init__(self, native_module):
         """
         Wrap a native module in a module.
 
         :param native_module: The native modules, module or function to wrap. (Must accept *args and or **kwargs and return a single tensor, a list of tensors or a dict of tensors or a named tuple)
         """
-        super().__init__(layer_type="LambdaModule")
-        if to_gpu and babilim.is_backend(babilim.PYTORCH_BACKEND) and not native_module.native.is_cuda:
-            import torch
-            if torch.cuda.is_available():
-                native_module = native_module.to(torch.device("cuda"))
-                info("Automatically moved LambdaModule to GPU. Use to_gpu=False to avoid this.")
+        super().__init__()
         self.native_module = native_module
 
+    def _auto_device(self):
+        if babilim.is_backend(babilim.PYTORCH_BACKEND):
+            import torch
+            if str(self.native_module.device) != self.device:
+                self.native_module = self.native_module.to(torch.device(self.device))
+            return self
+    
     @RunOnlyOnce
     def build(self, *args, **kwargs) -> None:
+        self._auto_device()
         build = getattr(self.native_module, "build", None)
         if callable(build):
             # Unwrap arguments

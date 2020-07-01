@@ -3,7 +3,7 @@ from torch.nn.functional import max_pool1d as _MaxPooling1D
 from torch.nn.functional import avg_pool2d as _AveragePooling2D
 from torch.nn.functional import avg_pool1d as _AveragePooling1D
 
-from babilim.model.module import Module
+from babilim.core.module import Module
 from babilim.core.tensor_pt import Tensor
 from babilim.core.annotations import RunOnlyOnce
 from babilim.model.modules.pt.flatten import Flatten
@@ -11,7 +11,7 @@ from babilim.model.modules.pt.flatten import Flatten
 
 class MaxPooling2D(Module):
     def __init__(self):
-        super().__init__(layer_type="MaxPooling2D")
+        super().__init__()
 
     @RunOnlyOnce
     def build(self, features):
@@ -23,7 +23,7 @@ class MaxPooling2D(Module):
 
 class MaxPooling1D(Module):
     def __init__(self):
-        super().__init__(layer_type="MaxPooling1D")
+        super().__init__()
 
     @RunOnlyOnce
     def build(self, features):
@@ -34,7 +34,7 @@ class MaxPooling1D(Module):
 
 class GlobalMaxPooling2D(Module):
     def __init__(self):
-        super().__init__(layer_type="GlobalMaxPooling2D")
+        super().__init__()
 
     @RunOnlyOnce
     def build(self, features):
@@ -47,7 +47,7 @@ class GlobalMaxPooling2D(Module):
 
 class GlobalMaxPooling1D(Module):
     def __init__(self):
-        super().__init__(layer_type="GlobalMaxPooling2D")
+        super().__init__()
 
     @RunOnlyOnce
     def build(self, features):
@@ -59,7 +59,7 @@ class GlobalMaxPooling1D(Module):
 
 class GlobalAveragePooling2D(Module):
     def __init__(self):
-        super().__init__(layer_type="GlobalAveragePooling2D")
+        super().__init__()
         self.flatten = Flatten()
 
     @RunOnlyOnce
@@ -72,7 +72,7 @@ class GlobalAveragePooling2D(Module):
 
 class GlobalAveragePooling1D(Module):
     def __init__(self):
-        super().__init__(layer_type="GlobalAveragePooling1D")
+        super().__init__()
         self.flatten = Flatten()
 
     @RunOnlyOnce

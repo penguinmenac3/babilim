@@ -2,11 +2,11 @@
 
 # Cell: 0
 import math
-from babilim.core.statefull_object import StatefullObject
+from babilim.core.module import Module
 
 
 # Cell: 1
-class LearningRateSchedule(StatefullObject):
+class LearningRateSchedule(Module):
     def __init__(self):
         """
         An interface to a learning rate schedule.

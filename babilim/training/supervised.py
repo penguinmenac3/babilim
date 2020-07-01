@@ -6,7 +6,7 @@ from babilim.training.trainer import Trainer
 from babilim.data import Dataloader
 from babilim.core import GradientTape
 from babilim.core.logging import error
-from babilim.model.module import Module
+from babilim.core.module import Module
 from babilim.training.callbacks.checkpoint_callback import CheckpointCallback
 from babilim.training.callbacks.log_callback import LogCallback
 from babilim.training.callbacks.tensorboard_callback import TensorboardCallback

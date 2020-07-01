@@ -5,7 +5,7 @@ from tensorboardX import SummaryWriter
 from babilim.core import ITensor
 from babilim.core.logging import get_log_path, create_checkpoint_structure
 from babilim.data import Dataloader
-from babilim.model.module import Module
+from babilim.core.module import Module
 from babilim.training.callbacks.base_callback import BaseCallback
 from babilim.training.losses import Loss
 from babilim.training.optimizers import Optimizer

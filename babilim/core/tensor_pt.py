@@ -3,7 +3,9 @@ from typing import Union, Any, Sequence, Dict, Tuple, Optional
 import numpy as np
 import torch
 from torch import Tensor as _Tensor
+from babilim.core.logging import error
 from babilim.core.itensor import ITensor, ITensorWrapper
+from babilim.core.device import get_current_device_native_format
 
 
 _variable_wrappers = {}
@@ -16,12 +18,12 @@ class TensorWrapper(ITensorWrapper):
     def wrap(self, obj: Any) -> Any:
         def _wrap_indexable(obj, indices):
             obj = obj.copy()
+            ret = obj
             for i in indices:
                 if obj[i] is None: continue
                 obj[i] = self.wrap(obj[i])
-                if obj[i] is None: return None
-            return obj
-
+                if obj[i] is None: ret = None
+            return ret
         if isinstance(obj, Tuple):
             obj = list(obj)
             obj = _wrap_indexable(obj, range(len(obj)))
@@ -33,15 +35,19 @@ class TensorWrapper(ITensorWrapper):
             obj = _wrap_indexable(obj, obj)
         elif isinstance(obj, _Tensor):
             obj = Tensor(native=obj, trainable=obj.requires_grad)
-            # FIXME is this required? obj should already be cuda
-            if not obj.native.is_cuda and torch.cuda.is_available():
-                obj.native = obj.native.to(torch.device("cuda"))
         elif isinstance(obj, np.ndarray):
             obj = Tensor(data=obj, trainable=False)
+        elif isinstance(obj, Tensor):
+            # Make sure that also babilim tensors are on the correct device.
+            obj._auto_device()
+            if obj.is_nan().any():
+                error("NaN Tensor: {}".format(obj.native))
+                raise ValueError("NaN Tensor {}".format(obj.native))
+            obj = None
         else:
             obj = None
         return obj
-    
+
     def unwrap(self, obj: Any) -> Any:
         if isinstance(obj, Sequence):
             for i in range(len(obj)):
@@ -56,14 +62,11 @@ class TensorWrapper(ITensorWrapper):
     def is_variable(self, obj: Any) -> bool:
         return isinstance(obj, _Tensor)
 
-    def wrap_variable(self, obj: Any, name: str) -> 'ITensor':
-        # TODO remove name from API
+    def wrap_variable(self, obj: Any) -> 'ITensor':
         if obj not in _variable_wrappers:
             tmp = Tensor(native=obj, trainable=obj.requires_grad)
-            if not tmp.native.is_cuda and torch.cuda.is_available():
-                tmp.native = tmp.native.to(torch.device("cuda"))
             _variable_wrappers[obj] = tmp
-        return _variable_wrappers[obj]
+        return _variable_wrappers[obj]._auto_device()
 
     def vars_from_object(self, v: Any, namespace: str) -> Sequence[Tuple[str, 'ITensor']]:
         extra_vars = []
@@ -75,14 +78,14 @@ class TensorWrapper(ITensorWrapper):
                 if self.is_variable(x):
                     params.append(key)
                     name = namespace + "/" + key
-                    extra_vars.append((name, self.wrap_variable(x, name=name)))
+                    extra_vars.append((name, self.wrap_variable(x)))
             buffers = v.named_buffers()
             for key, x in buffers:
                 key = key.replace(".", "/")
                 if key not in params:
                     if self.is_variable(x):
                         name = namespace + "/" + key
-                        extra_vars.append((name, self.wrap_variable(x, name=name)))
+                        extra_vars.append((name, self.wrap_variable(x)))
         return extra_vars
 
 
@@ -92,13 +95,18 @@ class Tensor(ITensor):
             #data = data.T
             native = torch.from_numpy(data)
             native.requires_grad = trainable
-            if torch.cuda.is_available() and not native.is_cuda:
-                native = native.to(torch.device("cuda"))
         elif native is not None:
             native = native
         else:
             raise RuntimeError("You must specify the data or a native value from the correct framework.")
         super().__init__(native)
+        self._auto_device()
+
+    def _auto_device(self):
+        device = get_current_device_native_format()
+        if str(self.native.device) != device:
+            self.native = self.native.to(torch.device(get_current_device_native_format()))
+        return self
 
     def ref(self) -> 'ITensor':
         return self.native

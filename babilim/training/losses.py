@@ -8,11 +8,11 @@ import babilim
 from babilim.core.itensor import ITensor
 from babilim.core.logging import info
 from babilim.core.tensor import Tensor
-from babilim.core.statefull_object import StatefullObject
+from babilim.core.module import Module
 
 
 # Cell: 1
-class Loss(StatefullObject):
+class Loss(Module):
     def __init__(self, log_std=False, log_min=False, log_max=False):
         """
         A loss is a statefull object which computes the difference between the prediction and the target.
@@ -27,24 +27,30 @@ class Loss(StatefullObject):
         self._log_min = log_min
         self._log_max = log_max
 
-    def __call__(self, y_pred: Any, y_true: Any) -> ITensor:
-        """
-        Implement a loss function between preds and true outputs.
-
-        :param y_pred: The predictions of the network. Either a NamedTuple pointing at ITensors or a Dict or Tuple of ITensors.
-        :param y_true: The desired outputs of the network (labels). Either a NamedTuple pointing at ITensors or a Dict or Tuple of ITensors.
-        """
-        loss = self.call(y_pred, y_true)
-        if loss.is_nan().any():
-            raise ValueError("Loss is nan. Loss value: {}".format(loss))
-        return loss
-
     def call(self, y_pred: Any, y_true: Any) -> ITensor:
         """
         Implement a loss function between preds and true outputs.
         
-        **`call` must be overwritten by subclasses.** Gets called by `__call__` internally.
-        Do not overwrite `__call__`, instead overwrite this function.
+        DO NOT:
+        * Overwrite this function (overwrite `self.loss(...)` instead)
+        * Call this function (call the module instead `self(y_pred, y_true)`)
+
+        :param y_pred: The predictions of the network. Either a NamedTuple pointing at ITensors or a Dict or Tuple of ITensors.
+        :param y_true: The desired outputs of the network (labels). Either a NamedTuple pointing at ITensors or a Dict or Tuple of ITensors.
+        """
+        loss = self.loss(y_pred, y_true)
+        if loss.is_nan().any():
+            raise ValueError("Loss is nan. Loss value: {}".format(loss))
+        return loss
+
+    def loss(self, y_pred: Any, y_true: Any) -> ITensor:
+        """
+        Implement a loss function between preds and true outputs.
+        
+        **`loss` must be overwritten by subclasses.**
+        
+        DO NOT:
+        * Call this function (call the module instead `self(y_pred, y_true)`)
 
         :param y_pred: The predictions of the network. Either a NamedTuple pointing at ITensors or a Dict or Tuple of ITensors.
         :param y_true: The desired outputs of the network (labels). Either a NamedTuple pointing at ITensors or a Dict or Tuple of ITensors.
@@ -127,7 +133,7 @@ class Loss(StatefullObject):
 
 # Cell: 2
 class NativeLossWrapper(Loss):
-    def __init__(self, loss, log_std=False, log_min=False, log_max=False, to_gpu=True):
+    def __init__(self, loss, log_std=False, log_min=False, log_max=False):
         """
         Wrap a native loss as a babilim loss.
 
@@ -140,16 +146,21 @@ class NativeLossWrapper(Loss):
         where log_val will be a function which can be used for logging scalar tensors/values.
 
         :param loss: The loss that should be wrapped.
+        :param log_std: When true the loss will log its standard deviation. (default: False)
+        :param log_min: When true the loss will log its minimum values. (default: False)
+        :param log_max: When true the loss will log its maximal values. (default: False)
         """
         super().__init__(log_std=log_std, log_min=log_min, log_max=log_max)
-        if to_gpu and babilim.is_backend(babilim.PYTORCH_BACKEND) and not loss.native.is_cuda:
-            import torch
-            if torch.cuda.is_available():
-                loss = loss.to(torch.device("cuda"))
-                info("Automatically moved Loss to GPU. Use to_gpu=False to avoid this.")
-        self.loss = loss
+        self.native_loss = loss
+        self._auto_device()
 
-    def call(self, y_pred: Any, y_true: Any) -> ITensor:
+    def _auto_device(self):
+        if babilim.is_backend(babilim.PYTORCH_BACKEND):
+            if str(self.native_loss.device) != self.device:
+                self.native_loss = self.native_loss.to(torch.device(self.device))
+            return self
+
+    def loss(self, y_pred: Any, y_true: Any) -> ITensor:
         """
         Compute the loss using the native loss function provided in the constructor.
         
@@ -192,7 +203,7 @@ class SparseCrossEntropyLossFromLogits(Loss):
             from tensorflow.nn import sparse_softmax_cross_entropy_with_logits
             self.loss_fun = sparse_softmax_cross_entropy_with_logits
 
-    def call(self, y_pred: ITensor, y_true: ITensor) -> ITensor:
+    def loss(self, y_pred: ITensor, y_true: ITensor) -> ITensor:
         """
         Compute the sparse cross entropy assuming y_pred to be logits.
         
@@ -218,7 +229,7 @@ class MeanSquaredError(Loss):
         """
         super().__init__(log_std=log_std, log_min=log_min, log_max=log_min)
     
-    def call(self, y_pred: ITensor, y_true: ITensor, axis: int=-1) -> ITensor:
+    def loss(self, y_pred: ITensor, y_true: ITensor, axis: int=-1) -> ITensor:
         """
         Compute the mean squared error.
         
@@ -243,7 +254,7 @@ class SparseCategoricalAccuracy(Loss):
         """
         super().__init__(log_std=log_std, log_min=log_min, log_max=log_min)
 
-    def call(self, y_pred: ITensor, y_true: ITensor, axis: int=-1) -> ITensor:
+    def loss(self, y_pred: ITensor, y_true: ITensor, axis: int=-1) -> ITensor:
         """
         Compute the sparse categorical accuracy.
         

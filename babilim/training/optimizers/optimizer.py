@@ -3,12 +3,12 @@
 # Cell: 0
 from typing import Iterable
 from babilim.core.itensor import ITensor
-from babilim.core.statefull_object import StatefullObject
+from babilim.core.module import Module
 from babilim.core import RunOnlyOnce
 
 
 # Cell: 1
-class Optimizer(StatefullObject):
+class Optimizer(Module):
     def __init__(self, initial_lr: float):
         """
         An optimizer base class.
@@ -17,6 +17,12 @@ class Optimizer(StatefullObject):
         """
         super().__init__()
         self.lr = initial_lr
+        
+    def call(self, gradients: Iterable[ITensor], variables: Iterable[ITensor]) -> None:
+        """
+        Maps to `apply_gradients`.
+        """
+        self.apply_gradients(gradients, variables)
 
     def apply_gradients(self, gradients: Iterable[ITensor], variables: Iterable[ITensor]) -> None:
         """

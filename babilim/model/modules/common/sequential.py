@@ -1,9 +1,9 @@
-from babilim.model.module import Module
+from babilim.core.module import Module
 
 
 class Sequential(Module):
     def __init__(self, *layers):
-        super().__init__(layer_type="Sequential")
+        super().__init__()
         self.layers = layers
 
     def call(self, features):

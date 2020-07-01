@@ -2,7 +2,7 @@
 
 > A package containing all losses.
 
-# *class* **Loss**(StatefullObject)
+# *class* **Loss**(Module)
 
 A loss is a statefull object which computes the difference between the prediction and the target.
 
@@ -15,8 +15,22 @@ A loss is a statefull object which computes the difference between the predictio
 
 Implement a loss function between preds and true outputs.
 
-**`call` must be overwritten by subclasses.** Gets called by `__call__` internally.
-Do not overwrite `__call__`, instead overwrite this function.
+DO NOT:
+* Overwrite this function (overwrite `self.loss(...)` instead)
+* Call this function (call the module instead `self(y_pred, y_true)`)
+
+* y_pred: The predictions of the network. Either a NamedTuple pointing at ITensors or a Dict or Tuple of ITensors.
+* y_true: The desired outputs of the network (labels). Either a NamedTuple pointing at ITensors or a Dict or Tuple of ITensors.
+
+
+### *def* **loss**(*self*, y_pred: Any, y_true: Any) -> ITensor
+
+Implement a loss function between preds and true outputs.
+
+**`loss` must be overwritten by subclasses.**
+
+DO NOT:
+* Call this function (call the module instead `self(y_pred, y_true)`)
 
 * y_pred: The predictions of the network. Either a NamedTuple pointing at ITensors or a Dict or Tuple of ITensors.
 * y_true: The desired outputs of the network (labels). Either a NamedTuple pointing at ITensors or a Dict or Tuple of ITensors.
@@ -69,9 +83,12 @@ Callable(y_pred, y_true, log_val) -> Tensor
 where log_val will be a function which can be used for logging scalar tensors/values.
 
 * loss: The loss that should be wrapped.
+* log_std: When true the loss will log its standard deviation. (default: False)
+* log_min: When true the loss will log its minimum values. (default: False)
+* log_max: When true the loss will log its maximal values. (default: False)
 
 
-### *def* **call**(*self*, y_pred: Any, y_true: Any) -> ITensor
+### *def* **loss**(*self*, y_pred: Any, y_true: Any) -> ITensor
 
 Compute the loss using the native loss function provided in the constructor.
 
@@ -90,7 +107,7 @@ This means that the preds are logits and the targets are not one hot encoded.
 * log_max: When true the loss will log its maximal values. (default: False)
 
 
-### *def* **call**(*self*, y_pred: ITensor, y_true: ITensor) -> ITensor
+### *def* **loss**(*self*, y_pred: ITensor, y_true: ITensor) -> ITensor
 
 Compute the sparse cross entropy assuming y_pred to be logits.
 
@@ -107,7 +124,7 @@ Compute the mean squared error.
 * log_max: When true the loss will log its maximal values. (default: False)
 
 
-### *def* **call**(*self*, y_pred: ITensor, y_true: ITensor, axis: int=-1) -> ITensor
+### *def* **loss**(*self*, y_pred: ITensor, y_true: ITensor, axis: int=-1) -> ITensor
 
 Compute the mean squared error.
 
@@ -127,7 +144,7 @@ Sparse means that the targets are not one hot encoded.
 * log_max: When true the loss will log its maximal values. (default: False)
 
 
-### *def* **call**(*self*, y_pred: ITensor, y_true: ITensor, axis: int=-1) -> ITensor
+### *def* **loss**(*self*, y_pred: ITensor, y_true: ITensor, axis: int=-1) -> ITensor
 
 Compute the sparse categorical accuracy.
 

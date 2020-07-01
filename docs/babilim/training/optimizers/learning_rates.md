@@ -2,7 +2,7 @@
 
 > A package with all typical learning rate schedules.
 
-# *class* **LearningRateSchedule**(StatefullObject)
+# *class* **LearningRateSchedule**(Module)
 
 An interface to a learning rate schedule.
 

@@ -3,7 +3,7 @@ from torch.nn import Conv2d as _Conv2d
 from torch.nn import Conv1d as _Conv1d
 from torch.nn.init import orthogonal_
 
-from babilim.model.module import Module
+from babilim.core.module import Module
 from babilim.core.tensor_pt import Tensor
 from babilim.core.annotations import RunOnlyOnce
 from babilim.model.modules.pt.activation import Activation
@@ -11,7 +11,7 @@ from babilim.model.modules.pt.activation import Activation
 
 class Conv2D(Module):
     def __init__(self, filters, kernel_size, padding=None, stride=None, dilation=None, kernel_initializer=None, activation=None):
-        super().__init__(layer_type="Conv2D")
+        super().__init__()
         self.filters = filters
         self.kernel_size = kernel_size
         if kernel_initializer is None:
@@ -46,7 +46,7 @@ class Conv2D(Module):
 
 class Conv1D(Module):
     def __init__(self, filters, kernel_size, padding=None, stride=None, dilation=None, kernel_initializer=None, activation=None):
-        super().__init__(layer_type="Conv1D")
+        super().__init__()
         self.filters = filters
         self.kernel_size = kernel_size
         if kernel_initializer is None:

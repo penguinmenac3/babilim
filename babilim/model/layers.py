@@ -3,7 +3,7 @@
 # Cell: 0
 from typing import Tuple, Iterable, Sequence, List, Dict, Optional, Union, Any
 from babilim import PYTORCH_BACKEND, TF_BACKEND, is_backend, get_backend
-from babilim.model.module import Module
+from babilim.core import Module
 
 
 # Cell: 1

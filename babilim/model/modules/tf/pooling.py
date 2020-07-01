@@ -3,14 +3,14 @@ from tensorflow.keras.layers import MaxPooling1D as _MaxPooling1D
 from tensorflow.keras.layers import GlobalAveragePooling2D as _GlobalAveragePooling2D
 from tensorflow.keras.layers import GlobalAveragePooling1D as _GlobalAveragePooling1D
 
-from babilim.model.module import Module
+from babilim.core.module import Module
 from babilim.core.tensor_tf import Tensor
 from babilim.core.annotations import RunOnlyOnce
 
 
 class MaxPooling2D(Module):
     def __init__(self):
-        super().__init__(layer_type="MaxPooling2D")
+        super().__init__()
         self.pool = _MaxPooling2D()
 
     @RunOnlyOnce
@@ -23,7 +23,7 @@ class MaxPooling2D(Module):
 
 class MaxPooling1D(Module):
     def __init__(self):
-        super().__init__(layer_type="MaxPooling1D")
+        super().__init__()
         self.pool = _MaxPooling1D()
 
     @RunOnlyOnce
@@ -36,7 +36,7 @@ class MaxPooling1D(Module):
 
 class GlobalAveragePooling2D(Module):
     def __init__(self):
-        super().__init__(layer_type="GlobalAveragePooling2D")
+        super().__init__()
         self.pool = _GlobalAveragePooling2D()
 
     @RunOnlyOnce
@@ -49,7 +49,7 @@ class GlobalAveragePooling2D(Module):
 
 class GlobalAveragePooling1D(Module):
     def __init__(self):
-        super().__init__(layer_type="GlobalAveragePooling1D")
+        super().__init__()
         self.pool = _GlobalAveragePooling1D()
 
     @RunOnlyOnce

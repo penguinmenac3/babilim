@@ -3,7 +3,7 @@ import time
 from babilim.core import ITensor
 from babilim.core.logging import info, log_progress, status, create_checkpoint_structure, get_log_path, warn
 from babilim.data import Dataloader
-from babilim.model.module import Module
+from babilim.core.module import Module
 from babilim.training.callbacks.base_callback import BaseCallback
 from babilim.training.losses import Loss
 from babilim.training.optimizers import Optimizer

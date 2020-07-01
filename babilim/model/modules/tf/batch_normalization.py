@@ -1,13 +1,13 @@
 from tensorflow.keras.layers import BatchNormalization as _BN
 
-from babilim.model.module import Module
+from babilim.core.module import Module
 from babilim.core.tensor_tf import Tensor
 from babilim.core.annotations import RunOnlyOnce
 
 
 class BatchNormalization(Module):
     def __init__(self):
-        super().__init__(layer_type="BatchNormalization")
+        super().__init__()
         self.bn = _BN()
 
     @RunOnlyOnce

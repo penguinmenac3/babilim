@@ -270,12 +270,11 @@ class ITensorWrapper(object):
         """
         raise NotImplementedError()
 
-    def wrap_variable(self, obj: Any, name: str) -> 'ITensor':
+    def wrap_variable(self, obj: Any) -> 'ITensor':
         """
         Wrap a variable as an ITensor.
         
         :param obj: The object that should be wrapped.
-        :param name: The name of the variable.
         :return: An ITensor object containing the variable.
         """
         raise NotImplementedError()

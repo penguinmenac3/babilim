@@ -1,7 +1,7 @@
 import torch
 from torch.nn import BatchNorm1d, BatchNorm2d, BatchNorm3d
 
-from babilim.model.module import Module
+from babilim.core.module import Module
 from babilim.core.itensor import ITensor
 from babilim.core.tensor_pt import Tensor
 from babilim.core.annotations import RunOnlyOnce
@@ -9,7 +9,7 @@ from babilim.core.annotations import RunOnlyOnce
 
 class BatchNormalization(Module):
     def __init__(self):
-        super().__init__(layer_type="BatchNormalization")
+        super().__init__()
 
     @RunOnlyOnce
     def build(self, features: ITensor):

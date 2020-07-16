@@ -156,8 +156,8 @@ class NativeLossWrapper(Loss):
 
     def _auto_device(self):
         if babilim.is_backend(babilim.PYTORCH_BACKEND):
-            if str(self.native_loss.device) != self.device:
-                self.native_loss = self.native_loss.to(torch.device(self.device))
+            import torch
+            self.native_loss = self.native_loss.to(torch.device(self.device))
             return self
 
     def loss(self, y_pred: Any, y_true: Any) -> ITensor:
@@ -177,7 +177,7 @@ class NativeLossWrapper(Loss):
         y_pred = type(y_pred)(**y_pred_tmp)
 
         # call function
-        result = self.loss(y_pred=y_pred, y_true=y_true,
+        result = self.native_loss(y_pred=y_pred, y_true=y_true,
                            log_val=lambda name, tensor: self.log(name, Tensor(data=tensor, trainable=True)))
 
         return Tensor(data=result, trainable=True)

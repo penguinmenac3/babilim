@@ -28,8 +28,7 @@ class Lambda(Module):
     def _auto_device(self):
         if babilim.is_backend(babilim.PYTORCH_BACKEND):
             import torch
-            if str(self.native_module.device) != self.device:
-                self.native_module = self.native_module.to(torch.device(self.device))
+            self.native_module = self.native_module.to(torch.device(self.device))
             return self
     
     @RunOnlyOnce

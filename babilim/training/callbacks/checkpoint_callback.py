@@ -64,8 +64,12 @@ class CheckpointCallback(BaseCallback):
             info("Trainable Variables:")
             for name, var in model.named_trainable_variables.items():
                 info("  {}: {}".format(name, var.shape))
+            for name, var in self.loss.named_trainable_variables.items():
+                info("  {}: {}".format(name, var.shape))
             info("Untrainable Variables:")
             for name, var in model.named_untrainable_variables.items():
+                info("  {}: {}".format(name, var.shape))
+            for name, var in self.loss.named_untrainable_variables.items():
                 info("  {}: {}".format(name, var.shape))
 
         return start_epoch

@@ -15,7 +15,7 @@ Attributes:
 * `self.device`: Specifies the device on which this module is.
 
 
-### *def* **initialize**(*self*, dataset: Dataset)
+### *def* **initialize**(*self*, dataset)
 
 Initializes your module by running a sample of your dataset through it.
 

@@ -8,7 +8,6 @@ import numpy as np
 
 import babilim
 from babilim import PYTORCH_BACKEND, TF_BACKEND
-from babilim.data import Dataset
 from babilim.core.annotations import RunOnlyOnce
 from babilim.core.device import get_current_device_native_format, Device
 from babilim.core.checkpoint import load_state, save_state
@@ -45,7 +44,7 @@ class Module(object):
         self.initialized_module = False
         self.device = get_current_device_native_format()
 
-    def initialize(self, dataset: Dataset):
+    def initialize(self, dataset):
         """
         Initializes your module by running a sample of your dataset through it.
 

@@ -41,10 +41,6 @@ class MyConfig(Config):
         self.train_epochs = 50
         self.train_my_param = 1337
 ```
-Output:
-```
-
-```
 
 # Dynamic Config Import
 

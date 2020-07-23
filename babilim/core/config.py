@@ -61,7 +61,7 @@ class Config(object):
 
 
 # Cell: 3
-def import_config(config_file: str) -> Config:
+def import_config(config_file: str, *args, **kwargs) -> Config:
     """
     Only libraries should use this method. Human users should directly import their configs.
     Automatically imports the most specific config from a given file.
@@ -90,12 +90,12 @@ def import_config(config_file: str) -> Config:
                 n = x
     if n is None:
         raise RuntimeError("There must be at least one class in {} derived from Config.".format(config_file))
-    config = module.__dict__[n]()
+    config = module.__dict__[n](*args, **kwargs)
     return config
 
 
 # Cell: 4
-def import_checkpoint_config(config_file: str) -> Any:
+def import_checkpoint_config(config_file: str, *args, **kwargs) -> Any:
     """
     Adds the folder in which the config_file is to the pythonpath, imports it and removes the folder from the python path again.
 
@@ -107,6 +107,6 @@ def import_checkpoint_config(config_file: str) -> Any:
     config_file_name="/".join(config_file.split("/")[-2:])
 
     sys.path.append(config_folder)
-    config = import_config(config_file_name)
+    config = import_config(config_file_name, *args, **kwargs)
     sys.path.remove(config_folder)
     return config

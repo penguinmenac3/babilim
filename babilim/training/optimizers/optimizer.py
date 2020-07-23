@@ -30,14 +30,13 @@ class Optimizer(Module):
 
         :param gradients: An iterable of the gradients.
         :param variables: An iterable of the variables to which the gradients should be applied (in the same order as gradients).
-        :param learning_rate: The learning rate which is currently used.
         """
         raise NotImplementedError("Apply gradients must be implemented by every optimizer.")
 
 
 # Cell: 2
 class NativePytorchOptimizerWrapper(Optimizer):
-    def __init__(self, optimizer_class, initial_lr, model, **kwargs):
+    def __init__(self, optimizer_class, initial_lr, **kwargs):
         """
         Wrap a native pytorch optimizer as a babilim optimizer.
 
@@ -49,17 +48,17 @@ class NativePytorchOptimizerWrapper(Optimizer):
         super().__init__(initial_lr)
         self.optimizer_class = optimizer_class
         self.kwargs = kwargs
-        self.model = model
         self.optim = None
 
     @RunOnlyOnce
-    def build(self, lr):
+    def build(self, gradients: Iterable[ITensor], variables: Iterable[ITensor]):
         """
         Build the optimizer. Automatically is called when apply_gradients is called for the first time.
         
-        :param lr: The learning rate used to initialize the optimizer.
+        :param gradients: An iterable of the gradients.
+        :param variables: An iterable of the variables to which the gradients should be applied (in the same order as gradients).
         """
-        self.optim = self.optimizer_class(self.model.trainable_variables_native, lr=lr, **self.kwargs)
+        self.optim = self.optimizer_class([var.native for var in variables], lr=self.lr, **self.kwargs)
 
     def apply_gradients(self, gradients: Iterable[ITensor], variables: Iterable[ITensor]) -> None:
         """
@@ -67,9 +66,8 @@ class NativePytorchOptimizerWrapper(Optimizer):
 
         :param gradients: An iterable of the gradients.
         :param variables: An iterable of the variables to which the gradients should be applied (in the same order as gradients).
-        :param learning_rate: The learning rate which is currently used.
         """
-        self.build(self.lr)
+        self.build(gradients, variables)
         for param_group in self.optim.param_groups:
             param_group['lr'] = self.lr
         self.optim.step()

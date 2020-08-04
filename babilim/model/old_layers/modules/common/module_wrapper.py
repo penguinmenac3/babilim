@@ -20,7 +20,7 @@ class Lambda(Module):
         """
         Wrap a native module in a module.
 
-        :param native_module: The native modules, module or function to wrap. (Must accept *args and or **kwargs and return a single tensor, a list of tensors or a dict of tensors or a named tuple)
+        :param native_module: The native model, module or function to wrap. (Must accept *args and or **kwargs and return a single tensor, a list of tensors or a dict of tensors or a named tuple)
         """
         super().__init__()
         self.native_module = native_module

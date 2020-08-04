@@ -58,3 +58,31 @@ class GlobalAveragePooling1D(Module):
 
     def call(self, features):
         return Tensor(native=self.pool(features.native))
+
+
+class ROIPooling(Module):
+    def __init__(self, output_size, spatial_scale):
+        super().__init__()
+        self.output_size = output_size
+        self.spatial_scale = spatial_scale
+
+    @RunOnlyOnce
+    def build(self, features):
+        pass
+
+    def call(self, features):
+        raise NotImplementedError()
+
+
+class ROIAlign(Module):
+    def __init__(self, output_size, spatial_scale):
+        super().__init__()
+        self.output_size = output_size
+        self.spatial_scale = spatial_scale
+
+    @RunOnlyOnce
+    def build(self, features):
+        pass
+
+    def call(self, features):
+        raise NotImplementedError()

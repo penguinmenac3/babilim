@@ -26,6 +26,26 @@ def Flatten() -> Module:
 
 
 # Cell: 2
+def Reshape(output_shape) -> Module:
+    """
+    Reshape a tensor.
+    
+    A tensor of shape (B, ?) where B is the batch size gets reshaped into (B, output_shape[0], output_shape[1], ...) where the batch size is kept and all other dimensions are depending on output_shape.
+    
+    :param output_shape: The shape that the tensor should have after reshaping is (batch_size,) + output_shape (meaning batch size is automatically kept).
+    :return: A module implementing the reshape layer.
+    """
+    if is_backend(PYTORCH_BACKEND):
+        from babilim.model.modules.pt.reshape import Reshape as _Reshape
+        return _Reshape(output_shape)
+    elif is_backend(TF_BACKEND):
+        from babilim.model.modules.tf.reshape import Reshape as _Reshape
+        return _Reshape(output_shape)
+    else:
+        raise NotImplementedError("The backend {} is not implemented by this modules.".format(get_backend()))
+
+
+# Cell: 3
 def Linear(out_features: int, activation=None) -> Module:
     """
     A simple linear layer.
@@ -46,7 +66,7 @@ def Linear(out_features: int, activation=None) -> Module:
         raise NotImplementedError("The backend {} is not implemented by this modules.".format(get_backend()))
 
 
-# Cell: 3
+# Cell: 4
 def Dense(out_features: int, activation=None) -> Module:
     """
     A simple dense layer (alias for Linear Layer).
@@ -60,7 +80,7 @@ def Dense(out_features: int, activation=None) -> Module:
     return Linear(out_features, activation)
 
 
-# Cell: 4
+# Cell: 5
 def Conv1D(filters: int, kernel_size: int, padding: Optional[str] = None, strides: int = 1, dilation_rate: int = 1, kernel_initializer: Optional[Any] = None, activation=None) -> Module:
     """
     A 1d convolution layer.
@@ -84,7 +104,7 @@ def Conv1D(filters: int, kernel_size: int, padding: Optional[str] = None, stride
         raise NotImplementedError("The backend {} is not implemented by this modules.".format(get_backend()))
 
 
-# Cell: 5
+# Cell: 6
 def Conv2D(filters: int, kernel_size: Tuple[int, int], padding: Optional[str] = None, strides: Tuple[int, int] = (1, 1), dilation_rate: Tuple[int, int] = (1, 1), kernel_initializer: Optional[Any] = None, activation=None) -> Module:
     """
     A 2d convolution layer.
@@ -108,7 +128,7 @@ def Conv2D(filters: int, kernel_size: Tuple[int, int], padding: Optional[str] = 
         raise NotImplementedError("The backend {} is not implemented by this modules.".format(get_backend()))
 
 
-# Cell: 6
+# Cell: 7
 def BatchNormalization() -> Module:
     """
     A batch normalization layer.
@@ -125,7 +145,7 @@ def BatchNormalization() -> Module:
         raise NotImplementedError("The backend {} is not implemented by this modules.".format(get_backend()))
 
 
-# Cell: 7
+# Cell: 8
 def GlobalMaxPooling2D() -> Module:
     """
     A global max pooling layer.
@@ -144,7 +164,7 @@ def GlobalMaxPooling2D() -> Module:
         raise NotImplementedError("The backend {} is not implemented by this modules.".format(get_backend()))
 
 
-# Cell: 8
+# Cell: 9
 def GlobalMaxPooling1D() -> Module:
     """
     A global max pooling layer.
@@ -163,7 +183,7 @@ def GlobalMaxPooling1D() -> Module:
         raise NotImplementedError("The backend {} is not implemented by this modules.".format(get_backend()))
 
 
-# Cell: 9
+# Cell: 10
 def MaxPooling2D() -> Module:
     """
     A 2x2 max pooling layer.
@@ -183,7 +203,7 @@ def MaxPooling2D() -> Module:
         raise NotImplementedError("The backend {} is not implemented by this modules.".format(get_backend()))
 
 
-# Cell: 10
+# Cell: 11
 def MaxPooling1D() -> Module:
     """
     A max pooling layer.
@@ -203,7 +223,7 @@ def MaxPooling1D() -> Module:
         raise NotImplementedError("The backend {} is not implemented by this modules.".format(get_backend()))
 
 
-# Cell: 11
+# Cell: 12
 def GlobalAveragePooling2D() -> Module:
     """
     A global average pooling layer.
@@ -222,7 +242,7 @@ def GlobalAveragePooling2D() -> Module:
         raise NotImplementedError("The backend {} is not implemented by this modules.".format(get_backend()))
 
 
-# Cell: 12
+# Cell: 13
 def GlobalAveragePooling1D() -> Module:
     """
     A global average pooling layer.
@@ -241,7 +261,59 @@ def GlobalAveragePooling1D() -> Module:
         raise NotImplementedError("The backend {} is not implemented by this modules.".format(get_backend()))
 
 
-# Cell: 13
+# Cell: 14
+def RoiPool(output_size, spatial_scale):
+    """
+    Performs Region of Interest (RoI) Pool operator described in Fast R-CNN
+
+    Returns a lambda with two parameters:
+    * **features**: (Tensor[N, C, H, W]) input tensor
+    * **rois**: (Tensor[N, K, 4]) the box coordinates in (x1, y1, x2, y2) format where the regions will be taken from.
+    
+    Parameters to RoiPool:
+    :param output_size: (Tuple[int, int]) the size of the output after the cropping
+            is performed, as (height, width)
+    :param spatial_scale: (float) a scaling factor that maps the input coordinates to
+            the box coordinates. Default: 1.0
+    :return: (Tensor[N, K, C, output_size[0], output_size[1]]) The feature maps crops corresponding to the input rois.
+    """
+    if is_backend(PYTORCH_BACKEND):
+        from babilim.model.modules.pt.pooling import ROIPool as _ROIPool
+        return _ROIPool(output_size, spatial_scale)
+    elif is_backend(TF_BACKEND):
+        from babilim.model.modules.tf.pooling import ROIPool as _ROIPool
+        return _ROIPool(output_size, spatial_scale)
+    else:
+        raise NotImplementedError("The backend {} is not implemented by this modules.".format(get_backend()))
+
+
+# Cell: 15
+def RoiAlign(output_size, spatial_scale):
+    """
+    Performs Region of Interest (RoI) Align operator described in Mask R-CNN
+
+    Returns a lambda with two parameters:
+    * **features**: (Tensor[N, C, H, W]) input tensor
+    * **rois**: (Tensor[N, K, 4]) the box coordinates in (x1, y1, x2, y2) format where the regions will be taken from.
+
+    Parameters to RoiAlign:
+    :param output_size: (Tuple[int, int]) the size of the output after the cropping
+            is performed, as (height, width)
+    :param spatial_scale: (float) a scaling factor that maps the input coordinates to
+            the box coordinates. Default: 1.0
+    :return: (Tensor[N, K, C, output_size[0], output_size[1]]) The feature maps crops corresponding to the input rois.
+    """
+    if is_backend(PYTORCH_BACKEND):
+        from babilim.model.modules.pt.pooling import ROIAlign as _ROIAlign
+        return _ROIAlign(output_size, spatial_scale)
+    elif is_backend(TF_BACKEND):
+        from babilim.model.modules.tf.pooling import ROIAlign as _ROIAlign
+        return _ROIAlign(output_size, spatial_scale)
+    else:
+        raise NotImplementedError("The backend {} is not implemented by this modules.".format(get_backend()))
+
+
+# Cell: 16
 def Activation(activation: str) -> Module:
     """
     Supports the activation functions.
@@ -257,7 +329,51 @@ def Activation(activation: str) -> Module:
     else:
         raise NotImplementedError("The backend {} is not implemented by this modules.".format(get_backend()))
 
-# Cell: 14
+# Cell: 17
+def TopKIndices(k: int) -> Module:
+    """
+    Returns the top k tensor indices (separate per batch).
+    
+    Returns a callable:
+    * **input_tensor**: (Tensor[N, L]) The tensor in which to search the top k indices.
+    * **returns**: (Tensor[N, K]) The tensor containing the indices of the top k values.
+    
+    :param k: The number of indices to return per batch.
+    :return: A module implementing the TopKIndices function.
+    """
+    if is_backend(PYTORCH_BACKEND):
+        from babilim.model.modules.pt.selection import TopKIndices as _TopKIndices
+        return _TopKIndices(k)
+    elif is_backend(TF_BACKEND):
+        from babilim.model.modules.tf.selection import TopKIndices as _TopKIndices
+        return _TopKIndices(k)
+    else:
+        raise NotImplementedError("The backend {} is not implemented by this modules.".format(get_backend()))
+
+
+# Cell: 18
+def Gather() -> Module:
+    """
+    Gather tensors from one tensor by providing an index tensor.
+    
+    Returns a callable:
+    * **input_tensor**: (Tensor[N, L, ?]) The tensor from which to gather values at the given indices.
+    * **indices**: (Tensor[N, K]) The indices at which to return the values of the input tensor.
+    * **returns**: (Tensor[N, K, ?]) The tensor containing the values at the indices given.
+    
+    :return: A module implementing a Gather function.
+    """
+    if is_backend(PYTORCH_BACKEND):
+        from babilim.model.modules.pt.selection import Gather as _Gather
+        return _Gather()
+    elif is_backend(TF_BACKEND):
+        from babilim.model.modules.tf.selection import Gather as _Gather
+        return _Gather()
+    else:
+        raise NotImplementedError("The backend {} is not implemented by this modules.".format(get_backend()))
+
+
+# Cell: 19
 def Lambda(native_module, to_gpu=True) -> Module:
     """
     Wrap a natively implemented layer into a babilim layer.
@@ -275,7 +391,7 @@ def Lambda(native_module, to_gpu=True) -> Module:
     return _Lambda(native_module, to_gpu=True)
 
 
-# Cell: 15
+# Cell: 20
 def Sequential(*layers) -> Module:
     """
     Create a module which is a sequential order of other layers.
@@ -290,3 +406,33 @@ def Sequential(*layers) -> Module:
     """
     from babilim.model.modules.common.sequential import Sequential as _Sequential
     return _Sequential(*layers)
+
+
+# Cell: 21
+def Stack(axis=0):
+    """
+    Create a callable that stacks layers.
+    """
+    if is_backend(PYTORCH_BACKEND):
+        import torch
+        return lambda layers: torch.stack(layers, dim=axis)
+    elif is_backend(TF_BACKEND):
+        import tensorflow as tf
+        return lambda layers: tf.stack(layers, axis=axis)
+    else:
+        raise NotImplementedError("The backend {} is not implemented by this modules.".format(get_backend()))
+
+
+# Cell: 22
+def Concat(axis=0):
+    """
+    Create a callable that stacks layers.
+    """
+    if is_backend(PYTORCH_BACKEND):
+        import torch
+        return lambda layers: torch.cat(layers,dim=axis)
+    elif is_backend(TF_BACKEND):
+        import tensorflow as tf
+        return lambda layers: tf.concat(layers, axis=axis)
+    else:
+        raise NotImplementedError("The backend {} is not implemented by this modules.".format(get_backend()))

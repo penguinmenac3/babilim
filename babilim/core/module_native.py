@@ -24,19 +24,31 @@ class ModuleNative(Module):
         """
         Build the model, this function automatically calls the native build with the tensors unwrapped.
 
+        This function gets called by `__call__` and itself passes all calls to `_build_pytorch` and `_build_tf`.
+        Furthermore, it takes care of unwrapping the tensors into native tensors before calling and wrapping them again after calling.
+        This allows the native functions `_build_pytorch` and `_build_tf` to be pure pytorch or tensorflow code.
+        All subclasses must implement `_build_pytorch` and `_build_tf`.
+
+        You should never call the build function directly. Call this module in the following style (this ensures the module is build on first run):
+        ```
+        module = MyModule()
+        result = module(*args, **kwargs)  # <- Build gets called internally here.
+        ```
+
+        Parameters:
         :param *args: You must specify the exact same parameters as for your call.
         :param **kwargs: You must specify the exact same parameters as for your call.
         """
         args = self._wrapper.unwrap(args)
         kwargs = self._wrapper.unwrap(kwargs)
         if is_backend(PYTORCH_BACKEND):
-            build_pytorch(*args, **kwargs)
+            self._build_pytorch(*args, **kwargs)
         elif is_backend(TF_BACKEND):
-            build_tf(*args, **kwargs)
+            self._build_tf(*args, **kwargs)
         else:
             raise RuntimeError("Unknown Backend: {}".format(get_backend()))
             
-    def build_pytorch(self, *args, **kwargs) -> None:
+    def _build_pytorch(self, *args, **kwargs) -> None:
         """
         A native build function in pytorch.
         
@@ -47,7 +59,7 @@ class ModuleNative(Module):
         """
         pass
     
-    def build_tf(self, *args, **kwargs) -> None:
+    def _build_tf(self, *args, **kwargs) -> None:
         """
         A native build function in tensorflow.
         
@@ -64,28 +76,34 @@ class ModuleNative(Module):
         This should be pure computation and not allocate any weights.
         Allocating weights should be done in the `build` function.
 
-        This function gets called by `__call__` and must be overwritten by any derived class.
+        This function gets called by `__call__` and itself passes all calls to `_call_pytorch` and `_call_tf`.
+        Furthermore, it takes care of unwrapping the tensors into native tensors before calling and wrapping them again after calling.
+        This allows the native functions `_call_pytorch` and `_call_tf` to be pure pytorch or tensorflow code.
+        All subclasses must implement `_call_pytorch` and `_call_tf`.
 
-        ```python
-        def call(self, image: ITensor) -> NetworkOutput:
+        You should call this module in the following style (this ensures the module is build on first run):
+        ```
+        module = MyModule()
+        result = module(*args, **kwargs)
         ```
 
+        Parameters:
         :param *args: You can specify any parameters you want.
         :param **kwargs: You can specify any named parameters you want.
         """
         args = self._wrapper.unwrap(args)
         kwargs = self._wrapper.unwrap(kwargs)
         if is_backend(PYTORCH_BACKEND):
-            results = call_pytorch(*args, **kwargs)
+            results = self._call_pytorch(*args, **kwargs)
         elif is_backend(TF_BACKEND):
-            results = call_tf(*args, **kwargs)
+            results = self._call_tf(*args, **kwargs)
         else:
             raise RuntimeError("Unknown Backend: {}".format(get_backend()))
         
         results = self._wrapper.wrap(results)
         return results
     
-    def call_pytorch(self, *args, **kwargs) -> Any:
+    def _call_pytorch(self, *args, **kwargs) -> Any:
         """
         A native call function in pytorch (like the forward).
         
@@ -94,7 +112,7 @@ class ModuleNative(Module):
         """
         raise NotImplemented()
     
-    def build_tf(self, *args, **kwargs) -> Any:
+    def _call_tf(self, *args, **kwargs) -> Any:
         """
         A native call function in tensorflow.
         

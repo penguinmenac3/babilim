@@ -1,3 +1,5 @@
+[Back to Overview](../../README.md)
+
 # babilim.core.config
 
 > The base class for every config.
@@ -46,7 +48,7 @@ class MyConfig(Config):
 
 When you write a library and need to dynamically import configs, use the following two functions.
 
-### *def* **import_config**(config_file: str) -> Config
+### *def* **import_config**(config_file: str, *args, **kwargs) -> Config
 
 Only libraries should use this method. Human users should directly import their configs.
 Automatically imports the most specific config from a given file.
@@ -55,7 +57,7 @@ Automatically imports the most specific config from a given file.
 * returns: The configuration object.
 
 
-### *def* **import_checkpoint_config**(config_file: str) -> Any
+### *def* **import_checkpoint_config**(config_file: str, *args, **kwargs) -> Any
 
 Adds the folder in which the config_file is to the pythonpath, imports it and removes the folder from the python path again.
 

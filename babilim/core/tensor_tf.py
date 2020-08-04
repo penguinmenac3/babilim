@@ -43,18 +43,28 @@ class TensorWrapper(ITensorWrapper):
         return obj
     
     def unwrap(self, obj: Any) -> Any:
-        out = None
-        if isinstance(obj, Sequence):
-            out = []
-            for i in range(len(obj)):
-                out.append(self.unwrap(obj[i]))
-        if isinstance(obj, Dict):
-            out = {}
-            for k in obj:
-                out[k] = self.unwrap(obj[k])
-        if isinstance(obj, Tensor):
-            out = obj.native
-        return out
+        def _unwrap_indexable(obj, indices):
+            obj = obj.copy()
+            ret = obj
+            for i in indices:
+                if obj[i] is None: continue
+                obj[i] = self.unwrap(obj[i])
+                if obj[i] is None: ret = None
+            return ret
+        if isinstance(obj, Tuple):
+            obj = list(obj)
+            obj = _unwrap_indexable(obj, range(len(obj)))
+            if obj is not None:
+                obj = tuple(obj)
+        elif isinstance(obj, Sequence):
+            obj = _unwrap_indexable(obj, range(len(obj)))
+        elif isinstance(obj, Dict):
+            obj = _unwrap_indexable(obj, obj)
+        elif isinstance(obj, Tensor):
+            obj = obj.native
+        else:
+            obj = None
+        return obj
 
     def is_variable(self, obj: Any) -> bool:
         return isinstance(obj, tf.Variable)

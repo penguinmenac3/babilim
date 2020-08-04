@@ -1,3 +1,5 @@
+[Back to Overview](../../../README.md)
+
 # babilim.training.optimizers.optimizer
 
 > The optimizer interface.
@@ -20,7 +22,6 @@ This method applies the gradients to variables.
 
 * gradients: An iterable of the gradients.
 * variables: An iterable of the variables to which the gradients should be applied (in the same order as gradients).
-* learning_rate: The learning rate which is currently used.
 
 
 # *class* **NativePytorchOptimizerWrapper**(Optimizer)
@@ -33,11 +34,12 @@ For example "optimizer_class=torch.optim.SGD".
 * kwargs: The arguments for the optimizer on initialization.
 
 
-### *def* **build**(*self*, lr)
+### *def* **build**(*self*, gradients: Iterable[ITensor], variables: Iterable[ITensor])
 
 Build the optimizer. Automatically is called when apply_gradients is called for the first time.
 
-* lr: The learning rate used to initialize the optimizer.
+* gradients: An iterable of the gradients.
+* variables: An iterable of the variables to which the gradients should be applied (in the same order as gradients).
 
 
 ### *def* **apply_gradients**(*self*, gradients: Iterable[ITensor], variables: Iterable[ITensor]) -> None
@@ -46,6 +48,5 @@ This method applies the gradients to variables.
 
 * gradients: An iterable of the gradients.
 * variables: An iterable of the variables to which the gradients should be applied (in the same order as gradients).
-* learning_rate: The learning rate which is currently used.
 
 

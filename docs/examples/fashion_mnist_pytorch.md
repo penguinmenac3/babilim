@@ -1,16 +1,6 @@
 [Back to Overview](../README.md)
 
-Example:
-```python
-import os
-
-if "HOME" in os.environ:
-    playground = "{}/Playground".format(os.environ["HOME"])
-    if os.path.exists(playground):
-        os.chdir(playground)
-```
-
-# Example: MNIST with Babilim
+# Example: MNIST with Babilim (Mixing with Native Pytorch)
 
 > A babilim example to solve fashion MNIST with a gpu.
 

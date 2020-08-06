@@ -4,7 +4,9 @@
 
 > Flatten a feature map into a linearized tensor.
 
-# *class* **Flatten**(ModuleNative)
+---
+---
+## *class* **Flatten**(ModuleNative)
 
 Flatten a feature map into a linearized tensor.
 

@@ -4,15 +4,17 @@
 
 > Pooling operations.
 
-# *class* **MaxPooling1D**(ModuleNative)
+---
+---
+## *class* **MaxPooling1D**(ModuleNative)
 
 A N max pooling layer.
 
 Computes the max of a N region with stride S.
 This divides the feature map size by S.
 
-* pool_size: Size of the region over which is pooled.
-* stride: The stride defines how the top left corner of the pooling moves across the image. If None then it is same to pool_size resulting in zero overlap between pooled regions.
+* **pool_size**: Size of the region over which is pooled.
+* **stride**: The stride defines how the top left corner of the pooling moves across the image. If None then it is same to pool_size resulting in zero overlap between pooled regions.
 
 
 Example:
@@ -34,15 +36,17 @@ Output:
 
 ```
 
-# *class* **MaxPooling2D**(ModuleNative)
+---
+---
+## *class* **MaxPooling2D**(ModuleNative)
 
 A NxN max pooling layer.
 
 Computes the max of a NxN region with stride S.
 This divides the feature map size by S.
 
-* pool_size: Size of the region over which is pooled.
-* stride: The stride defines how the top left corner of the pooling moves across the image. If None then it is same to pool_size resulting in zero overlap between pooled regions.
+* **pool_size**: Size of the region over which is pooled.
+* **stride**: The stride defines how the top left corner of the pooling moves across the image. If None then it is same to pool_size resulting in zero overlap between pooled regions.
 
 
 Example:
@@ -64,7 +68,9 @@ Output:
 
 ```
 
-# *class* **GlobalAveragePooling1D**(ModuleNative)
+---
+---
+## *class* **GlobalAveragePooling1D**(ModuleNative)
 
 A global average pooling layer.
 
@@ -90,7 +96,9 @@ Output:
 
 ```
 
-# *class* **GlobalAveragePooling2D**(ModuleNative)
+---
+---
+## *class* **GlobalAveragePooling2D**(ModuleNative)
 
 A global average pooling layer.
 

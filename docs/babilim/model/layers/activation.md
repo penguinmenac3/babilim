@@ -4,11 +4,13 @@
 
 > Compute an activation function.
 
-# *class* **Activation**(ModuleNative)
+---
+---
+## *class* **Activation**(ModuleNative)
 
 Supports the activation functions.
 
-* activation: A string specifying the activation function to use. (Only "relu" and None supported yet.)
+* **activation**: A string specifying the activation function to use. (Only "relu" and None supported yet.)
 
 
 Example:

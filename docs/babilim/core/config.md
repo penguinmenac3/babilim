@@ -6,7 +6,9 @@
 
 This code is under the MIT License.
 
-# *class* **Config**(object)
+---
+---
+## *class* **Config**(object)
 
 A configuration for a deep learning project.
 
@@ -48,20 +50,22 @@ class MyConfig(Config):
 
 When you write a library and need to dynamically import configs, use the following two functions.
 
+---
 ### *def* **import_config**(config_file: str, *args, **kwargs) -> Config
 
 Only libraries should use this method. Human users should directly import their configs.
 Automatically imports the most specific config from a given file.
 
-* config_file: Path to the configuration file (e.g. configs/my_config.py)
-* returns: The configuration object.
+* **config_file**: Path to the configuration file (e.g. configs/my_config.py)
+* **returns**: The configuration object.
 
 
+---
 ### *def* **import_checkpoint_config**(config_file: str, *args, **kwargs) -> Any
 
 Adds the folder in which the config_file is to the pythonpath, imports it and removes the folder from the python path again.
 
-* config_file: The configuration file which should be loaded.
-* returns: The configuration object.
+* **config_file**: The configuration file which should be loaded.
+* **returns**: The configuration object.
 
 

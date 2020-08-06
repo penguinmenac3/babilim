@@ -3,6 +3,8 @@
 checkpoints
 logs
 datasets
+.logs
+.datasets
 
 *.code-workspace
 .vs

@@ -4,14 +4,16 @@
 
 > A simple fully connected layer (aka Linear Layer or Dense).
 
-# *class* **FullyConnected**(ModuleNative)
+---
+---
+## *class* **FullyConnected**(ModuleNative)
 
 A simple fully connected layer (aka Linear Layer or Dense).
 
 It computes Wx+b with optional activation funciton.
 
-* out_features: The number of output features.
-* activation: The activation function that should be added after the fc layer.
+* **out_features**: The number of output features.
+* **activation**: The activation function that should be added after the fc layer.
 
 
 Example:

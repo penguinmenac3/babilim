@@ -15,7 +15,9 @@ def _isnamedtupleinstance(x):
     return all(type(n)==str for n in f)
 ```
 
-# *class* **Lambda**(Module)
+---
+---
+## *class* **Lambda**(Module)
 
 Wrap a natively implemented layer into a babilim layer.
 
@@ -25,14 +27,16 @@ This can be used to implement layers that are missing in babilim in an easy way.
 my_lambda = Lambda(tf.max)
 ```
 
-* native_module: The native pytorch/tensorflow module that should be wrapped.
-* to_gpu: (Optional) True if the module should be automatically be moved to the gpu. (default: True)
+* **native_module**: The native pytorch/tensorflow module that should be wrapped.
+* **to_gpu**: (Optional) True if the module should be automatically be moved to the gpu. (default: True)
 
 
+---
 ### *def* **build**(*self*, *args, **kwargs) -> None
 
 *(no documentation found)*
 
+---
 ### *def* **call**(*self*, *args, **kwargs) -> Any
 
 Do not call this directly, use `__call__`:
@@ -41,10 +45,12 @@ my_lambda(*args, **kwargs)
 ```
 
 
+---
 ### *def* **eval**(*self*)
 
 *(no documentation found)*
 
+---
 ### *def* **train**(*self*, mode=True)
 
 *(no documentation found)*

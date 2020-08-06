@@ -4,7 +4,9 @@
 
 > Apply batch normalization to a tensor.
 
-# *class* **BatchNormalization**(ModuleNative)
+---
+---
+## *class* **BatchNormalization**(ModuleNative)
 
 A batch normalization layer.
 

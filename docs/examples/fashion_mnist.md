@@ -57,13 +57,13 @@ import babilim
 from babilim.core import logging
 
 logging.DEBUG_VERBOSITY = True
-logging.set_logger(os.path.join("logs", logging.get_timestamp() + "_FashionMNIST", "log.txt"))
+logging.set_logger(os.path.join(".logs", logging.get_timestamp() + "_FashionMNIST", "log.txt"))
 
 babilim.set_backend(babilim.AUTO_BACKEND)
 ```
 Output:
 ```
-[2020-08-04 17:32:34] INFO Using backend: pytorch-gpu
+[2020-08-05 10:34:26] INFO Using backend: pytorch-gpu
 
 ```
 
@@ -118,7 +118,7 @@ class FashionMnistConfig(Config):
         super().__init__()
         self.problem_number_of_categories = 10
         self.problem_samples = 60000
-        self.problem_base_dir = "datasets"
+        self.problem_base_dir = ".datasets"
 
         self.train_epochs = 10
         self.train_l2_weight = 0.01
@@ -234,6 +234,24 @@ transformer = MNISTTransformer()
 data_train.realtime_transformers.append(transformer)
 data_dev.realtime_transformers.append(transformer)
 ```
+Output:
+```
+0%|          | 0/26421880 [00:00<?, ?it/s]Downloading http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-images-idx3-ubyte.gz to .datasets\FashionMNIST\raw\train-images-idx3-ubyte.gz
+26427392it [00:05, 4763526.62it/s]
+Extracting .datasets\FashionMNIST\raw\train-images-idx3-ubyte.gz to .datasets\FashionMNIST\raw
+32768it [00:00, 334485.99it/s]
+0it [00:00, ?it/s]Downloading http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-labels-idx1-ubyte.gz to .datasets\FashionMNIST\raw\train-labels-idx1-ubyte.gz
+Extracting .datasets\FashionMNIST\raw\train-labels-idx1-ubyte.gz to .datasets\FashionMNIST\raw
+Downloading http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/t10k-images-idx3-ubyte.gz to .datasets\FashionMNIST\raw\t10k-images-idx3-ubyte.gz
+4423680it [00:00, 4556826.60it/s]
+8192it [00:00, 131358.12it/s]
+Extracting .datasets\FashionMNIST\raw\t10k-images-idx3-ubyte.gz to .datasets\FashionMNIST\raw
+Downloading http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/t10k-labels-idx1-ubyte.gz to .datasets\FashionMNIST\raw\t10k-labels-idx1-ubyte.gz
+Extracting .datasets\FashionMNIST\raw\t10k-labels-idx1-ubyte.gz to .datasets\FashionMNIST\raw
+Processing...
+Done!
+
+```
 
 One last step is to test if the dataset works.
 To test this we will call the dataset with multiple random indices.
@@ -283,8 +301,8 @@ Train Split
 Dev Split
 
 ```
-![data](../../docs/jlabdev_images/8357a73ce02517327bf2719b0d904533.png)
-![data](../../docs/jlabdev_images/561202e662ff6d25b390e8a08f51ea5f.png)
+![data](../../docs/jlabdev_images/c86437ac17fc0391a870ed712746ce90.png)
+![data](../../docs/jlabdev_images/ad705e38551070331e95a02d2310d046.png)
 
 ## The Model
 
@@ -371,7 +389,7 @@ model.initialize(data_train)
 ```
 Output:
 ```
-[2020-08-04 17:32:38] INFO Build Model
+[2020-08-05 10:34:38] INFO Build Model
 
 ```
 
@@ -393,8 +411,8 @@ Train Data Predictions
 Dev Data Predictions
 
 ```
-![data](../../docs/jlabdev_images/002a950ddaa9b346a81b0df7368890c1.png)
-![data](../../docs/jlabdev_images/ded19f22ab9e146049741e1bd27e302e.png)
+![data](../../docs/jlabdev_images/2d38ed25ad1d97993e5d55224fa9c646.png)
+![data](../../docs/jlabdev_images/6abcca51269d07fcd3da4707562cc485.png)
 
 ## The Trainer
 
@@ -452,58 +470,52 @@ trainer.fit(data_train.to_dataloader(), data_dev.to_dataloader(), config.train_e
 ```
 Output:
 ```
-[2020-08-04 17:33:13] INFO Started fit.
-[2020-08-04 17:33:13] INFO Build Model
-[2020-08-04 17:33:14] INFO Trainable Variables:
-[2020-08-04 17:33:14] INFO   /linear/0/bn/weight: (1,)
-[2020-08-04 17:33:14] INFO   /linear/0/bn/bias: (1,)
-[2020-08-04 17:33:14] INFO   /linear/1/weight: (12, 1, 3, 3)
-[2020-08-04 17:33:14] INFO   /linear/1/bias: (12,)
-[2020-08-04 17:33:14] INFO   /linear/4/bn/weight: (12,)
-[2020-08-04 17:33:14] INFO   /linear/4/bn/bias: (12,)
-[2020-08-04 17:33:14] INFO   /linear/5/weight: (18, 12, 3, 3)
-[2020-08-04 17:33:14] INFO   /linear/5/bias: (18,)
-[2020-08-04 17:33:14] INFO   /linear/8/bn/weight: (18,)
-[2020-08-04 17:33:14] INFO   /linear/8/bn/bias: (18,)
-[2020-08-04 17:33:14] INFO   /linear/9/weight: (18, 18, 3, 3)
-[2020-08-04 17:33:14] INFO   /linear/9/bias: (18,)
-[2020-08-04 17:33:14] INFO   /linear/12/bn/weight: (18,)
-[2020-08-04 17:33:14] INFO   /linear/12/bn/bias: (18,)
-[2020-08-04 17:33:14] INFO   /linear/13/weight: (18, 18, 3, 3)
-[2020-08-04 17:33:14] INFO   /linear/13/bias: (18,)
-[2020-08-04 17:33:14] INFO   /linear/16/bn/weight: (18,)
-[2020-08-04 17:33:14] INFO   /linear/16/bn/bias: (18,)
-[2020-08-04 17:33:14] INFO   /linear/18/weight: (18, 18)
-[2020-08-04 17:33:14] INFO   /linear/18/bias: (18,)
-[2020-08-04 17:33:14] INFO   /linear/20/weight: (10, 18)
-[2020-08-04 17:33:14] INFO   /linear/20/bias: (10,)
-[2020-08-04 17:33:14] INFO Untrainable Variables:
-[2020-08-04 17:33:14] INFO   /linear/0/bn/running_mean: (1,)
-[2020-08-04 17:33:14] INFO   /linear/0/bn/running_var: (1,)
-[2020-08-04 17:33:14] INFO   /linear/0/bn/num_batches_tracked: ()
-[2020-08-04 17:33:14] INFO   /linear/4/bn/running_mean: (12,)
-[2020-08-04 17:33:14] INFO   /linear/4/bn/running_var: (12,)
-[2020-08-04 17:33:14] INFO   /linear/4/bn/num_batches_tracked: ()
-[2020-08-04 17:33:14] INFO   /linear/8/bn/running_mean: (18,)
-[2020-08-04 17:33:14] INFO   /linear/8/bn/running_var: (18,)
-[2020-08-04 17:33:14] INFO   /linear/8/bn/num_batches_tracked: ()
-[2020-08-04 17:33:14] INFO   /linear/12/bn/running_mean: (18,)
-[2020-08-04 17:33:14] INFO   /linear/12/bn/running_var: (18,)
-[2020-08-04 17:33:14] INFO   /linear/12/bn/num_batches_tracked: ()
-[2020-08-04 17:33:14] INFO   /linear/16/bn/running_mean: (18,)
-[2020-08-04 17:33:14] INFO   /linear/16/bn/running_var: (18,)
-[2020-08-04 17:33:14] INFO   /linear/16/bn/num_batches_tracked: ()
-[2020-08-04 17:51:01] STAT Training 1/10 - metrics/ca=0.731 - loss/total=1.525 - LR 0.000905
-[2020-08-04 17:51:01] INFO Saved Checkoint: checkpoints\latest.npz
-[2020-08-04 17:53:56] STAT Epoch 1/10 (ETA 3:06:29) - metrics/ca=0.753 - loss/total=1.508
-[2020-08-04 17:53:56] INFO Saved Checkoint: checkpoints\best.npz
-[2020-08-04 18:11:26] STAT Training 2/10 - metrics/ca=0.779 - loss/total=1.275 - LR 0.000805
-[2020-08-04 18:11:26] INFO Saved Checkoint: checkpoints\latest.npz
-[2020-08-04 18:14:19] STAT Epoch 2/10 (ETA 2:44:23) - metrics/ca=0.805 - loss/total=1.238
-[2020-08-04 18:14:19] INFO Saved Checkoint: checkpoints\best.npz
-[2020-08-04 18:31:32] STAT Training 3/10 - metrics/ca=0.831 - loss/total=1.064 - LR 0.000717
-[2020-08-04 18:31:32] INFO Saved Checkoint: checkpoints\latest.npz
-[2020-08-04 18:32:25] WARN Fit interrupted by user!
+[2020-08-05 10:08:29] INFO Started fit.
+[2020-08-05 10:08:29] INFO Build Model
+[2020-08-05 10:08:29] INFO Trainable Variables:
+[2020-08-05 10:08:29] INFO   /linear/0/bn/weight: (1,)
+[2020-08-05 10:08:29] INFO   /linear/0/bn/bias: (1,)
+[2020-08-05 10:08:29] INFO   /linear/1/weight: (12, 1, 3, 3)
+[2020-08-05 10:08:29] INFO   /linear/1/bias: (12,)
+[2020-08-05 10:08:29] INFO   /linear/4/bn/weight: (12,)
+[2020-08-05 10:08:29] INFO   /linear/4/bn/bias: (12,)
+[2020-08-05 10:08:29] INFO   /linear/5/weight: (18, 12, 3, 3)
+[2020-08-05 10:08:29] INFO   /linear/5/bias: (18,)
+[2020-08-05 10:08:29] INFO   /linear/8/bn/weight: (18,)
+[2020-08-05 10:08:29] INFO   /linear/8/bn/bias: (18,)
+[2020-08-05 10:08:29] INFO   /linear/9/weight: (18, 18, 3, 3)
+[2020-08-05 10:08:29] INFO   /linear/9/bias: (18,)
+[2020-08-05 10:08:29] INFO   /linear/12/bn/weight: (18,)
+[2020-08-05 10:08:29] INFO   /linear/12/bn/bias: (18,)
+[2020-08-05 10:08:29] INFO   /linear/13/weight: (18, 18, 3, 3)
+[2020-08-05 10:08:29] INFO   /linear/13/bias: (18,)
+[2020-08-05 10:08:29] INFO   /linear/16/bn/weight: (18,)
+[2020-08-05 10:08:29] INFO   /linear/16/bn/bias: (18,)
+[2020-08-05 10:08:29] INFO   /linear/18/weight: (18, 18)
+[2020-08-05 10:08:29] INFO   /linear/18/bias: (18,)
+[2020-08-05 10:08:29] INFO   /linear/20/weight: (10, 18)
+[2020-08-05 10:08:29] INFO   /linear/20/bias: (10,)
+[2020-08-05 10:08:29] INFO Untrainable Variables:
+[2020-08-05 10:08:29] INFO   /linear/0/bn/running_mean: (1,)
+[2020-08-05 10:08:29] INFO   /linear/0/bn/running_var: (1,)
+[2020-08-05 10:08:29] INFO   /linear/0/bn/num_batches_tracked: ()
+[2020-08-05 10:08:29] INFO   /linear/4/bn/running_mean: (12,)
+[2020-08-05 10:08:29] INFO   /linear/4/bn/running_var: (12,)
+[2020-08-05 10:08:29] INFO   /linear/4/bn/num_batches_tracked: ()
+[2020-08-05 10:08:29] INFO   /linear/8/bn/running_mean: (18,)
+[2020-08-05 10:08:29] INFO   /linear/8/bn/running_var: (18,)
+[2020-08-05 10:08:29] INFO   /linear/8/bn/num_batches_tracked: ()
+[2020-08-05 10:08:29] INFO   /linear/12/bn/running_mean: (18,)
+[2020-08-05 10:08:29] INFO   /linear/12/bn/running_var: (18,)
+[2020-08-05 10:08:29] INFO   /linear/12/bn/num_batches_tracked: ()
+[2020-08-05 10:08:29] INFO   /linear/16/bn/running_mean: (18,)
+[2020-08-05 10:08:29] INFO   /linear/16/bn/running_var: (18,)
+[2020-08-05 10:08:29] INFO   /linear/16/bn/num_batches_tracked: ()
+[2020-08-05 10:25:36] STAT Training 1/10 - metrics/ca=0.665 - loss/total=1.456 - LR 0.000905
+[2020-08-05 10:25:36] INFO Saved Checkoint: checkpoints\latest.npz
+[2020-08-05 10:28:25] STAT Epoch 1/10 (ETA 2:59:30) - metrics/ca=0.685 - loss/total=1.421
+[2020-08-05 10:28:25] INFO Saved Checkoint: checkpoints\best.npz
+[2020-08-05 10:32:58] WARN Fit interrupted by user!
 
 ```
 

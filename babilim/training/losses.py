@@ -13,34 +13,43 @@ from babilim.core.module import Module
 
 # Cell: 1
 class Loss(Module):
-    def __init__(self, log_std=False, log_min=False, log_max=False):
+    def __init__(self, log_std=False, log_min=False, log_max=False, reduction: str = "mean"):
         """
         A loss is a statefull object which computes the difference between the prediction and the target.
         
         :param log_std: When true the loss will log its standard deviation. (default: False)
         :param log_min: When true the loss will log its minimum values. (default: False)
         :param log_max: When true the loss will log its maximal values. (default: False)
+        :param reduction: Specifies the reduction to apply to the output: `'none'` | `'mean'` | `'sum'`. `'none'`: no reduction will be applied, `'mean'`: the sum of the output will be divided by the number of elements in the output, `'sum'`: the output will be summed. Default: 'mean'.
         """
         super().__init__()
         self._accumulators = defaultdict(list)
         self._log_std = log_std
         self._log_min = log_min
         self._log_max = log_max
+        self.reduction = reduction
+        if reduction not in ["none", "mean", "sum"]:
+            raise NotImplementedError()
 
     def call(self, y_pred: Any, y_true: Any) -> ITensor:
         """
         Implement a loss function between preds and true outputs.
         
-        DO NOT:
+        **DO NOT**:
         * Overwrite this function (overwrite `self.loss(...)` instead)
         * Call this function (call the module instead `self(y_pred, y_true)`)
 
+        Arguments:
         :param y_pred: The predictions of the network. Either a NamedTuple pointing at ITensors or a Dict or Tuple of ITensors.
         :param y_true: The desired outputs of the network (labels). Either a NamedTuple pointing at ITensors or a Dict or Tuple of ITensors.
         """
         loss = self.loss(y_pred, y_true)
         if loss.is_nan().any():
             raise ValueError("Loss is nan. Loss value: {}".format(loss))
+        if self.reduction == "mean":
+            loss = loss.mean()
+        elif self.reduction == "sum":
+            loss = loss.sum()
         return loss
 
     def loss(self, y_pred: Any, y_true: Any) -> ITensor:
@@ -49,9 +58,10 @@ class Loss(Module):
         
         **`loss` must be overwritten by subclasses.**
         
-        DO NOT:
+        **DO NOT**:
         * Call this function (call the module instead `self(y_pred, y_true)`)
 
+        Arguments:
         :param y_pred: The predictions of the network. Either a NamedTuple pointing at ITensors or a Dict or Tuple of ITensors.
         :param y_true: The desired outputs of the network (labels). Either a NamedTuple pointing at ITensors or a Dict or Tuple of ITensors.
         """
@@ -133,7 +143,7 @@ class Loss(Module):
 
 # Cell: 2
 class NativeLossWrapper(Loss):
-    def __init__(self, loss, log_std=False, log_min=False, log_max=False):
+    def __init__(self, loss, log_std=False, log_min=False, log_max=False, reduction: str = "mean"):
         """
         Wrap a native loss as a babilim loss.
 
@@ -149,8 +159,9 @@ class NativeLossWrapper(Loss):
         :param log_std: When true the loss will log its standard deviation. (default: False)
         :param log_min: When true the loss will log its minimum values. (default: False)
         :param log_max: When true the loss will log its maximal values. (default: False)
+        :param reduction: Specifies the reduction to apply to the output: `'none'` | `'mean'` | `'sum'`. `'none'`: no reduction will be applied, `'mean'`: the sum of the output will be divided by the number of elements in the output, `'sum'`: the output will be summed. Default: 'mean'.
         """
-        super().__init__(log_std=log_std, log_min=log_min, log_max=log_max)
+        super().__init__(log_std=log_std, log_min=log_min, log_max=log_max, reduction=reduction)
         self.native_loss = loss
         self._auto_device()
 
@@ -185,7 +196,7 @@ class NativeLossWrapper(Loss):
 
 # Cell: 3
 class SparseCrossEntropyLossFromLogits(Loss):
-    def __init__(self, log_std=False, log_min=False, log_max=False):
+    def __init__(self, log_std=False, log_min=False, log_max=False, reduction: str = "mean"):
         """
         Compute a sparse cross entropy.
         
@@ -194,11 +205,12 @@ class SparseCrossEntropyLossFromLogits(Loss):
         :param log_std: When true the loss will log its standard deviation. (default: False)
         :param log_min: When true the loss will log its minimum values. (default: False)
         :param log_max: When true the loss will log its maximal values. (default: False)
+        :param reduction: Specifies the reduction to apply to the output: `'none'` | `'mean'` | `'sum'`. `'none'`: no reduction will be applied, `'mean'`: the sum of the output will be divided by the number of elements in the output, `'sum'`: the output will be summed. Default: 'mean'.
         """
-        super().__init__(log_std=log_std, log_min=log_min, log_max=log_min)
+        super().__init__(log_std=log_std, log_min=log_min, log_max=log_min, reduction=reduction)
         if babilim.is_backend(babilim.PYTORCH_BACKEND):
             from torch.nn import CrossEntropyLoss
-            self.loss_fun = CrossEntropyLoss()
+            self.loss_fun = CrossEntropyLoss(reduction="none")
         else:
             from tensorflow.nn import sparse_softmax_cross_entropy_with_logits
             self.loss_fun = sparse_softmax_cross_entropy_with_logits
@@ -218,16 +230,86 @@ class SparseCrossEntropyLossFromLogits(Loss):
 
 
 # Cell: 4
+class BinaryCrossEntropyLossFromLogits(Loss):
+    def __init__(self, log_std=False, log_min=False, log_max=False, reduction: str = "mean"):
+        """
+        Compute a binary cross entropy.
+        
+        This means that the preds are logits and the targets are a binary (1 or 0) tensor of same shape as logits.
+
+        :param log_std: When true the loss will log its standard deviation. (default: False)
+        :param log_min: When true the loss will log its minimum values. (default: False)
+        :param log_max: When true the loss will log its maximal values. (default: False)
+        :param reduction: Specifies the reduction to apply to the output: `'none'` | `'mean'` | `'sum'`. `'none'`: no reduction will be applied, `'mean'`: the sum of the output will be divided by the number of elements in the output, `'sum'`: the output will be summed. Default: 'mean'.
+        """
+        super().__init__(log_std=log_std, log_min=log_min, log_max=log_min, reduction=reduction)
+        if babilim.is_backend(babilim.PYTORCH_BACKEND):
+            from torch.nn import BCEWithLogitsLoss
+            self.loss_fun = BCEWithLogitsLoss(reduction="none")
+        else:
+            from tensorflow.nn import sigmoid_cross_entropy_with_logits
+            self.loss_fun = sigmoid_cross_entropy_with_logits
+
+    def loss(self, y_pred: ITensor, y_true: ITensor) -> ITensor:
+        """
+        Compute the sparse cross entropy assuming y_pred to be logits.
+        
+        :param y_pred: The predictions of the network. Either a NamedTuple pointing at ITensors or a Dict or Tuple of ITensors.
+        :param y_true: The desired outputs of the network (labels). Either a NamedTuple pointing at ITensors or a Dict or Tuple of ITensors.
+        """
+        if babilim.is_backend(babilim.PYTORCH_BACKEND):
+            return Tensor(data=self.loss_fun(y_pred.native, y_true.native), trainable=True)
+        else:
+            return Tensor(data=self.loss_fun(labels=y_true.native, logits=y_pred.native), trainable=True)
+
+
+# Cell: 5
+class SmoothL1Loss(Loss):
+    def __init__(self, log_std=False, log_min=False, log_max=False, reduction: str = "mean"):
+        """
+        Compute a binary cross entropy.
+        
+        This means that the preds are logits and the targets are a binary (1 or 0) tensor of same shape as logits.
+
+        :param log_std: When true the loss will log its standard deviation. (default: False)
+        :param log_min: When true the loss will log its minimum values. (default: False)
+        :param log_max: When true the loss will log its maximal values. (default: False)
+        :param reduction: Specifies the reduction to apply to the output: `'none'` | `'mean'` | `'sum'`. `'none'`: no reduction will be applied, `'mean'`: the sum of the output will be divided by the number of elements in the output, `'sum'`: the output will be summed. Default: 'mean'.
+        """
+        super().__init__(log_std=log_std, log_min=log_min, log_max=log_min, reduction=reduction)
+        if babilim.is_backend(babilim.PYTORCH_BACKEND):
+            from torch.nn import SmoothL1Loss
+            self.loss_fun = SmoothL1Loss(reduction="none")
+        else:
+            from tensorflow.keras.losses import huber
+            self.loss_fun = huber
+            self.delta = 1.0
+
+    def loss(self, y_pred: ITensor, y_true: ITensor) -> ITensor:
+        """
+        Compute the sparse cross entropy assuming y_pred to be logits.
+        
+        :param y_pred: The predictions of the network. Either a NamedTuple pointing at ITensors or a Dict or Tuple of ITensors.
+        :param y_true: The desired outputs of the network (labels). Either a NamedTuple pointing at ITensors or a Dict or Tuple of ITensors.
+        """
+        if babilim.is_backend(babilim.PYTORCH_BACKEND):
+            return Tensor(data=self.loss_fun(y_pred.native, y_true.native), trainable=True)
+        else:
+            return Tensor(data=self.loss_fun(labels=y_true.native, logits=y_pred.native, delta=self.delta), trainable=True)
+
+
+# Cell: 6
 class MeanSquaredError(Loss):
-    def __init__(self, log_std=False, log_min=False, log_max=False):
+    def __init__(self, log_std=False, log_min=False, log_max=False, reduction: str = "mean"):
         """
         Compute the mean squared error.
         
         :param log_std: When true the loss will log its standard deviation. (default: False)
         :param log_min: When true the loss will log its minimum values. (default: False)
         :param log_max: When true the loss will log its maximal values. (default: False)
+        :param reduction: Specifies the reduction to apply to the output: `'none'` | `'mean'` | `'sum'`. `'none'`: no reduction will be applied, `'mean'`: the sum of the output will be divided by the number of elements in the output, `'sum'`: the output will be summed. Default: 'mean'.
         """
-        super().__init__(log_std=log_std, log_min=log_min, log_max=log_min)
+        super().__init__(log_std=log_std, log_min=log_min, log_max=log_min, reduction=reduction)
     
     def loss(self, y_pred: ITensor, y_true: ITensor, axis: int=-1) -> ITensor:
         """
@@ -240,9 +322,9 @@ class MeanSquaredError(Loss):
         return ((y_pred - y_true) ** 2).mean(axis=axis)
 
 
-# Cell: 5
+# Cell: 7
 class SparseCategoricalAccuracy(Loss):
-    def __init__(self, log_std=False, log_min=False, log_max=False):
+    def __init__(self, log_std=False, log_min=False, log_max=False, reduction: str = "mean"):
         """
         Compute the sparse mean squared error.
         
@@ -251,8 +333,9 @@ class SparseCategoricalAccuracy(Loss):
         :param log_std: When true the loss will log its standard deviation. (default: False)
         :param log_min: When true the loss will log its minimum values. (default: False)
         :param log_max: When true the loss will log its maximal values. (default: False)
+        :param reduction: Specifies the reduction to apply to the output: `'none'` | `'mean'` | `'sum'`. `'none'`: no reduction will be applied, `'mean'`: the sum of the output will be divided by the number of elements in the output, `'sum'`: the output will be summed. Default: 'mean'.
         """
-        super().__init__(log_std=log_std, log_min=log_min, log_max=log_min)
+        super().__init__(log_std=log_std, log_min=log_min, log_max=log_min, reduction=reduction)
 
     def loss(self, y_pred: ITensor, y_true: ITensor, axis: int=-1) -> ITensor:
         """
@@ -265,4 +348,4 @@ class SparseCategoricalAccuracy(Loss):
         pred_class = y_pred.argmax(axis=axis)
         true_class = y_true.cast("int64")
         correct_predictions = pred_class == true_class
-        return correct_predictions.cast("float32").mean()
+        return correct_predictions.cast("float32").mean(axis=axis)

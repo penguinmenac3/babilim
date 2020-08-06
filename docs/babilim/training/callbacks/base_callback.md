@@ -4,7 +4,9 @@
 
 > A base callback every other callback inherits from this.
 
-# *class* **BaseCallback**(object)
+---
+---
+## *class* **BaseCallback**(object)
 
 Creates a new base callback.
 
@@ -27,34 +29,42 @@ When deriving implement all functions you need and make sure to call the super v
 The super initializer must also be called at the top of your derived class.
 
 
+---
 ### *def* **on_fit_start**(*self*, model: Module, train_dataloader: Dataloader, dev_dataloader: Dataloader, loss: Loss, optimizer: Optimizer, start_epoch: int, epochs: int) -> int
 
 *(no documentation found)*
 
+---
 ### *def* **on_fit_end**(*self*) -> None
 
 *(no documentation found)*
 
+---
 ### *def* **on_fit_interruted**(*self*, exception) -> None
 
 *(no documentation found)*
 
+---
 ### *def* **on_fit_failed**(*self*, exception) -> None
 
 *(no documentation found)*
 
+---
 ### *def* **on_epoch_begin**(*self*, dataloader: Dataloader, phase: str, epoch: int) -> None
 
 *(no documentation found)*
 
+---
 ### *def* **on_iter_begin**(*self*, iter: int, feature, target) -> None
 
 *(no documentation found)*
 
+---
 ### *def* **on_iter_end**(*self*, predictions, loss_result: ITensor) -> None
 
 *(no documentation found)*
 
+---
 ### *def* **on_epoch_end**(*self*) -> None
 
 *(no documentation found)*

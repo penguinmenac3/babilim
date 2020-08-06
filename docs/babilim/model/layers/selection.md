@@ -4,7 +4,9 @@
 
 > These layers select parts of a tensor.
 
-# *class* **Gather**(ModuleNative)
+---
+---
+## *class* **Gather**(ModuleNative)
 
 Gather tensors from one tensor by providing an index tensor.
 
@@ -34,7 +36,9 @@ Output:
 
 ```
 
-# *class* **TopKIndices**(ModuleNative)
+---
+---
+## *class* **TopKIndices**(ModuleNative)
 
 Returns the top k tensor indices (separate per batch).
 
@@ -43,7 +47,7 @@ Created object is callable with the following parameters:
 * **returns**: (Tensor[N, K]) The tensor containing the indices of the top k values.
 
 Parameters for the constructor:
-* k: The number of indices to return per batch.
+* **k**: The number of indices to return per batch.
 
 
 Example:

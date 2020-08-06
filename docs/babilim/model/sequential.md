@@ -4,7 +4,9 @@
 
 > Sequentially combine modules into a model.
 
-# *class* **Sequential**(Module)
+---
+---
+## *class* **Sequential**(Module)
 
 Create a module which is a sequential order of other layers.
 
@@ -14,9 +16,10 @@ Runs the layers in order.
 my_seq = Sequential(layer1, layer2, layer3)
 ```
 
-* layers: All ordered parameters are used as layers.
+* **layers**: All ordered parameters are used as layers.
 
 
+---
 ### *def* **call**(*self*, features)
 
 Do not call this directly, use `__call__`:

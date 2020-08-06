@@ -10,11 +10,12 @@ This code is under the MIT License.
 
 The gradient tape helps with keeping track of the gradients with a unified API for pytorch and tensorflow.
 
+---
 ### *def* **GradientTape**(variables: List) -> object
 
 Collect the gradients for the block within a with statement.
 
-* variables: The variables for which the gradients should be tracked.
+* **variables**: The variables for which the gradients should be tracked.
 
 
 A simple example illustrates the usage best.

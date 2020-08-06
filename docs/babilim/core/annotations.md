@@ -6,11 +6,13 @@
 
 This code is under the MIT License and requires the abc package.
 
-# *class* **RunOnlyOnce**(_ClassDecorator)
+---
+---
+## *class* **RunOnlyOnce**(_ClassDecorator)
 
 A decorator that ensures a function in an object gets only called exactly once.
 
-* f: The function that should be wrapped.
+* **f**: The function that should be wrapped.
 
 
 The run only once annotation is fundamental for the build function pattern, whereas it allows to write a function which is only called once, no matter how often it gets called. This behaviour is very usefull for creating variables on the GPU only once in the build and not on every run of the neural network.
@@ -40,12 +42,13 @@ Foo
 
 # Jupyter Notebook Helpers
 
+---
 ### *def* **extend_class**(clazz, function_name)
 
 Extend a class by the function decorated with this decorator.
 
-* clazz: The class that should be decorated.
-* function_name: The name that the function in the class should have. (Can be different than unbound name of the class.)
+* **clazz**: The class that should be decorated.
+* **function_name**: The name that the function in the class should have. (Can be different than unbound name of the class.)
 
 
 This annotation can be used for developing code in a jupyter notebook. It allows you to define a class in separate cells, like the following example. This gives you the exploratory capabilities of jupyter while developing a class that can be later exported (using nbdev) and used in production.

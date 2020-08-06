@@ -4,7 +4,9 @@
 
 > Ways of combining tensors.
 
-# *class* **Stack**(ModuleNative)
+---
+---
+## *class* **Stack**(ModuleNative)
 
 Stack layers along an axis.
 
@@ -13,7 +15,7 @@ Creates a callable object with the following signature:
 * **return**: A tensor of shape [..., S, ...] where the position at which S is in the shape is equal to the axis.
 
 Parameters of the constructor.
-* axis: (int) The axis along which the stacking happens.
+* **axis**: (int) The axis along which the stacking happens.
 
 
 Example:
@@ -38,7 +40,9 @@ Output:
 
 ```
 
-# *class* **Concat**(ModuleNative)
+---
+---
+## *class* **Concat**(ModuleNative)
 
 Concatenate layers along an axis.
 
@@ -47,7 +51,7 @@ Creates a callable object with the following signature:
 * **return**: A tensor of shape [..., S * inp_tensor.shape[axis], ...] where the position at which S is in the shape is equal to the axis.
 
 Parameters of the constructor.
-* axis: (int) The axis along which the concatenation happens.
+* **axis**: (int) The axis along which the concatenation happens.
 
 
 Example:

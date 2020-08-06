@@ -3,16 +3,8 @@
 
 * [MNIST with Babilim
 ](examples/fashion_mnist.md)
-* [MNIST with Babilim
+* [MNIST with Babilim (Mixing with Native Pytorch)
 ](examples/fashion_mnist_pytorch.md)
-* [MNIST with Babilim
-](examples/logs/2020-08-04_17/31/54_FashionMNIST/src_2020-08-04_17/31/54/fashion_mnist.md)
-* [MNIST with Babilim
-](examples/logs/2020-08-04_17/31/54_FashionMNIST/src_2020-08-04_17/31/54/fashion_mnist_pytorch.md)
-* [MNIST with Babilim
-](examples/logs/2020-08-04_17/32/33_FashionMNIST/src_2020-08-04_17/32/33/fashion_mnist.md)
-* [MNIST with Babilim
-](examples/logs/2020-08-04_17/32/33_FashionMNIST/src_2020-08-04_17/32/33/fashion_mnist_pytorch.md)
 
 
 # Documentation

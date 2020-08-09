@@ -121,6 +121,9 @@ class Tensor(ITensor):
             self.native = other.native
         return self
 
+    def reshape(self, shape) -> 'Tensor':
+        return Tensor(native=tf.reshape(self.native, shape))
+
     def numpy(self) -> np.ndarray:
         return self.native.numpy()
 

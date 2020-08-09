@@ -87,6 +87,15 @@ class ITensor(object):
         """
         raise NotImplementedError("Each implementation of a variable must implement this.")
 
+    def reshape(self, shape) -> 'ITensor':
+        """
+        Reshape a tensor into a given shape.
+
+        :param shape: (Tuple) The desired target shape.
+        :return: (ITensor) Returns a view on the tensor with the new shape.
+        """
+        raise NotImplementedError("Each implementation of a tensor must implement this.")
+
     def numpy(self) -> np.ndarray:
         """
         Converts the tensor to a numpy array.

@@ -160,6 +160,9 @@ class Tensor(ITensor):
             self.native.data = other.native
         return self
 
+    def reshape(self, shape) -> 'ITensor':
+        return Tensor(native=self.native.view(*shape))
+
     def numpy(self) -> np.ndarray:
         tmp = self.native
         if tmp.requires_grad:

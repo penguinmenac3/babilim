@@ -65,6 +65,15 @@ Assign the values from another tensor to this tensor.
 
 
 ---
+### *def* **reshape**(*self*, shape) -> 'ITensor'
+
+Reshape a tensor into a given shape.
+
+* **shape**: (Tuple) The desired target shape.
+* **returns**: (ITensor) Returns a view on the tensor with the new shape.
+
+
+---
 ### *def* **numpy**(*self*) -> np.ndarray
 
 Converts the tensor to a numpy array.

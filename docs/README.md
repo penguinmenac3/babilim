@@ -33,6 +33,8 @@
 ](babilim/data/dataloader.md)
 * [babilim.data.dataset
 ](babilim/data/dataset.md)
+* [babilim.data.datasets.coco
+](babilim/data/datasets/coco.md)
 * [babilim.data.image_grid
 ](babilim/data/image_grid.md)
 * [babilim.data.transformer

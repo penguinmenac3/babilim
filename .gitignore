@@ -1,8 +1,6 @@
 .idea
 .vscode
 checkpoints
-logs
-datasets
 .logs
 .datasets
 

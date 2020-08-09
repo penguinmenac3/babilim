@@ -349,3 +349,37 @@ class SparseCategoricalAccuracy(Loss):
         true_class = y_true.cast("int64")
         correct_predictions = pred_class == true_class
         return correct_predictions.cast("float32").mean(axis=axis)
+
+
+# Cell: 8
+class NaNMaskedLoss(Loss):
+    def __init__(self, loss, log_std=False, log_min=False, log_max=False):
+        """
+        Compute a sparse cross entropy.
+        
+        This means that the preds are logits and the targets are not one hot encoded.
+        
+        :param loss: The loss that should be wrapped and only applied on non nan values.
+        :param log_std: When true the loss will log its standard deviation. (default: False)
+        :param log_min: When true the loss will log its minimum values. (default: False)
+        :param log_max: When true the loss will log its maximal values. (default: False)
+        """
+        super().__init__(log_std=log_std, log_min=log_min, log_max=log_min, reduction="none")
+        self.wrapped_loss = loss
+        self.one = Tensor(data=np.array([1], dtype=np.float32), trainable=False)  # FIXME is this actually correct?
+
+    def loss(self, y_pred: ITensor, y_true: ITensor) -> ITensor:
+        """
+        Compute the loss given in the constructor only on values where the GT is not NaN.
+        
+        :param y_pred: The predictions of the network. Either a NamedTuple pointing at ITensors or a Dict or Tuple of ITensors.
+        :param y_true: The desired outputs of the network (labels). Either a NamedTuple pointing at ITensors or a Dict or Tuple of ITensors.
+        """
+        ones_broadcastable_shape = tuple([1 for _ in len(y_true.shape)])
+        self.one = self.one.reshape(ones_broadcastable_shape)
+        mask = self.one - y_true.is_nan().cast("float32")
+
+        y_pred = y_pred * mask
+        y_true = y_true * mask
+        
+        return self.wrapped_loss(y_pred[mask], y_true[mask])

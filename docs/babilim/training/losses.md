@@ -228,3 +228,26 @@ Compute the sparse categorical accuracy.
 * **axis**: (Optional) The axis along which to compute the sparse categorical accuracy.
 
 
+---
+---
+## *class* **NaNMaskedLoss**(Loss)
+
+Compute a sparse cross entropy.
+
+This means that the preds are logits and the targets are not one hot encoded.
+
+* **loss**: The loss that should be wrapped and only applied on non nan values.
+* **log_std**: When true the loss will log its standard deviation. (default: False)
+* **log_min**: When true the loss will log its minimum values. (default: False)
+* **log_max**: When true the loss will log its maximal values. (default: False)
+
+
+---
+### *def* **loss**(*self*, y_pred: ITensor, y_true: ITensor) -> ITensor
+
+Compute the loss given in the constructor only on values where the GT is not NaN.
+
+* **y_pred**: The predictions of the network. Either a NamedTuple pointing at ITensors or a Dict or Tuple of ITensors.
+* **y_true**: The desired outputs of the network (labels). Either a NamedTuple pointing at ITensors or a Dict or Tuple of ITensors.
+
+

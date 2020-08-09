@@ -37,6 +37,8 @@
 ](babilim/data/image_grid.md)
 * [babilim.data.transformer
 ](babilim/data/transformer.md)
+* [babilim.model.imagenet
+](babilim/model/imagenet.md)
 * [babilim.model.layers.activation
 ](babilim/model/layers/activation.md)
 * [babilim.model.layers.batch_normalization

@@ -366,7 +366,7 @@ class NaNMaskedLoss(Loss):
         """
         super().__init__(log_std=log_std, log_min=log_min, log_max=log_min, reduction="none")
         self.wrapped_loss = loss
-        self.one = Tensor(data=np.array([1], dtype=np.float32), trainable=False)  # FIXME is this actually correct?
+        self.zero = Tensor(data=np.array(0), trainable=False)
 
     def loss(self, y_pred: ITensor, y_true: ITensor) -> ITensor:
         """
@@ -375,11 +375,15 @@ class NaNMaskedLoss(Loss):
         :param y_pred: The predictions of the network. Either a NamedTuple pointing at ITensors or a Dict or Tuple of ITensors.
         :param y_true: The desired outputs of the network (labels). Either a NamedTuple pointing at ITensors or a Dict or Tuple of ITensors.
         """
-        ones_broadcastable_shape = tuple([1 for _ in len(y_true.shape)])
-        self.one = self.one.reshape(ones_broadcastable_shape)
-        mask = self.one - y_true.is_nan().cast("float32")
+        binary_mask = (~y_true.is_nan())
+        mask = binary_mask.cast("float32")
 
-        y_pred = y_pred * mask
-        y_true = y_true * mask
+        masked_y_pred = (y_pred * mask)[binary_mask]
+        masked_y_true = (y_true * mask)[binary_mask]
         
-        return self.wrapped_loss(y_pred[mask], y_true[mask])
+        if masked_y_pred.shape[0] > 0:
+            loss = self.wrapped_loss(masked_y_pred, masked_y_true)
+        else:
+            loss = self.zero
+
+        return loss

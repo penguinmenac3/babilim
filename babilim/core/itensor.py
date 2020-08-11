@@ -96,6 +96,16 @@ class ITensor(object):
         """
         raise NotImplementedError("Each implementation of a tensor must implement this.")
 
+    def transpose(self, axis_a=0, axis_b=1) -> 'ITensor':
+        """
+        Transpose a tensor by swapping two axis.
+
+        :param axis_a: (Optional[int]) The axis that should be swapped. Default: 0
+        :param axis_b: (Optional[int]) The axis that should be swapped. Default: 1
+        :return: (ITensor) Returns a tensor where axis_a and axis_b are swapped.
+        """
+        raise NotImplementedError("Each implementation of a tensor must implement this.")
+
     def numpy(self) -> np.ndarray:
         """
         Converts the tensor to a numpy array.

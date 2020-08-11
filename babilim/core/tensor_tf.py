@@ -124,6 +124,12 @@ class Tensor(ITensor):
     def reshape(self, shape) -> 'Tensor':
         return Tensor(native=tf.reshape(self.native, shape))
 
+    def transpose(self, axis_a=0, axis_b=1) -> 'Tensor':
+        permutation = [i for i in range(len(self.shape))]
+        permutation[axis_a] = axis_b
+        permutation[axis_b] = axis_a
+        return Tensor(native=tf.transpose(self.native, perm=permutation))
+
     def numpy(self) -> np.ndarray:
         return self.native.numpy()
 

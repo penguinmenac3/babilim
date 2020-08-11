@@ -40,9 +40,9 @@ class TensorWrapper(ITensorWrapper):
         elif isinstance(obj, Tensor):
             # Make sure that also babilim tensors are on the correct device.
             obj._auto_device()
-            if obj.is_nan().any():
-                error("NaN Tensor: {}".format(obj.native))
-                raise ValueError("NaN Tensor {}".format(obj.native))
+            #if obj.is_nan().any():
+            #    error("NaN Tensor: {}".format(obj.native))
+            #    raise ValueError("NaN Tensor {}".format(obj.native))
             obj = None
         else:
             obj = None
@@ -160,8 +160,11 @@ class Tensor(ITensor):
             self.native.data = other.native
         return self
 
-    def reshape(self, shape) -> 'ITensor':
+    def reshape(self, shape) -> 'Tensor':
         return Tensor(native=self.native.view(*shape))
+
+    def transpose(self, axis_a=0, axis_b=1) -> 'Tensor':
+        return Tensor(native=torch.transpose(self.native, axis_a, axis_b))
 
     def numpy(self) -> np.ndarray:
         tmp = self.native

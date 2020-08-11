@@ -74,6 +74,16 @@ Reshape a tensor into a given shape.
 
 
 ---
+### *def* **transpose**(*self*, axis_a=0, axis_b=1) -> 'ITensor'
+
+Transpose a tensor by swapping two axis.
+
+* **axis_a**: (Optional[int]) The axis that should be swapped. Default: 0
+* **axis_b**: (Optional[int]) The axis that should be swapped. Default: 1
+* **returns**: (ITensor) Returns a tensor where axis_a and axis_b are swapped.
+
+
+---
 ### *def* **numpy**(*self*) -> np.ndarray
 
 Converts the tensor to a numpy array.

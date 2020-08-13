@@ -36,7 +36,6 @@ Wrap a native pytorch optimizer as a babilim optimizer.
 
 * **optimizer_class**: The class which should be wrapped (not an instance).
 For example "optimizer_class=torch.optim.SGD".
-* **model**: The model that is used (instance of type IModel).
 * **kwargs**: The arguments for the optimizer on initialization.
 
 

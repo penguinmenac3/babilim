@@ -42,7 +42,6 @@ class NativePytorchOptimizerWrapper(Optimizer):
 
         :param optimizer_class: The class which should be wrapped (not an instance).
          For example "optimizer_class=torch.optim.SGD".
-        :param model: The model that is used (instance of type IModel).
         :param kwargs: The arguments for the optimizer on initialization.
         """
         super().__init__(initial_lr)

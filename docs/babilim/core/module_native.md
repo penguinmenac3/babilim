@@ -34,6 +34,26 @@ Parameters:
 * ****kwargs**: You must specify the exact same parameters as for your call.
 
 
+
+
+A native build function in pytorch.
+
+Even though babilim never calls this function directly multiple times, it is recommended to add the RunOnlyOnce guard in case a user calls it multiple times.
+
+* ***args**: You must specify the exact same parameters as for your call.
+* ****kwargs**: You must specify the exact same parameters as for your call.
+
+
+
+
+A native build function in tensorflow.
+
+Even though babilim never calls this function directly multiple times, it is recommended to add the RunOnlyOnce guard in case a user calls it multiple times.
+
+* ***args**: You must specify the exact same parameters as for your call.
+* ****kwargs**: You must specify the exact same parameters as for your call.
+
+
 ---
 ### *def* **call**(*self*, *args, **kwargs) -> Any
 
@@ -55,5 +75,21 @@ result = module(*args, **kwargs)
 Parameters:
 * ***args**: You can specify any parameters you want.
 * ****kwargs**: You can specify any named parameters you want.
+
+
+
+
+A native call function in pytorch (like the forward).
+
+* ***args**: You must specify the exact same parameters as for your call.
+* ****kwargs**: You must specify the exact same parameters as for your call.
+
+
+
+
+A native call function in tensorflow.
+
+* ***args**: You must specify the exact same parameters as for your call.
+* ****kwargs**: You must specify the exact same parameters as for your call.
 
 

@@ -27,6 +27,21 @@ Initializes your module by running a sample of your dataset through it.
 * **dataset**: The dataset you want to use for initialization. (Must be of type babilim.data.Dataset)
 
 
+
+
+Makes a module callable. Automatically wraps tensorflow or pytorch tensors to ITensors from babilim.
+
+```python
+module = MyModule()
+module(*args, **kwargs)
+```
+
+Warning: This function should not be overwritten. Instead overwrite `call` with no underscores.
+
+* ***args**: All indexed parameters of your call function derivate.
+* ****kwargs**: All named parameters of your call function derivate.
+
+
 ---
 ### *def* **build**(*self*, *args, **kwargs) -> None
 
@@ -105,39 +120,47 @@ A named list of all submodules.
 A submodule is a module stored in an attribute of a module.
 
 
----
----
-#### *class* **MyModule**(Module)
 
-*(no documentation found)*
 
----
-### *def* **forward**(*self*, features)
+Allows registration of the parameters with a native module.
 
-if babilim.is_backend(PYTORCH_BACKEND):
+This makes the parameters of a babilim modules available to the native modules.
+When using a babilim modules in a native modules, use this function and pass the native module as a parameter.
+
+This function works by adding all trainable_variables to the module you pass.
+Warning: You need to build the babilim modules before calling this function. Building can be done by calling for example.
+
+Here is a pytorch example:
+
+```python
+import torch
 from torch.nn import Module
-if isinstance(module, Module):
-myname = "_error_"
-for var in module.__dict__:
-if module.__dict__[var] == self:
-myname = var
-if isinstance(module.__dict__[var], list) and self in module.__dict__[var]:
-myname = "{}/{}".format(var, module.__dict__[var].index(self))
+from babilim.modules import Linear
 
-# Register self as pytorch module.
-module._modules[myname] = self
+class MyModule(Module):
+def __init__(self):
+super().__init__()
+self.linear = Linear(10)
 
-for name, param in self.named_variables.items():
-if param.trainable:
-module.register_parameter(myname + name, param.native)
-else:
-module.register_buffer(myname + name, param.native)
-else:
-if babilim.core.logging.DEBUG_VERBOSITY:
-_warn_once("babilim.model.module.Module:_register_params Not implemented for tf2 but I think it is not required.")
+def forward(self, features):
+result = self.linear(features)
+self.linear.register_params(self)
+return result
+```
 
-@property
-def training(self) -> bool:
+* **module**: The native module on which parameters of this modules should be registered.
+
+
+---
+### *def* **training**(*self*) -> bool
+
+Property if the object is in training mode.
+
+```python
+module.training
+```
+
+* **returns**: True if the object is in training mode.
 
 
 ---

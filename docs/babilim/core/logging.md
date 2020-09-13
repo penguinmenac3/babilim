@@ -76,6 +76,14 @@ Uses the current timestamp the last_update and the difference between progresses
 
 # Logging
 
+
+
+Log the code of the current working directory into output directory.
+
+* **output_dir**: The directory where to copy all code.
+* **overwrite_existing**: When set to true it overwrites existing code copies.
+
+
 ---
 ### *def* **set_logger**(log_file: str) -> None
 

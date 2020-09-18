@@ -6,14 +6,6 @@
 
 This code is under the MIT License and requires the abc package.
 
-
-
-A class decorator is a base class that is used for all annotations that should be usable with python classes.
-Regular annotations will not work with classes.
-
-This is a helper class that can be used when writing annotations.
-
-
 ---
 ---
 ## *class* **RunOnlyOnce**(_ClassDecorator)

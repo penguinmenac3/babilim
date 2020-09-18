@@ -10,8 +10,8 @@ class GradientTapePT(object):
     def __enter__(self):
         for var in self.variables:
             if var.native.grad is not None:
-                    var.native.grad.detach_()
-                    var.native.grad.zero_()
+                var.native.grad.detach_()
+                var.native.grad.zero_()
         return self
 
     def __exit__(self, type, value, traceback):

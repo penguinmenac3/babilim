@@ -32,7 +32,7 @@
 
 
 # Cell: 2
-from typing import Any, Sequence, Tuple
+from typing import Any, Sequence, Tuple, NamedTuple
 import traceback
 import os
 import sys
@@ -45,17 +45,15 @@ from babilim.data.dataloader import Dataloader
 
 # Cell: 3
 class Dataset(Sequence):
-    def __init__(self, config: Config, cache_dir: str = None):
+    def __init__(self, config: Config, dataset_input_type=NamedTuple, dataset_output_type=NamedTuple, cache_dir: str = None):
         """
         An abstract class representing a Dataset.
 
-        All other datasets must subclass it. All subclasses must override
-        `__len__`, that provides the size of the dataset, and `getitem`,
-        supporting integer indexing in range from 0 to len(self) exclusive and `_get_version`.
-
-        Extending on the pytorch dataset this dataset also needs to implement a `version` function.
-        The version function returns a number (can be a hash) which changes, whenever the dataset changes.
-        This enables subsequent callers to buffer this dataset and update their buffers when the version changes.
+        All other datasets must subclass it.
+        Must overwrite `_get_version` and implement getters for the fields supported in the dataset_input_type and
+        dataset_output_type. Getters must be following this name schema:
+        "get_{field_name}" (where {field_name} is replaced with the actual name).
+        Examples would be: get_image(self, token), get_class_id(self, token), get_instances(self, token).
         
         A dataset loads the data from the disk as general as possible and then transformers adapt it to the needs of the neural network.
         There are two types of transformers (which are called in the order listed here):
@@ -63,6 +61,8 @@ class Dataset(Sequence):
         * `self.realtime_transformers = []`: These transformers are applied every time a sample is retrieved. (e.g. random data augmentations)
         
         :param config: The configuration used for your problem. (The problem parameters and train_batch_size are relevant for data loading.)
+        :param dataset_input_type: The type of the DatasetInput that the dataset outputs. This is used to automatically collect attributes from get_<attrname>.
+        :param dataset_output_type: The type of the DatasetOutput that the dataset outputs. This is used to automatically collect attributes from get_<attrname>.
         :param cache_dir: The directory where the dataset can cache itself. Caching allows faster loading, when complex transformations are required.
         """
         self.config = config
@@ -75,6 +75,25 @@ class Dataset(Sequence):
         if self._cache_dir is not None:
             self.init_caching(cache_dir)
             self._cached_len = len(self._cache_indices)
+        self.all_sample_tokens = []
+        self.sample_tokens = None
+        self.dataset_input_type = dataset_input_type
+        self.dataset_output_type = dataset_output_type
+
+    def set_sample_token_filter(self, filter_fun):
+        """
+        Use a filter function (lambda token: True if keep else False) to filter self.all_sample_tokens to a subset.
+
+        Use Cases:
+        * Can be used to filter out some samples.
+        * Can be used for sequence datasets to limit them to 1 sequence only.
+
+        :param filter_fun: A function that has one parameter (token) and returns true if the token should be kept and false, if the token should be removed. (If None is given, then the filter will be reset to not filtering.)
+        """
+        if filter_fun is None:
+            self.sample_tokens = self.all_sample_tokens
+        else:
+            self.sample_tokens = filter(filter_fun, self.all_sample_tokens)
 
     def init_caching(self, cache_dir):
         """
@@ -104,24 +123,34 @@ class Dataset(Sequence):
             pickle.dump(value, f)
         self._cache_indices[index] = fp
 
-    def getitem(self, index: int) -> Tuple[Any, Any]:
+    def _fill_type_using_getters(self, namedtuple_type, sample_token):
+        data = {}
+        for k in namedtuple_type._fields:
+            getter = getattr(self, "get_{}".format(k), None)
+            if getter is not None:
+                data[k] = getter(sample_token)
+            else:
+                raise RuntimeError("Missing getter (get_{}) for dataset_input_type field: {}".format(k, k))
+        return namedtuple_type(**data)
+
+    def getitem_by_sample_token(self, sample_token: int) -> Tuple[Any, Any]:
         """
-        Gets called by `__getitem__`.
+        Gets called when an index of the dataset is accessed via dataset[idx] (aka __getitem__).
+
+        This functions returns the raw DatasetInput and DatasetOutput types, whereas the __getitem__ also calls the transformer and then returns whatever the transformer converts these types into.
         
-        This function must be overwritten by subclasses.
-        It loads a training sample given an index in the dataset.
-        
-        Never overwrite `__getitem__` directly, as it handles the caching and application of transformers.
-        
-        :param index: The index between 0 and len(self), identifying the sample that should be loaded.
-        :return: A tuple of features and values for the neural network. Features must be of type InputType (namedtuple) and labels of type InputType(namedtuple).
+        :param sample_token: The unique token that identifies a single sample from the dataset.
+        :return: A tuple of features and values for the neural network. Features must be of type DatasetInput (namedtuple) and labels of type DatasetOutput (namedtuple).
         """
-        if self._caching:
-            raise KeyError("The cache for index '{}' is missing.".format(index))
-        else:
-            raise NotImplementedError
+        dataset_input = self._fill_type_using_getters(self.dataset_input_type, sample_token)
+        dataset_output = self._fill_type_using_getters(self.dataset_output_type, sample_token)
+        return dataset_input, dataset_output
 
     def __getitem__(self, index: int) -> Tuple[Any, Any]:
+        # If not initialized initialize
+        if self.sample_tokens is None:
+            self.set_sample_token_filter(None)
+
         # Check if len is exceeded.
         if index >= len(self):
             raise IndexError()
@@ -132,7 +161,8 @@ class Dataset(Sequence):
         else:
             # Print index errors, they probably were an error and not intentional.
             try:
-                sample = self.getitem(index)
+                sample_token = self.sample_tokens[index]
+                sample = self.getitem_by_sample_token(sample_token)
             except IndexError as e:
                 traceback.print_exc(file=sys.stderr)
                 raise e
@@ -153,7 +183,12 @@ class Dataset(Sequence):
     def __len__(self) -> int:
         if self._cached_len >= 0:
             return self._cached_len
-        raise NotImplementedError
+        
+        # If not initialized initialize
+        if self.sample_tokens is None:
+            self.set_sample_token_filter(None)
+        
+        return len(self.sample_tokens)
 
     @property
     def version(self) -> str:

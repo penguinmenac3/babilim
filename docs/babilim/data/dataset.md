@@ -10,13 +10,11 @@
 
 An abstract class representing a Dataset.
 
-All other datasets must subclass it. All subclasses must override
-`__len__`, that provides the size of the dataset, and `getitem`,
-supporting integer indexing in range from 0 to len(self) exclusive and `_get_version`.
-
-Extending on the pytorch dataset this dataset also needs to implement a `version` function.
-The version function returns a number (can be a hash) which changes, whenever the dataset changes.
-This enables subsequent callers to buffer this dataset and update their buffers when the version changes.
+All other datasets must subclass it.
+Must overwrite `_get_version` and implement getters for the fields supported in the dataset_input_type and
+dataset_output_type. Getters must be following this name schema:
+"get_{field_name}" (where {field_name} is replaced with the actual name).
+Examples would be: get_image(self, token), get_class_id(self, token), get_instances(self, token).
 
 A dataset loads the data from the disk as general as possible and then transformers adapt it to the needs of the neural network.
 There are two types of transformers (which are called in the order listed here):
@@ -24,7 +22,21 @@ There are two types of transformers (which are called in the order listed here):
 * `self.realtime_transformers = []`: These transformers are applied every time a sample is retrieved. (e.g. random data augmentations)
 
 * **config**: The configuration used for your problem. (The problem parameters and train_batch_size are relevant for data loading.)
+* **dataset_input_type**: The type of the DatasetInput that the dataset outputs. This is used to automatically collect attributes from get_<attrname>.
+* **dataset_output_type**: The type of the DatasetOutput that the dataset outputs. This is used to automatically collect attributes from get_<attrname>.
 * **cache_dir**: The directory where the dataset can cache itself. Caching allows faster loading, when complex transformations are required.
+
+
+---
+### *def* **set_sample_token_filter**(*self*, filter_fun)
+
+Use a filter function (lambda token: True if keep else False) to filter self.all_sample_tokens to a subset.
+
+Use Cases:
+* Can be used to filter out some samples.
+* Can be used for sequence datasets to limit them to 1 sequence only.
+
+* **filter_fun**: A function that has one parameter (token) and returns true if the token should be kept and false, if the token should be removed. (If None is given, then the filter will be reset to not filtering.)
 
 
 ---
@@ -39,17 +51,14 @@ When calling this function the cache gets read if it exists or otherwise the fol
 
 
 ---
-### *def* **getitem**(*self*, index: int) -> Tuple[Any, Any]
+### *def* **getitem_by_sample_token**(*self*, sample_token: int) -> Tuple[Any, Any]
 
-Gets called by `__getitem__`.
+Gets called when an index of the dataset is accessed via dataset[idx] (aka __getitem__).
 
-This function must be overwritten by subclasses.
-It loads a training sample given an index in the dataset.
+This functions returns the raw DatasetInput and DatasetOutput types, whereas the __getitem__ also calls the transformer and then returns whatever the transformer converts these types into.
 
-Never overwrite `__getitem__` directly, as it handles the caching and application of transformers.
-
-* **index**: The index between 0 and len(self), identifying the sample that should be loaded.
-* **returns**: A tuple of features and values for the neural network. Features must be of type InputType (namedtuple) and labels of type InputType(namedtuple).
+* **sample_token**: The unique token that identifies a single sample from the dataset.
+* **returns**: A tuple of features and values for the neural network. Features must be of type DatasetInput (namedtuple) and labels of type DatasetOutput (namedtuple).
 
 
 ---

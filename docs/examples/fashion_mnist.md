@@ -63,7 +63,7 @@ babilim.set_backend(babilim.AUTO_BACKEND)
 ```
 Output:
 ```
-[2020-08-05 10:34:26] INFO Using backend: pytorch-gpu
+[2020-09-19 18:07:18] INFO Using backend: pytorch-gpu
 
 ```
 
@@ -165,7 +165,7 @@ from typing import Tuple
 
 class FashionMnistDataset(Dataset):
     def __init__(self, config: FashionMnistConfig, split: str):
-        super().__init__(config)
+        super().__init__(config, dataset_input_type=NetworkInput, dataset_output_type=NetworkOutput)
         if babilim.is_backend(TF_BACKEND):
             from tensorflow.keras.datasets import fashion_mnist
             (train, dev) = fashion_mnist.load_data()
@@ -177,19 +177,23 @@ class FashionMnistDataset(Dataset):
             from torchvision.datasets import FashionMNIST
             self.dataset = FashionMNIST(config.problem_base_dir, train=split==SPLIT_TRAIN, download=True)
 
+        self.all_sample_tokens = range(len(self.dataset))
+
     def __len__(self) -> int:
         return int(len(self.dataset))
 
-    def getitem(self, idx: int) -> Tuple[NetworkInput, NetworkOutput]:
-        image, label = self.dataset[idx]
+    def get_image(self, sample_token):
+        image, _ = self.dataset[sample_token]
         image = np.array(image, dtype="float32")
-        label = np.array(label, dtype="uint8")
-        
         image = np.reshape(image, (28, 28))
-        return NetworkInput(image=image), NetworkOutput(class_id=label)
+        return image
 
-    @property
-    def version(self) -> str:
+    def get_class_id(self, sample_token):
+        _, label = self.dataset[sample_token]
+        label = np.array(label, dtype="uint8")
+        return label
+
+    def _get_version(self) -> str:
         return "FashionMnistDataset"
 ```
 
@@ -233,24 +237,6 @@ data_dev = FashionMnistDataset(config, SPLIT_DEV)
 transformer = MNISTTransformer()
 data_train.realtime_transformers.append(transformer)
 data_dev.realtime_transformers.append(transformer)
-```
-Output:
-```
-0%|          | 0/26421880 [00:00<?, ?it/s]Downloading http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-images-idx3-ubyte.gz to .datasets\FashionMNIST\raw\train-images-idx3-ubyte.gz
-26427392it [00:05, 4763526.62it/s]
-Extracting .datasets\FashionMNIST\raw\train-images-idx3-ubyte.gz to .datasets\FashionMNIST\raw
-32768it [00:00, 334485.99it/s]
-0it [00:00, ?it/s]Downloading http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-labels-idx1-ubyte.gz to .datasets\FashionMNIST\raw\train-labels-idx1-ubyte.gz
-Extracting .datasets\FashionMNIST\raw\train-labels-idx1-ubyte.gz to .datasets\FashionMNIST\raw
-Downloading http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/t10k-images-idx3-ubyte.gz to .datasets\FashionMNIST\raw\t10k-images-idx3-ubyte.gz
-4423680it [00:00, 4556826.60it/s]
-8192it [00:00, 131358.12it/s]
-Extracting .datasets\FashionMNIST\raw\t10k-images-idx3-ubyte.gz to .datasets\FashionMNIST\raw
-Downloading http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/t10k-labels-idx1-ubyte.gz to .datasets\FashionMNIST\raw\t10k-labels-idx1-ubyte.gz
-Extracting .datasets\FashionMNIST\raw\t10k-labels-idx1-ubyte.gz to .datasets\FashionMNIST\raw
-Processing...
-Done!
-
 ```
 
 One last step is to test if the dataset works.
@@ -301,8 +287,8 @@ Train Split
 Dev Split
 
 ```
-![data](../../docs/jlabdev_images/c86437ac17fc0391a870ed712746ce90.png)
-![data](../../docs/jlabdev_images/ad705e38551070331e95a02d2310d046.png)
+![data](../../docs/jlabdev_images/5f9dca0e1314af506c5438906e5264b1.png)
+![data](../../docs/jlabdev_images/2ecc0d627927ce012d617fb6a0676464.png)
 
 ## The Model
 
@@ -389,7 +375,7 @@ model.initialize(data_train)
 ```
 Output:
 ```
-[2020-08-05 10:34:38] INFO Build Model
+[2020-09-19 18:07:23] INFO Build Model
 
 ```
 
@@ -411,8 +397,8 @@ Train Data Predictions
 Dev Data Predictions
 
 ```
-![data](../../docs/jlabdev_images/2d38ed25ad1d97993e5d55224fa9c646.png)
-![data](../../docs/jlabdev_images/6abcca51269d07fcd3da4707562cc485.png)
+![data](../../docs/jlabdev_images/7ef099716891a5a9a0f661dc4422a9fb.png)
+![data](../../docs/jlabdev_images/3d33613cafb52e68e2a064a7f30d5e05.png)
 
 ## The Trainer
 
@@ -470,87 +456,87 @@ trainer.fit(data_train.to_dataloader(), data_dev.to_dataloader(), config.train_e
 ```
 Output:
 ```
-[2020-08-05 10:35:15] INFO Started fit.
-[2020-08-05 10:35:15] INFO Build Model
-[2020-08-05 10:35:15] INFO Trainable Variables:
-[2020-08-05 10:35:15] INFO   /linear/0/bn/weight: (1,)
-[2020-08-05 10:35:15] INFO   /linear/0/bn/bias: (1,)
-[2020-08-05 10:35:15] INFO   /linear/1/weight: (12, 1, 3, 3)
-[2020-08-05 10:35:15] INFO   /linear/1/bias: (12,)
-[2020-08-05 10:35:15] INFO   /linear/4/bn/weight: (12,)
-[2020-08-05 10:35:15] INFO   /linear/4/bn/bias: (12,)
-[2020-08-05 10:35:15] INFO   /linear/5/weight: (18, 12, 3, 3)
-[2020-08-05 10:35:15] INFO   /linear/5/bias: (18,)
-[2020-08-05 10:35:15] INFO   /linear/8/bn/weight: (18,)
-[2020-08-05 10:35:15] INFO   /linear/8/bn/bias: (18,)
-[2020-08-05 10:35:15] INFO   /linear/9/weight: (18, 18, 3, 3)
-[2020-08-05 10:35:15] INFO   /linear/9/bias: (18,)
-[2020-08-05 10:35:15] INFO   /linear/12/bn/weight: (18,)
-[2020-08-05 10:35:15] INFO   /linear/12/bn/bias: (18,)
-[2020-08-05 10:35:15] INFO   /linear/13/weight: (18, 18, 3, 3)
-[2020-08-05 10:35:15] INFO   /linear/13/bias: (18,)
-[2020-08-05 10:35:15] INFO   /linear/16/bn/weight: (18,)
-[2020-08-05 10:35:15] INFO   /linear/16/bn/bias: (18,)
-[2020-08-05 10:35:15] INFO   /linear/18/weight: (18, 18)
-[2020-08-05 10:35:15] INFO   /linear/18/bias: (18,)
-[2020-08-05 10:35:15] INFO   /linear/20/weight: (10, 18)
-[2020-08-05 10:35:15] INFO   /linear/20/bias: (10,)
-[2020-08-05 10:35:15] INFO Untrainable Variables:
-[2020-08-05 10:35:15] INFO   /linear/0/bn/running_mean: (1,)
-[2020-08-05 10:35:15] INFO   /linear/0/bn/running_var: (1,)
-[2020-08-05 10:35:15] INFO   /linear/0/bn/num_batches_tracked: ()
-[2020-08-05 10:35:15] INFO   /linear/4/bn/running_mean: (12,)
-[2020-08-05 10:35:15] INFO   /linear/4/bn/running_var: (12,)
-[2020-08-05 10:35:15] INFO   /linear/4/bn/num_batches_tracked: ()
-[2020-08-05 10:35:15] INFO   /linear/8/bn/running_mean: (18,)
-[2020-08-05 10:35:15] INFO   /linear/8/bn/running_var: (18,)
-[2020-08-05 10:35:15] INFO   /linear/8/bn/num_batches_tracked: ()
-[2020-08-05 10:35:15] INFO   /linear/12/bn/running_mean: (18,)
-[2020-08-05 10:35:15] INFO   /linear/12/bn/running_var: (18,)
-[2020-08-05 10:35:15] INFO   /linear/12/bn/num_batches_tracked: ()
-[2020-08-05 10:35:15] INFO   /linear/16/bn/running_mean: (18,)
-[2020-08-05 10:35:15] INFO   /linear/16/bn/running_var: (18,)
-[2020-08-05 10:35:15] INFO   /linear/16/bn/num_batches_tracked: ()
-[2020-08-05 10:52:23] STAT Training 1/10 - metrics/ca=0.795 - loss/total=1.401 - LR 0.000905
-[2020-08-05 10:52:23] INFO Saved Checkoint: checkpoints\latest.npz
-[2020-08-05 10:55:08] STAT Epoch 1/10 (ETA 2:59:00) - metrics/ca=0.790 - loss/total=1.385
-[2020-08-05 10:55:08] INFO Saved Checkoint: checkpoints\best.npz
-[2020-08-05 11:11:52] STAT Training 2/10 - metrics/ca=0.829 - loss/total=1.129 - LR 0.000805
-[2020-08-05 11:11:52] INFO Saved Checkoint: checkpoints\latest.npz
-[2020-08-05 11:14:38] STAT Epoch 2/10 (ETA 2:37:33) - metrics/ca=0.832 - loss/total=1.118
-[2020-08-05 11:14:38] INFO Saved Checkoint: checkpoints\best.npz
-[2020-08-05 11:31:39] STAT Training 3/10 - metrics/ca=0.840 - loss/total=0.994 - LR 0.000717
-[2020-08-05 11:31:39] INFO Saved Checkoint: checkpoints\latest.npz
-[2020-08-05 11:34:38] STAT Epoch 3/10 (ETA 2:18:34) - metrics/ca=0.844 - loss/total=0.966
-[2020-08-05 11:34:38] INFO Saved Checkoint: checkpoints\best.npz
-[2020-08-05 11:51:44] STAT Training 4/10 - metrics/ca=0.843 - loss/total=0.898 - LR 0.000638
-[2020-08-05 11:51:44] INFO Saved Checkoint: checkpoints\latest.npz
-[2020-08-05 11:54:32] STAT Epoch 4/10 (ETA 1:58:55) - metrics/ca=0.849 - loss/total=0.875
-[2020-08-05 11:54:32] INFO Saved Checkoint: checkpoints\best.npz
-[2020-08-05 12:11:57] STAT Training 5/10 - metrics/ca=0.856 - loss/total=0.823 - LR 0.000568
-[2020-08-05 12:11:57] INFO Saved Checkoint: checkpoints\latest.npz
-[2020-08-05 12:14:53] STAT Epoch 5/10 (ETA 1:39:38) - metrics/ca=0.857 - loss/total=0.807
-[2020-08-05 12:14:53] INFO Saved Checkoint: checkpoints\best.npz
-[2020-08-05 12:32:47] STAT Training 6/10 - metrics/ca=0.868 - loss/total=0.754 - LR 0.000505
-[2020-08-05 12:32:47] INFO Saved Checkoint: checkpoints\latest.npz
-[2020-08-05 12:35:35] STAT Epoch 6/10 (ETA 1:20:13) - metrics/ca=0.858 - loss/total=0.764
-[2020-08-05 12:35:35] INFO Saved Checkoint: checkpoints\best.npz
-[2020-08-05 12:52:37] STAT Training 7/10 - metrics/ca=0.871 - loss/total=0.720 - LR 0.000449
-[2020-08-05 12:52:37] INFO Saved Checkoint: checkpoints\latest.npz
-[2020-08-05 12:55:22] STAT Epoch 7/10 (ETA 1:00:03) - metrics/ca=0.863 - loss/total=0.720
-[2020-08-05 12:55:22] INFO Saved Checkoint: checkpoints\best.npz
-[2020-08-05 13:12:16] STAT Training 8/10 - metrics/ca=0.868 - loss/total=0.689 - LR 0.000400
-[2020-08-05 13:12:16] INFO Saved Checkoint: checkpoints\latest.npz
-[2020-08-05 13:15:01] STAT Epoch 8/10 (ETA 0:39:56) - metrics/ca=0.870 - loss/total=0.681
-[2020-08-05 13:15:01] INFO Saved Checkoint: checkpoints\best.npz
-[2020-08-05 13:31:59] STAT Training 9/10 - metrics/ca=0.878 - loss/total=0.646 - LR 0.000356
-[2020-08-05 13:31:59] INFO Saved Checkoint: checkpoints\latest.npz
-[2020-08-05 13:34:58] STAT Epoch 9/10 (ETA 0:19:58) - metrics/ca=0.873 - loss/total=0.649
-[2020-08-05 13:34:58] INFO Saved Checkoint: checkpoints\best.npz
-[2020-08-05 13:52:50] STAT Training 10/10 - metrics/ca=0.873 - loss/total=0.649 - LR 0.000317
-[2020-08-05 13:52:50] INFO Saved Checkoint: checkpoints\latest.npz
-[2020-08-05 13:55:45] STAT Epoch 10/10 (ETA 0:00:00) - metrics/ca=0.872 - loss/total=0.630
-[2020-08-05 13:55:45] INFO Saved Checkoint: checkpoints\best.npz
+[2020-09-19 18:07:39] INFO Started fit.
+[2020-09-19 18:07:39] INFO Build Model
+[2020-09-19 18:07:40] INFO Trainable Variables:
+[2020-09-19 18:07:40] INFO   /linear/0/bn/weight: (1,)
+[2020-09-19 18:07:40] INFO   /linear/0/bn/bias: (1,)
+[2020-09-19 18:07:40] INFO   /linear/1/weight: (12, 1, 3, 3)
+[2020-09-19 18:07:40] INFO   /linear/1/bias: (12,)
+[2020-09-19 18:07:40] INFO   /linear/4/bn/weight: (12,)
+[2020-09-19 18:07:40] INFO   /linear/4/bn/bias: (12,)
+[2020-09-19 18:07:40] INFO   /linear/5/weight: (18, 12, 3, 3)
+[2020-09-19 18:07:40] INFO   /linear/5/bias: (18,)
+[2020-09-19 18:07:40] INFO   /linear/8/bn/weight: (18,)
+[2020-09-19 18:07:40] INFO   /linear/8/bn/bias: (18,)
+[2020-09-19 18:07:40] INFO   /linear/9/weight: (18, 18, 3, 3)
+[2020-09-19 18:07:40] INFO   /linear/9/bias: (18,)
+[2020-09-19 18:07:40] INFO   /linear/12/bn/weight: (18,)
+[2020-09-19 18:07:40] INFO   /linear/12/bn/bias: (18,)
+[2020-09-19 18:07:40] INFO   /linear/13/weight: (18, 18, 3, 3)
+[2020-09-19 18:07:40] INFO   /linear/13/bias: (18,)
+[2020-09-19 18:07:40] INFO   /linear/16/bn/weight: (18,)
+[2020-09-19 18:07:40] INFO   /linear/16/bn/bias: (18,)
+[2020-09-19 18:07:40] INFO   /linear/18/weight: (18, 18)
+[2020-09-19 18:07:40] INFO   /linear/18/bias: (18,)
+[2020-09-19 18:07:40] INFO   /linear/20/weight: (10, 18)
+[2020-09-19 18:07:40] INFO   /linear/20/bias: (10,)
+[2020-09-19 18:07:40] INFO Untrainable Variables:
+[2020-09-19 18:07:40] INFO   /linear/0/bn/running_mean: (1,)
+[2020-09-19 18:07:40] INFO   /linear/0/bn/running_var: (1,)
+[2020-09-19 18:07:40] INFO   /linear/0/bn/num_batches_tracked: ()
+[2020-09-19 18:07:40] INFO   /linear/4/bn/running_mean: (12,)
+[2020-09-19 18:07:40] INFO   /linear/4/bn/running_var: (12,)
+[2020-09-19 18:07:40] INFO   /linear/4/bn/num_batches_tracked: ()
+[2020-09-19 18:07:40] INFO   /linear/8/bn/running_mean: (18,)
+[2020-09-19 18:07:40] INFO   /linear/8/bn/running_var: (18,)
+[2020-09-19 18:07:40] INFO   /linear/8/bn/num_batches_tracked: ()
+[2020-09-19 18:07:40] INFO   /linear/12/bn/running_mean: (18,)
+[2020-09-19 18:07:40] INFO   /linear/12/bn/running_var: (18,)
+[2020-09-19 18:07:40] INFO   /linear/12/bn/num_batches_tracked: ()
+[2020-09-19 18:07:40] INFO   /linear/16/bn/running_mean: (18,)
+[2020-09-19 18:07:40] INFO   /linear/16/bn/running_var: (18,)
+[2020-09-19 18:07:40] INFO   /linear/16/bn/num_batches_tracked: ()
+[2020-09-19 18:12:30] STAT Training 1/10 - metrics/ca=0.697 - loss/total=1.499 - LR 0.000905
+[2020-09-19 18:12:30] INFO Saved Checkoint: checkpoints/latest.npz
+[2020-09-19 18:13:16] STAT Epoch 1/10 (ETA 0:50:31) - metrics/ca=0.717 - loss/total=1.464
+[2020-09-19 18:13:16] INFO Saved Checkoint: checkpoints/best.npz
+[2020-09-19 18:18:05] STAT Training 2/10 - metrics/ca=0.790 - loss/total=1.213 - LR 0.000805
+[2020-09-19 18:18:05] INFO Saved Checkoint: checkpoints/latest.npz
+[2020-09-19 18:18:50] STAT Epoch 2/10 (ETA 0:44:42) - metrics/ca=0.794 - loss/total=1.198
+[2020-09-19 18:18:50] INFO Saved Checkoint: checkpoints/best.npz
+[2020-09-19 18:23:35] STAT Training 3/10 - metrics/ca=0.819 - loss/total=1.065 - LR 0.000717
+[2020-09-19 18:23:35] INFO Saved Checkoint: checkpoints/latest.npz
+[2020-09-19 18:24:21] STAT Epoch 3/10 (ETA 0:38:56) - metrics/ca=0.821 - loss/total=1.041
+[2020-09-19 18:24:21] INFO Saved Checkoint: checkpoints/best.npz
+[2020-09-19 18:29:07] STAT Training 4/10 - metrics/ca=0.834 - loss/total=0.963 - LR 0.000638
+[2020-09-19 18:29:07] INFO Saved Checkoint: checkpoints/latest.npz
+[2020-09-19 18:29:54] STAT Epoch 4/10 (ETA 0:33:21) - metrics/ca=0.834 - loss/total=0.925
+[2020-09-19 18:29:54] INFO Saved Checkoint: checkpoints/best.npz
+[2020-09-19 18:34:46] STAT Training 5/10 - metrics/ca=0.848 - loss/total=0.865 - LR 0.000568
+[2020-09-19 18:34:46] INFO Saved Checkoint: checkpoints/latest.npz
+[2020-09-19 18:35:31] STAT Epoch 5/10 (ETA 0:27:51) - metrics/ca=0.850 - loss/total=0.853
+[2020-09-19 18:35:31] INFO Saved Checkoint: checkpoints/best.npz
+[2020-09-19 18:40:19] STAT Training 6/10 - metrics/ca=0.863 - loss/total=0.812 - LR 0.000505
+[2020-09-19 18:40:19] INFO Saved Checkoint: checkpoints/latest.npz
+[2020-09-19 18:41:05] STAT Epoch 6/10 (ETA 0:22:16) - metrics/ca=0.852 - loss/total=0.799
+[2020-09-19 18:41:05] INFO Saved Checkoint: checkpoints/best.npz
+[2020-09-19 18:45:53] STAT Training 7/10 - metrics/ca=0.873 - loss/total=0.752 - LR 0.000449
+[2020-09-19 18:45:53] INFO Saved Checkoint: checkpoints/latest.npz
+[2020-09-19 18:46:39] STAT Epoch 7/10 (ETA 0:16:42) - metrics/ca=0.862 - loss/total=0.763
+[2020-09-19 18:46:39] INFO Saved Checkoint: checkpoints/best.npz
+[2020-09-19 18:51:29] STAT Training 8/10 - metrics/ca=0.871 - loss/total=0.719 - LR 0.000400
+[2020-09-19 18:51:29] INFO Saved Checkoint: checkpoints/latest.npz
+[2020-09-19 18:52:14] STAT Epoch 8/10 (ETA 0:11:08) - metrics/ca=0.866 - loss/total=0.727
+[2020-09-19 18:52:14] INFO Saved Checkoint: checkpoints/best.npz
+[2020-09-19 18:57:04] STAT Training 9/10 - metrics/ca=0.876 - loss/total=0.703 - LR 0.000356
+[2020-09-19 18:57:04] INFO Saved Checkoint: checkpoints/latest.npz
+[2020-09-19 18:57:50] STAT Epoch 9/10 (ETA 0:05:34) - metrics/ca=0.861 - loss/total=0.707
+[2020-09-19 18:57:50] INFO Saved Checkoint: checkpoints/best.npz
+[2020-09-19 19:02:38] STAT Training 10/10 - metrics/ca=0.872 - loss/total=0.691 - LR 0.000317
+[2020-09-19 19:02:38] INFO Saved Checkoint: checkpoints/latest.npz
+[2020-09-19 19:03:24] STAT Epoch 10/10 (ETA 0:00:00) - metrics/ca=0.869 - loss/total=0.667
+[2020-09-19 19:03:24] INFO Saved Checkoint: checkpoints/best.npz
 
 ```
 
@@ -576,6 +562,6 @@ Train Data Predictions
 Dev Data Predictions
 
 ```
-![data](../../docs/jlabdev_images/bb3568fd367b15dabfad7c2640d08bb7.png)
-![data](../../docs/jlabdev_images/2e7b45eae0d72915f4fc03f9dc028cfb.png)
+![data](../../docs/jlabdev_images/068d782c8a6153310b08ed511db6ceae.png)
+![data](../../docs/jlabdev_images/a519d15a3c52a052c8bbcfbc2b8b8e9f.png)
 

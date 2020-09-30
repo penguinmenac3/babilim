@@ -55,7 +55,7 @@ import datetime as __datetime
 
 import numpy as np
 import matplotlib.pyplot as plt
-import scipy.misc
+import imageio
 
 
 # Cell: 2
@@ -368,7 +368,7 @@ def log_image(*, name: str, data: np.ndarray = None) -> None:
     if data is None:
         plt.savefig(fname)
     else:
-        scipy.misc.imsave(fname, data)
+        imageio.imwrite(fname, data)
 
 
 # Cell: 17

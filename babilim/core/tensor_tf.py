@@ -135,7 +135,13 @@ class Tensor(ITensor):
 
     def mean(self, axis: Optional[int]=None) -> 'Tensor':
         return Tensor(native=tf.reduce_mean(self.native, axis=axis))
-        
+
+    def min(self, axis: Optional[int]=None) -> 'ITensor':
+        return Tensor(native=tf.min(self.native, axis=axis))
+
+    def max(self, axis: Optional[int]=None) -> 'ITensor':
+        return Tensor(native=tf.max(self.native, axis=axis))
+
     def argmax(self, axis: Optional[int]=None) -> 'ITensor':
         return Tensor(native=tf.argmax(self.native, axis=axis))
 
@@ -147,6 +153,9 @@ class Tensor(ITensor):
 
     def any(self) -> bool:
         return tf.reduce_any(self.native)
+
+    def all(self) -> bool:
+        return tf.reduce_all(self.native)
 
     @property
     def shape(self) -> Tuple:
@@ -187,6 +196,12 @@ class Tensor(ITensor):
         else:
             return Tensor(native=self.native / other)
 
+    def __floordiv__(self, other: Union[int, 'Tensor']) -> 'Tensor':
+        if isinstance(other, Tensor):
+            return Tensor(native=self.native // other.native)
+        else:
+            return Tensor(native=self.native // other)
+
     def __mod__(self, other: Union[float, 'Tensor']) -> 'Tensor':
         if isinstance(other, Tensor):
             return Tensor(native=self.native % other.native)
@@ -199,24 +214,43 @@ class Tensor(ITensor):
         else:
             return Tensor(native=self.native ** other)
 
+
     # Comparison Operators
-    def __lt__(self, other: 'Tensor') -> 'Tensor':
-        return Tensor(native=self.native < other.native)
+    def __lt__(self, other: Union[float, 'Tensor']) -> 'Tensor':
+        if isinstance(other, Tensor):
+            return Tensor(native=self.native < other.native)
+        else:
+            return Tensor(native=self.native < other)
 
-    def __gt__(self, other: 'Tensor') -> 'Tensor':
-        return Tensor(native=self.native > other.native)
+    def __gt__(self, other: Union[float, 'Tensor']) -> 'Tensor':
+        if isinstance(other, Tensor):
+            return Tensor(native=self.native > other.native)
+        else:
+            return Tensor(native=self.native > other)
 
-    def __le__(self, other: 'Tensor') -> 'Tensor':
-        return Tensor(native=self.native <= other.native)
+    def __le__(self, other: Union[float, 'Tensor']) -> 'Tensor':
+        if isinstance(other, Tensor):
+            return Tensor(native=self.native <= other.native)
+        else:
+            return Tensor(native=self.native <= other)
 
-    def __ge__(self, other: 'Tensor') -> 'Tensor':
-        return Tensor(native=self.native >= other.native)
+    def __ge__(self, other: Union[float, 'Tensor']) -> 'Tensor':
+        if isinstance(other, Tensor):
+            return Tensor(native=self.native >= other.native)
+        else:
+            return Tensor(native=self.native >= other)
 
-    def __eq__(self, other: 'Tensor') -> 'Tensor':
-        return Tensor(native=self.native == other.native)
+    def __eq__(self, other: Union[float, 'Tensor']) -> 'Tensor':
+        if isinstance(other, Tensor):
+            return Tensor(native=self.native == other.native)
+        else:
+            return Tensor(native=self.native == other)
 
-    def __ne__(self, other: 'Tensor') -> 'Tensor':
-        return Tensor(native=self.native != other.native)
+    def __ne__(self, other: Union[float, 'Tensor']) -> 'Tensor':
+        if isinstance(other, Tensor):
+            return Tensor(native=self.native != other.native)
+        else:
+            return Tensor(native=self.native != other)
 
     # Unary Operators
     def __neg__(self) -> 'Tensor':
@@ -234,3 +268,14 @@ class Tensor(ITensor):
         else:
             result = self.native[item]
         return Tensor(native=result)
+
+    def __setitem__(self, item, value) -> None:
+        if isinstance(value, Tensor):
+            value = value.native
+        if isinstance(item, Tensor):
+            self.native[item.native] = value.native
+        else:
+            self.native[item] = value.native
+
+    def __and__(self, other: 'ITensor') -> 'ITensor':
+        return Tensor(native=self.native & other.native)

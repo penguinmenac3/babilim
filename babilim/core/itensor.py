@@ -132,6 +132,24 @@ class ITensor(object):
         """
         raise NotImplementedError("Each implementation of a variable must implement this.")
 
+    def min(self, axis: Optional[int]=None) -> 'ITensor':
+        """
+        Computes the min operation on the tensor.
+        
+        :param axis: (Optional) An axis along which the min should be computed. If none is given, all axis are reduced.
+        :return: A tensor containing the min.
+        """
+        raise NotImplementedError("Each implementation of a tensor must implement this.")
+
+    def max(self, axis: Optional[int]=None) -> 'ITensor':
+        """
+        Computes the max operation on the tensor.
+        
+        :param axis: (Optional) An axis along which the max should be computed. If none is given, all axis are reduced.
+        :return: A tensor containing the max.
+        """
+        raise NotImplementedError("Each implementation of a tensor must implement this.")
+
     def argmax(self, axis: Optional[int]=None) -> 'ITensor':
         """
         Computes the argmax operation on the tensor.
@@ -163,6 +181,14 @@ class ITensor(object):
         Check if any vlaue of the tensor is true.
         
         :return: True if any value was true.
+        """
+        raise NotImplementedError("Each implementation of a tensor must implement this.")
+
+    def all(self) -> bool:
+        """
+        Check if all vlaues of the tensor are true.
+        
+        :return: True if all values are true.
         """
         raise NotImplementedError("Each implementation of a tensor must implement this.")
 
@@ -199,6 +225,9 @@ class ITensor(object):
     def __truediv__(self, other: Union[float, 'ITensor']) -> 'ITensor':
         raise NotImplementedError("Each implementation of a variable must implement this.")
 
+    def __floordiv__(self, other: Union[int, 'ITensor']) -> 'ITensor':
+        raise NotImplementedError("Each implementation of a variable must implement this.")
+
     def __mod__(self, other: Union[float, 'ITensor']) -> 'ITensor':
         raise NotImplementedError("Each implementation of a variable must implement this.")
 
@@ -206,22 +235,22 @@ class ITensor(object):
         raise NotImplementedError("Each implementation of a variable must implement this.")
 
     # Comparison Operators
-    def __lt__(self, other: 'ITensor') -> 'ITensor':
+    def __lt__(self, other: Union[float, 'ITensor']) -> 'ITensor':
         raise NotImplementedError("Each implementation of a variable must implement this.")
 
-    def __gt__(self, other: 'ITensor') -> 'ITensor':
+    def __gt__(self, other: Union[float, 'ITensor']) -> 'ITensor':
         raise NotImplementedError("Each implementation of a variable must implement this.")
 
-    def __le__(self, other: 'ITensor') -> 'ITensor':
+    def __le__(self, other: Union[float, 'ITensor']) -> 'ITensor':
         raise NotImplementedError("Each implementation of a variable must implement this.")
 
-    def __ge__(self, other: 'ITensor') -> 'ITensor':
+    def __ge__(self, other: Union[float, 'ITensor']) -> 'ITensor':
         raise NotImplementedError("Each implementation of a variable must implement this.")
 
-    def __eq__(self, other: 'ITensor') -> 'ITensor':
+    def __eq__(self, other: Union[float, 'ITensor']) -> 'ITensor':
         raise NotImplementedError("Each implementation of a variable must implement this.")
 
-    def __ne__(self, other: 'ITensor') -> 'ITensor':
+    def __ne__(self, other: Union[float, 'ITensor']) -> 'ITensor':
         raise NotImplementedError("Each implementation of a variable must implement this.")
 
     # Unary Operators
@@ -235,6 +264,9 @@ class ITensor(object):
         raise NotImplementedError("Each implementation of a variable must implement this.")
 
     def __getitem__(self, item) -> 'ITensor':
+        raise NotImplementedError("Each implementation of a variable must implement this.")
+
+    def __setitem__(self, item, value) -> None:
         raise NotImplementedError("Each implementation of a variable must implement this.")
 
     # Assignment Operators
@@ -255,6 +287,9 @@ class ITensor(object):
 
     def __ipow__(self, other: Union[float, 'ITensor']) -> 'ITensor':
         return self.assign(self ** other)
+
+    def __and__(self, other: 'ITensor') -> 'ITensor':
+        raise NotImplementedError("Each implementation of a variable must implement this.")
 
 
 # Cell: 3

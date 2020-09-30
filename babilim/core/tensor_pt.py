@@ -181,6 +181,18 @@ class Tensor(ITensor):
         else:
             return Tensor(native=self.native.mean())
     
+    def min(self, axis: Optional[int]=None) -> 'ITensor':
+        if axis is not None:
+            return Tensor(native=self.native.min(dim=axis)[0])
+        else:
+            return Tensor(native=self.native.min()[0])
+
+    def max(self, axis: Optional[int]=None) -> 'ITensor':
+        if axis is not None:
+            return Tensor(native=self.native.max(dim=axis)[0])
+        else:
+            return Tensor(native=self.native.max()[0])
+
     def argmax(self, axis: Optional[int]=None) -> 'ITensor':
         if axis is not None:
             return Tensor(native=self.native.argmax(dim=axis))
@@ -198,6 +210,9 @@ class Tensor(ITensor):
 
     def any(self) -> bool:
         return self.native.any()
+
+    def all(self) -> bool:
+        return self.native.all()
 
     @property
     def shape(self) -> Tuple:
@@ -238,6 +253,12 @@ class Tensor(ITensor):
         else:
             return Tensor(native=self.native / other)
 
+    def __floordiv__(self, other: Union[int, 'Tensor']) -> 'Tensor':
+        if isinstance(other, Tensor):
+            return Tensor(native=self.native // other.native)
+        else:
+            return Tensor(native=self.native // other)
+
     def __mod__(self, other: Union[float, 'Tensor']) -> 'Tensor':
         if isinstance(other, Tensor):
             return Tensor(native=self.native % other.native)
@@ -251,23 +272,41 @@ class Tensor(ITensor):
             return Tensor(native=self.native ** other)
 
     # Comparison Operators
-    def __lt__(self, other: 'Tensor') -> 'Tensor':
-        return Tensor(native=self.native < other.native)
+    def __lt__(self, other: Union[float, 'Tensor']) -> 'Tensor':
+        if isinstance(other, Tensor):
+            return Tensor(native=self.native < other.native)
+        else:
+            return Tensor(native=self.native < other)
 
-    def __gt__(self, other: 'Tensor') -> 'Tensor':
-        return Tensor(native=self.native > other.native)
+    def __gt__(self, other: Union[float, 'Tensor']) -> 'Tensor':
+        if isinstance(other, Tensor):
+            return Tensor(native=self.native > other.native)
+        else:
+            return Tensor(native=self.native > other)
 
-    def __le__(self, other: 'Tensor') -> 'Tensor':
-        return Tensor(native=self.native <= other.native)
+    def __le__(self, other: Union[float, 'Tensor']) -> 'Tensor':
+        if isinstance(other, Tensor):
+            return Tensor(native=self.native <= other.native)
+        else:
+            return Tensor(native=self.native <= other)
 
-    def __ge__(self, other: 'Tensor') -> 'Tensor':
-        return Tensor(native=self.native >= other.native)
+    def __ge__(self, other: Union[float, 'Tensor']) -> 'Tensor':
+        if isinstance(other, Tensor):
+            return Tensor(native=self.native >= other.native)
+        else:
+            return Tensor(native=self.native >= other)
 
-    def __eq__(self, other: 'Tensor') -> 'Tensor':
-        return Tensor(native=self.native == other.native)
+    def __eq__(self, other: Union[float, 'Tensor']) -> 'Tensor':
+        if isinstance(other, Tensor):
+            return Tensor(native=self.native == other.native)
+        else:
+            return Tensor(native=self.native == other)
 
-    def __ne__(self, other: 'Tensor') -> 'Tensor':
-        return Tensor(native=self.native != other.native)
+    def __ne__(self, other: Union[float, 'Tensor']) -> 'Tensor':
+        if isinstance(other, Tensor):
+            return Tensor(native=self.native != other.native)
+        else:
+            return Tensor(native=self.native != other)
 
     # Unary Operators
     def __neg__(self) -> 'Tensor':
@@ -285,3 +324,14 @@ class Tensor(ITensor):
         else:
             result = self.native[item]
         return Tensor(native=result)
+
+    def __setitem__(self, item, value) -> None:
+        if isinstance(value, Tensor):
+            value = value.native
+        if isinstance(item, Tensor):
+            self.native[item.native] = value
+        else:
+            self.native[item] = value.native
+
+    def __and__(self, other: 'ITensor') -> 'ITensor':
+        return Tensor(native=self.native & other.native)

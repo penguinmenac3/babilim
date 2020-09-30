@@ -10,6 +10,7 @@
 # Cell: 1
 from collections import defaultdict
 from typing import Any
+import json
 import numpy as np
 import babilim
 from babilim.core.itensor import ITensor
@@ -20,7 +21,7 @@ from babilim.core.module import Module
 
 # Cell: 2
 class Loss(Module):
-    def __init__(self, log_std=False, log_min=False, log_max=False, reduction: str = "mean"):
+    def __init__(self, reduction: str = "mean"):
         """
         A loss is a statefull object which computes the difference between the prediction and the target.
         
@@ -31,9 +32,6 @@ class Loss(Module):
         """
         super().__init__()
         self._accumulators = defaultdict(list)
-        self._log_std = log_std
-        self._log_min = log_min
-        self._log_max = log_max
         self.reduction = reduction
         if reduction not in ["none", "mean", "sum"]:
             raise NotImplementedError()
@@ -83,11 +81,14 @@ class Loss(Module):
         :param name: The name under which to log the tensor.
         :param value: The tensor that should be logged.
         """
-        val = value.numpy()
-        if len(val.shape) > 0:
-            self._accumulators[name].append(val)
+        if isinstance(value, ITensor):
+            val = value.numpy()
+            if len(val.shape) > 0:
+                self._accumulators[name].append(val)
+            else:
+                self._accumulators[name].append(np.array([val]))
         else:
-            self._accumulators[name].append(np.array([val]))
+            self._accumulators[name].append(np.array([value]))
 
     def reset_avg(self) -> None:
         """
@@ -97,7 +98,7 @@ class Loss(Module):
         """
         self._accumulators = defaultdict(list)
 
-    def summary(self, samples_seen, summary_writer=None) -> None:
+    def summary(self, samples_seen, summary_writer=None, summary_txt=None, log_std=False, log_min=False, log_max=False) -> None:
         """
         Write a summary of the accumulated logs into tensorboard.
         
@@ -105,19 +106,25 @@ class Loss(Module):
             This is used for the x axis in the plot. If you use the samples seen it is independant of the batch size.
             If the network was trained for 4 batches with 32 batch size or for 32 batches with 4 batchsize does not matter.
         :param summary_writer: The summary writer to use for writing the summary. If none is provided it will use the tensorflow default.
+        :param summary_txt: The file where to write the summary in csv format.
         """
+        results = {}
         if summary_writer is not None:
             for k in self._accumulators:
                 if not self._accumulators[k]:
                     continue
                 combined = np.concatenate(self._accumulators[k], axis=0)
                 summary_writer.add_scalar("{}".format(k), combined.mean(), global_step=samples_seen)
-                if self._log_std:
-                    summary_writer.add_scalar("{}_std".format(k), combined.std(), global_step=samples_seen)
-                if self._log_min:
-                    summary_writer.add_scalar("{}_min".format(k), combined.min(), global_step=samples_seen)
-                if self._log_max:
-                    summary_writer.add_scalar("{}_max".format(k), combined.max(), global_step=samples_seen)
+                results[f"{k}"] = combined.mean()
+                if log_std:
+                    results[f"{k}_std"] = combined.std()
+                    summary_writer.add_scalar("{}_std".format(k), results[f"{k}_std"], global_step=samples_seen)
+                if log_min:
+                    results[f"{k}_min"] = combined.min()
+                    summary_writer.add_scalar("{}_min".format(k), results[f"{k}_min"], global_step=samples_seen)
+                if log_max:
+                    results[f"{k}_max"] = combined.max()
+                    summary_writer.add_scalar("{}_max".format(k), results[f"{k}_max"], global_step=samples_seen)
         else:
             import tensorflow as tf
             for k in self._accumulators:
@@ -125,12 +132,24 @@ class Loss(Module):
                     continue
                 combined = np.concatenate(self._accumulators[k], axis=0)
                 tf.summary.scalar("{}".format(k), combined.mean(), step=samples_seen)
-                if self._log_std:
-                    tf.summary.scalar("{}_std".format(k), combined.std(), step=samples_seen)
-                if self._log_min:
-                    tf.summary.scalar("{}_min".format(k), combined.min(), step=samples_seen)
-                if self._log_max:
-                    tf.summary.scalar("{}_max".format(k), combined.max(), step=samples_seen)
+                results[f"{k}"] = combined.mean()
+                if log_std:
+                    results[f"{k}_std"] = combined.std()
+                    tf.summary.scalar("{}_std".format(k), results[f"{k}_std"], step=samples_seen)
+                if log_min:
+                    results[f"{k}_min"] = combined.min()
+                    tf.summary.scalar("{}_min".format(k), results[f"{k}_min"], step=samples_seen)
+                if log_max:
+                    results[f"{k}_max"] = combined.max()
+                    tf.summary.scalar("{}_max".format(k), results[f"{k}_max"], step=samples_seen)
+
+        if summary_txt is not None:
+            results["samples_seen"] = samples_seen
+            for k in results:
+                results[k] = f"{results[k]:.5f}"
+            with open(summary_txt, "a") as f:
+                f.write(json.dumps(results)+"\n")
+
 
     @property
     def avg(self):
@@ -150,7 +169,7 @@ class Loss(Module):
 
 # Cell: 3
 class NativeLossWrapper(Loss):
-    def __init__(self, loss, log_std=False, log_min=False, log_max=False, reduction: str = "mean"):
+    def __init__(self, loss, reduction: str = "mean"):
         """
         Wrap a native loss as a babilim loss.
 
@@ -163,12 +182,9 @@ class NativeLossWrapper(Loss):
         where log_val will be a function which can be used for logging scalar tensors/values.
 
         :param loss: The loss that should be wrapped.
-        :param log_std: When true the loss will log its standard deviation. (default: False)
-        :param log_min: When true the loss will log its minimum values. (default: False)
-        :param log_max: When true the loss will log its maximal values. (default: False)
         :param reduction: Specifies the reduction to apply to the output: `'none'` | `'mean'` | `'sum'`. `'none'`: no reduction will be applied, `'mean'`: the sum of the output will be divided by the number of elements in the output, `'sum'`: the output will be summed. Default: 'mean'.
         """
-        super().__init__(log_std=log_std, log_min=log_min, log_max=log_max, reduction=reduction)
+        super().__init__(reduction=reduction)
         self.native_loss = loss
         self._auto_device()
 
@@ -203,18 +219,15 @@ class NativeLossWrapper(Loss):
 
 # Cell: 4
 class SparseCrossEntropyLossFromLogits(Loss):
-    def __init__(self, log_std=False, log_min=False, log_max=False, reduction: str = "mean"):
+    def __init__(self, reduction: str = "mean"):
         """
         Compute a sparse cross entropy.
         
         This means that the preds are logits and the targets are not one hot encoded.
         
-        :param log_std: When true the loss will log its standard deviation. (default: False)
-        :param log_min: When true the loss will log its minimum values. (default: False)
-        :param log_max: When true the loss will log its maximal values. (default: False)
         :param reduction: Specifies the reduction to apply to the output: `'none'` | `'mean'` | `'sum'`. `'none'`: no reduction will be applied, `'mean'`: the sum of the output will be divided by the number of elements in the output, `'sum'`: the output will be summed. Default: 'mean'.
         """
-        super().__init__(log_std=log_std, log_min=log_min, log_max=log_min, reduction=reduction)
+        super().__init__(reduction=reduction)
         if babilim.is_backend(babilim.PYTORCH_BACKEND):
             from torch.nn import CrossEntropyLoss
             self.loss_fun = CrossEntropyLoss(reduction="none")
@@ -238,18 +251,15 @@ class SparseCrossEntropyLossFromLogits(Loss):
 
 # Cell: 5
 class BinaryCrossEntropyLossFromLogits(Loss):
-    def __init__(self, log_std=False, log_min=False, log_max=False, reduction: str = "mean"):
+    def __init__(self, reduction: str = "mean"):
         """
         Compute a binary cross entropy.
         
         This means that the preds are logits and the targets are a binary (1 or 0) tensor of same shape as logits.
 
-        :param log_std: When true the loss will log its standard deviation. (default: False)
-        :param log_min: When true the loss will log its minimum values. (default: False)
-        :param log_max: When true the loss will log its maximal values. (default: False)
         :param reduction: Specifies the reduction to apply to the output: `'none'` | `'mean'` | `'sum'`. `'none'`: no reduction will be applied, `'mean'`: the sum of the output will be divided by the number of elements in the output, `'sum'`: the output will be summed. Default: 'mean'.
         """
-        super().__init__(log_std=log_std, log_min=log_min, log_max=log_min, reduction=reduction)
+        super().__init__(reduction=reduction)
         if babilim.is_backend(babilim.PYTORCH_BACKEND):
             from torch.nn import BCEWithLogitsLoss
             self.loss_fun = BCEWithLogitsLoss(reduction="none")
@@ -272,18 +282,15 @@ class BinaryCrossEntropyLossFromLogits(Loss):
 
 # Cell: 6
 class SmoothL1Loss(Loss):
-    def __init__(self, log_std=False, log_min=False, log_max=False, reduction: str = "mean"):
+    def __init__(self, reduction: str = "mean"):
         """
         Compute a binary cross entropy.
         
         This means that the preds are logits and the targets are a binary (1 or 0) tensor of same shape as logits.
 
-        :param log_std: When true the loss will log its standard deviation. (default: False)
-        :param log_min: When true the loss will log its minimum values. (default: False)
-        :param log_max: When true the loss will log its maximal values. (default: False)
         :param reduction: Specifies the reduction to apply to the output: `'none'` | `'mean'` | `'sum'`. `'none'`: no reduction will be applied, `'mean'`: the sum of the output will be divided by the number of elements in the output, `'sum'`: the output will be summed. Default: 'mean'.
         """
-        super().__init__(log_std=log_std, log_min=log_min, log_max=log_min, reduction=reduction)
+        super().__init__(reduction=reduction)
         if babilim.is_backend(babilim.PYTORCH_BACKEND):
             from torch.nn import SmoothL1Loss
             self.loss_fun = SmoothL1Loss(reduction="none")
@@ -307,16 +314,13 @@ class SmoothL1Loss(Loss):
 
 # Cell: 7
 class MeanSquaredError(Loss):
-    def __init__(self, log_std=False, log_min=False, log_max=False, reduction: str = "mean"):
+    def __init__(self, reduction: str = "mean"):
         """
         Compute the mean squared error.
         
-        :param log_std: When true the loss will log its standard deviation. (default: False)
-        :param log_min: When true the loss will log its minimum values. (default: False)
-        :param log_max: When true the loss will log its maximal values. (default: False)
         :param reduction: Specifies the reduction to apply to the output: `'none'` | `'mean'` | `'sum'`. `'none'`: no reduction will be applied, `'mean'`: the sum of the output will be divided by the number of elements in the output, `'sum'`: the output will be summed. Default: 'mean'.
         """
-        super().__init__(log_std=log_std, log_min=log_min, log_max=log_min, reduction=reduction)
+        super().__init__(reduction=reduction)
     
     def loss(self, y_pred: ITensor, y_true: ITensor, axis: int=-1) -> ITensor:
         """
@@ -331,18 +335,15 @@ class MeanSquaredError(Loss):
 
 # Cell: 8
 class SparseCategoricalAccuracy(Loss):
-    def __init__(self, log_std=False, log_min=False, log_max=False, reduction: str = "mean"):
+    def __init__(self, reduction: str = "mean"):
         """
         Compute the sparse mean squared error.
         
         Sparse means that the targets are not one hot encoded.
         
-        :param log_std: When true the loss will log its standard deviation. (default: False)
-        :param log_min: When true the loss will log its minimum values. (default: False)
-        :param log_max: When true the loss will log its maximal values. (default: False)
         :param reduction: Specifies the reduction to apply to the output: `'none'` | `'mean'` | `'sum'`. `'none'`: no reduction will be applied, `'mean'`: the sum of the output will be divided by the number of elements in the output, `'sum'`: the output will be summed. Default: 'mean'.
         """
-        super().__init__(log_std=log_std, log_min=log_min, log_max=log_min, reduction=reduction)
+        super().__init__(reduction=reduction)
 
     def loss(self, y_pred: ITensor, y_true: ITensor, axis: int=-1) -> ITensor:
         """
@@ -360,18 +361,15 @@ class SparseCategoricalAccuracy(Loss):
 
 # Cell: 9
 class NaNMaskedLoss(Loss):
-    def __init__(self, loss, log_std=False, log_min=False, log_max=False):
+    def __init__(self, loss):
         """
         Compute a sparse cross entropy.
         
         This means that the preds are logits and the targets are not one hot encoded.
         
         :param loss: The loss that should be wrapped and only applied on non nan values.
-        :param log_std: When true the loss will log its standard deviation. (default: False)
-        :param log_min: When true the loss will log its minimum values. (default: False)
-        :param log_max: When true the loss will log its maximal values. (default: False)
         """
-        super().__init__(log_std=log_std, log_min=log_min, log_max=log_min, reduction="none")
+        super().__init__(reduction="none")
         self.wrapped_loss = loss
         self.zero = Tensor(data=np.array(0), trainable=False)
 

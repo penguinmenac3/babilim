@@ -14,7 +14,7 @@ from babilim.core.module_native import ModuleNative
 
 # Cell: 2
 class ImagenetModel(ModuleNative):
-    def __init__(self, encoder_type, only_encoder=False, pretrained=False):
+    def __init__(self, encoder_type, only_encoder=False, pretrained=False, last_layer=None):
         """
         Create one of the iconic image net models in one line.
         Allows for only using the encoder part.
@@ -24,11 +24,13 @@ class ImagenetModel(ModuleNative):
         :param encoder_type: The encoder type that should be used. Must be in ("vgg16", "vgg16_bn", "vgg19", "vgg19_bn", "resnet50", "resnet101", "resnet152", "densenet121", "densenet169", "densenet201", "inception_v3", "mobilenet_v2")
         :param only_encoder: Leaves out the classification head for VGG16 leaving you with a feature encoder.
         :param pretrained: If you want imagenet weights for this network.
+        :param last_layer: Index of the last layer in the encoder. Allows to cutoff encoder after a few layers.
         """
         super().__init__()
         self.only_encoder = only_encoder
         self.pretrained = pretrained
         self.encoder_type = encoder_type
+        self.last_layer = last_layer
 
     @RunOnlyOnce
     def _build_tf(self, image):
@@ -40,7 +42,7 @@ class ImagenetModel(ModuleNative):
     @RunOnlyOnce
     def _build_pytorch(self, image):
         import torch
-        from torchvision.models import vgg16_bn, vgg16_bn, vgg19, vgg19_bn, resnet50, resnet101, resnet152, densenet121, densenet169, densenet201, inception_v3, mobilenet_v2
+        from torchvision.models import vgg16, vgg16_bn, vgg19, vgg19_bn, resnet50, resnet101, resnet152, densenet121, densenet169, densenet201, inception_v3, mobilenet_v2
         from torch.nn import Sequential
         model = None
         if self.encoder_type == "vgg16":
@@ -71,7 +73,10 @@ class ImagenetModel(ModuleNative):
             raise RuntimeError("Unsupported encoder type.")
         
         if self.only_encoder:
-            self.model = Sequential(*list(model(pretrained=self.pretrained).features))
+            encoder = list(model(pretrained=self.pretrained).features)
+            if self.last_layer is not None:
+                encoder = encoder[:self.last_layer+1]
+            self.model = Sequential(*encoder)
         else:
             self.model = model(pretrained=self.pretrained)
         

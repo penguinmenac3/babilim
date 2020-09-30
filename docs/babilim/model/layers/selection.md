@@ -15,6 +15,9 @@ Created object is callable with the following parameters:
 * **indices**: (Tensor[N, K]) The indices at which to return the values of the input tensor.
 * **returns**: (Tensor[N, K, ?]) The tensor containing the values at the indices given.
 
+Arguments:
+* **axis**: The axis along which to select.
+
 
 Example:
 ```python

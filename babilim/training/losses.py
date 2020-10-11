@@ -244,7 +244,7 @@ class SparseCrossEntropyLossFromLogits(Loss):
         """
         y_true = y_true.cast("int64")
         if babilim.is_backend(babilim.PYTORCH_BACKEND):
-            return Tensor(data=self.loss_fun(y_pred.native, y_true.native), trainable=True)
+            return Tensor(data=self.loss_fun(y_pred.native, y_true.native[:, 0]), trainable=True)
         else:
             return Tensor(data=self.loss_fun(labels=y_true.native, logits=y_pred.native), trainable=True)
 
@@ -361,7 +361,7 @@ class SparseCategoricalAccuracy(Loss):
 
 # Cell: 9
 class NaNMaskedLoss(Loss):
-    def __init__(self, loss):
+    def __init__(self, loss, masked_dim=-1):
         """
         Compute a sparse cross entropy.
         
@@ -372,6 +372,7 @@ class NaNMaskedLoss(Loss):
         super().__init__(reduction="none")
         self.wrapped_loss = loss
         self.zero = Tensor(data=np.array(0), trainable=False)
+        self.masked_dim = masked_dim
 
     def loss(self, y_pred: ITensor, y_true: ITensor) -> ITensor:
         """
@@ -383,13 +384,20 @@ class NaNMaskedLoss(Loss):
         binary_mask = (~y_true.is_nan())
         mask = binary_mask.cast("float32")
         masked_y_true = (y_true * mask)[binary_mask]
+        shape = list(y_true.shape)
+        shape[self.masked_dim] = -1
+        masked_y_true = masked_y_true.reshape(shape)
 
-        if y_pred.shape[-1] != binary_mask.shape[-1] and binary_mask.shape[-1] == 1:
-            new_shape = binary_mask.shape[:-1]
-            binary_mask = binary_mask.reshape(new_shape)
+        for dim in range(len(binary_mask.shape)):
+            if y_pred.shape[dim] != binary_mask.shape[dim] and y_pred.shape[dim] % binary_mask.shape[dim] == 0:
+                repeat = y_pred.shape[dim] / binary_mask.shape[dim]
+                binary_mask = binary_mask.repeat(int(repeat), axis=dim)
         masked_y_pred = (y_pred * mask)[binary_mask]
+        shape = list(y_pred.shape)
+        shape[self.masked_dim] = -1
+        masked_y_pred = masked_y_pred.reshape(shape)
         
-        if masked_y_pred.shape[0] > 0:
+        if masked_y_pred.shape[self.masked_dim] > 0:
             loss = self.wrapped_loss(masked_y_pred, masked_y_true)
         else:
             loss = self.zero

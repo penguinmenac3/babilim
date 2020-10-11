@@ -214,6 +214,9 @@ class Tensor(ITensor):
     def all(self) -> bool:
         return self.native.all()
 
+    def repeat(self, repeats, axis) -> 'ITensor':
+        return Tensor(native=torch.repeat_interleave(self.native, repeats, dim=axis))
+
     @property
     def shape(self) -> Tuple:
         return tuple(self.native.shape)

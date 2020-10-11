@@ -192,6 +192,16 @@ class ITensor(object):
         """
         raise NotImplementedError("Each implementation of a tensor must implement this.")
 
+    def repeat(self, repeats, axis) -> 'ITensor':
+        """
+        Repeat a tensor along an axis for n times.
+        
+        :param repeats: The n how often the tensor should be repeated.
+        :param axis: The axis along which to repeat.
+        :return: A copy of the tensor which is repeated n times along the axis
+        """
+        raise NotImplementedError("Each implementation of a tensor must implement this.")
+
     @property
     def shape(self) -> Tuple:
         """

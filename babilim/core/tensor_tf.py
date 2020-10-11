@@ -157,6 +157,10 @@ class Tensor(ITensor):
     def all(self) -> bool:
         return tf.reduce_all(self.native)
 
+    def repeat(self, repeats, axis) -> 'ITensor':
+        # TODO implement in tensorflow
+        raise NotImplementedError()
+
     @property
     def shape(self) -> Tuple:
         return self.native.shape

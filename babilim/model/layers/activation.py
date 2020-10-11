@@ -14,14 +14,16 @@ from babilim.core.module_native import ModuleNative
 
 # Cell: 2
 class Activation(ModuleNative):
-    def __init__(self, activation):
+    def __init__(self, activation, axis):
         """
         Supports the activation functions.
     
         :param activation: A string specifying the activation function to use. (Only "relu" and None supported yet.)
+        :param axis: The axis along which the softmax should happen.
         """
         super().__init__()
         self.activation = activation
+        self.axis = axis
         
     @RunOnlyOnce
     def _build_pytorch(self, features):
@@ -30,14 +32,29 @@ class Activation(ModuleNative):
         elif self.activation == "relu":
             from torch.nn.functional import relu
             self.activation = relu
+        elif self.activation == "softmax":
+            from torch.nn.functional import softmax
+            self.activation = softmax
+        elif self.activation == "sigmoid":
+            from torch.nn.functional import sigmoid
+            self.activation = sigmoid
+        elif self.activation == "tanh":
+            from torch.nn.functional import tanh
+            self.activation = tanh
+        elif self.activation == "elu":
+            from torch.nn.functional import elu
+            self.activation = elu
+        elif self.activation == "prelu":
+            from torch.nn.functional import prelu
+            self.activation = prelu
         else:
-            raise NotImplementedError("Activation '{}' not implemented.".format(activation))
+            raise NotImplementedError("Activation '{}' not implemented.".format(self.activation))
         
     def _call_pytorch(self, features):
         if self.activation is None:
             return features
         else:
-            return self.activation(features)
+            return self.activation(features, dim=self.axis)
     
     @RunOnlyOnce
     def _build_tf(self, features):

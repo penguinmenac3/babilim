@@ -35,7 +35,7 @@ class Conv1D(ModuleNative):
         self.dilation = dilation_rate
         self.stride = stride
         self.kernel_initializer = kernel_initializer
-        self.activation = Activation(activation)
+        self.activation = Activation(activation, axis=1)
         
     @RunOnlyOnce
     def _build_pytorch(self, features):
